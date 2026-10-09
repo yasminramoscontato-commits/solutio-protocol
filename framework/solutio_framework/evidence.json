@@ -1,0 +1,321 @@
+{
+ "version": "2026-10-09",
+ "status_legend": {
+  "law": "Statute, regulation or binding decision text.",
+  "court": "Judgment or court of accounts decision.",
+  "official-data": "Data published by a government body.",
+  "audit-finding": "Audit result not finally judged.",
+  "estimate": "Estimate by an institution or industry body.",
+  "survey": "Self-reported survey.",
+  "allegation": "Indictment, investigation or press report; not proven.",
+  "field-observation": "Founder's anonymized operational knowledge from a state central purchasing body."
+ },
+ "items": [
+  {
+   "id": "GL-WB-PROCUREMENT",
+   "level": "global",
+   "status": "estimate",
+   "date": "2020-02-05",
+   "claim": "Governments spend about US$11 trillion a year on public procurement, about 12% of global GDP (2018 data).",
+   "source": "World Bank, Bosio & Djankov, 'How large is public procurement?'",
+   "url": "https://blogs.worldbank.org/developmenttalk/how-large-public-procurement"
+  },
+  {
+   "id": "GL-OCP-PROCUREMENT",
+   "level": "global",
+   "status": "estimate",
+   "date": "2020-09-01",
+   "claim": "Open Contracting Partnership and Spend Network estimate about US$13 trillion a year in public contracts.",
+   "source": "Open Contracting Partnership, 'How governments spend'",
+   "url": "https://www.open-contracting.org/global-procurement-spend"
+  },
+  {
+   "id": "GL-FCI-FACTORING",
+   "level": "global",
+   "status": "estimate",
+   "date": "2026-05-13",
+   "claim": "Global factoring volume reached EUR 4.039 trillion in 2025.",
+   "source": "FCI statistics via GTR",
+   "url": "https://www.gtreview.com/news/global/us-factoring-revenues-soar-as-global-turnover-hits-record-highs-fci/"
+  },
+  {
+   "id": "GL-QINGDAO-2014",
+   "level": "global",
+   "status": "court",
+   "date": "2018-12-10",
+   "claim": "Duplicated warehouse receipts were used to borrow repeatedly against the same metal; bank loans above US$1.7bn; founder sentenced to 23 years.",
+   "source": "Caixin Global",
+   "url": "https://www.caixinglobal.com/2018-12-11/dezheng-founder-gets-32-years-in-prison-over-port-forgery-scandal-101358154.html"
+  },
+  {
+   "id": "GL-FIRSTBRANDS-2025",
+   "level": "global",
+   "status": "allegation",
+   "date": "2026-01-29",
+   "claim": "US prosecutors allege fake, inflated and double-pledged invoices were submitted to factoring partners; Chapter 11 with over US$9bn of liabilities and about US$2.3bn of factoring liabilities.",
+   "source": "US Attorney's Office SDNY (indictment); GTR",
+   "url": "https://justice.gov/usao-sdny/pr/first-brands-executives-charged-multibillion-dollar-fraud"
+  },
+  {
+   "id": "GL-TRICOLOR-2025",
+   "level": "global",
+   "status": "allegation",
+   "date": "2025-12-17",
+   "claim": "Executives allegedly pledged the same collateral to several lenders (about US$2.2bn pledged against about US$1.4bn real); two executives pleaded guilty.",
+   "source": "US Attorney's Office SDNY",
+   "url": "https://www.justice.gov/usao-sdny/pr/ceo-cfo-coo-charged-connection-billion-dollar-collapse-tricolor-auto"
+  },
+  {
+   "id": "GL-GREENSILL-FINMA",
+   "level": "global",
+   "status": "court",
+   "date": "2023-02-28",
+   "claim": "The Swiss regulator found Credit Suisse could not check whether receivables financed through Greensill funds were actually owed; 72% of one sub-fund's exposure came from future receivables.",
+   "source": "FINMA via GTR",
+   "url": "https://www.gtreview.com/news/europe/regulator-blasts-credit-suisse-over-investment-in-greensill-future-receivables/"
+  },
+  {
+   "id": "GL-ITALY-PCC",
+   "level": "global",
+   "status": "official-data",
+   "date": "2025-06-27",
+   "claim": "Italy's average public payment time fell from about 120-130 days (2013) to 30 days (2024) after the central invoice platform (PCC).",
+   "source": "MEF/RGS data via Il Sole 24 Ore",
+   "url": "https://en.ilsole24ore.com/art/turnaround-12-years-delays-pa-now-pays-companies-within-30-days-AHinOrPB"
+  },
+  {
+   "id": "GL-INDIA-SAMADHAAN",
+   "level": "global",
+   "status": "official-data",
+   "date": "2026-08-17",
+   "claim": "India's MSME Samadhaan portal holds 256,892 delayed-payment applications worth INR 55,244 crore, INR 20,979 crore still pending.",
+   "source": "CRISIL press release citing the portal",
+   "url": "https://intelligence.crisil.com/en/homepage/newsroom/press-releases/2026/08/executed-well-msme-bill-can-be-an-ibc-moment-for-delayed-payments.html"
+  },
+  {
+   "id": "GL-PILOTS-LEDGER",
+   "level": "global",
+   "status": "official-data",
+   "date": "2020-09-03",
+   "claim": "Peru Compras recorded 154,400 purchase orders on the IDB's LACChain; earlier pilots (Colombia, Chile) stamped documents for transparency but none enforced single financing or statutory caps.",
+   "source": "Andina; WEF via Global Government Forum",
+   "url": "https://andina.pe/agencia/noticia-peru-compras-registro-blockchain-mas-154000-ordenes-compra-812367.aspx"
+  },
+  {
+   "id": "EU-DIR-2011-7",
+   "level": "eu",
+   "status": "law",
+   "date": "2011-02-16",
+   "claim": "Public authorities must pay within 30 days, extendable to 60 for public healthcare.",
+   "source": "Directive 2011/7/EU, art. 4",
+   "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32011L0007"
+  },
+  {
+   "id": "EU-CJEU-C122-18",
+   "level": "eu",
+   "status": "court",
+   "date": "2020-01-28",
+   "claim": "The Court of Justice ruled Italy breached the 30/60-day rule for public authorities.",
+   "source": "CJEU C-122/18 Commission v Italy",
+   "url": "https://www.cde.ual.es/en/italy-should-have-ensured-that-its-public-authorities-complied-in-their-commercial-transactions-with-private-undertakings-with-periods-for-payment-not-exceeding-30-or-60-days"
+  },
+  {
+   "id": "EU-LATE-PAYMENT-BANKRUPTCIES",
+   "level": "eu",
+   "status": "estimate",
+   "date": "2023-09-12",
+   "claim": "The European Commission attributes one in four EU bankruptcies to late payment.",
+   "source": "Accountancy Europe factsheet on the Late Payment Regulation proposal",
+   "url": "https://accountancyeurope.eu/wp-content/uploads/2024/02/LPR-factsheet-2024.pdf"
+  },
+  {
+   "id": "EU-CJEU-C216-17",
+   "level": "eu",
+   "status": "court",
+   "date": "2018-12-19",
+   "claim": "A framework agreement must determine at the outset the maximum volume; once that limit is reached the agreement has no further effect.",
+   "source": "CJEU C-216/17 Antitrust and Coopservice, paras. 60-61",
+   "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:62017CJ0216"
+  },
+  {
+   "id": "EU-CJEU-C23-20",
+   "level": "eu",
+   "status": "court",
+   "date": "2021-06-17",
+   "claim": "The notice must state a maximum quantity or value; it may be split among participating authorities.",
+   "source": "CJEU C-23/20 Simonsen & Weel, operative part 1 and paras. 78-79",
+   "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:62020CJ0023"
+  },
+  {
+   "id": "US-GAO-05-201",
+   "level": "global",
+   "status": "audit-finding",
+   "date": "2005-04-29",
+   "claim": "10 of 11 task orders (over US$66M) placed by one agency for another on a shared GSA contract were outside its scope; GAO designated interagency contracting a high-risk area.",
+   "source": "GAO-05-201",
+   "url": "https://www.gao.gov/products/gao-05-201"
+  },
+  {
+   "id": "BR-IPEA-PROCUREMENT",
+   "level": "national",
+   "status": "official-data",
+   "date": "2019-05-01",
+   "claim": "Brazilian public procurement averaged 12.5% of GDP in 2006-2016.",
+   "source": "IPEA, TD 2476",
+   "url": "https://repositorio.ipea.gov.br/bitstream/11058/9315/2/td_2476_sumex.pdf"
+  },
+  {
+   "id": "BR-TCU-547-2026",
+   "level": "national",
+   "status": "court",
+   "date": "2026-03-11",
+   "claim": "Price-registration procedures from Jan 2023 to Jun 2025 totalled about R$ 970.9bn in 301.5k procurements run on 179 different systems (federal systems: R$ 337.8bn); in 2025 they were R$ 470bn (42.38% of R$ 1.1tn). The federal adhesion module allowed requests and authorizations above the 2x cap (balances of -2, -155, -25), rounded the 50% cap up, allowed authorization after expiry, and could not produce reliable remaining balances.",
+   "source": "TCU Acórdão 547/2026-Plenário, TC 016.359/2025-9 (report paras. 66-68, 81; items 9.1.1.6-9.1.1.11, 9.1.3.2)",
+   "url": "https://portal.tcu.gov.br/uploads/noticias/pdf/2026/03/11/016.359-2025-9_.pdf"
+  },
+  {
+   "id": "BR-TCU-1487-2007",
+   "level": "national",
+   "status": "court",
+   "date": "2007-08-01",
+   "claim": "62 bodies adhered to a R$ 32 million Ministry of Health record, a theoretical exposure of about R$ 1.984 billion; TCU ordered limits on adhesions.",
+   "source": "TCU Acórdão 1.487/2007-Plenário, as quoted in secondary sources (original not reachable online)",
+   "url": "https://jus.com.br/artigos/14847/o-sistema-de-registro-de-precos-e-o-carona/3"
+  },
+  {
+   "id": "BR-ATRICON-NOTA-01-2025",
+   "level": "national",
+   "status": "law",
+   "date": "2025-04-02",
+   "claim": "The national associations of courts of accounts recommend checking limits before accepting adhesions and publishing registered quantities, contracts and balances per item.",
+   "source": "Nota Recomendatória Conjunta 01/2025",
+   "url": "https://atricon.org.br/wp-content/uploads/2025/03/NOTA-RECOMENDATORIA-CONJUNTA-no-01-2025-Adesao-a-ARP-TSK.pdf"
+  },
+  {
+   "id": "BR-LAW-14133-ART141",
+   "level": "national",
+   "status": "law",
+   "date": "2021-04-01",
+   "claim": "Payments follow chronological order per funding source and category; deviations need prior justification in five listed cases and monthly publication; unjustified deviation is a crime (CP art. 337-H).",
+   "source": "Lei 14.133/2021, art. 141",
+   "url": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm"
+  },
+  {
+   "id": "BR-LAW-14133-ART137",
+   "level": "national",
+   "status": "law",
+   "date": "2021-04-01",
+   "claim": "More than two months of payment delay entitles the supplier to suspend performance or terminate.",
+   "source": "Lei 14.133/2021, art. 137, §2, IV and §3, II",
+   "url": "https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm"
+  },
+  {
+   "id": "BR-TESOURO-RAP-2026",
+   "level": "national",
+   "status": "official-data",
+   "date": "2026-01-29",
+   "claim": "Federal unpaid committed expenditure (restos a pagar) carried into 2026: R$ 391.5bn (9.4% of the budget), of which R$ 109.0bn already processed (delivered and verified).",
+   "source": "Tesouro Nacional, Relatório de Restos a Pagar 2026",
+   "url": "https://cdn.tesouro.gov.br/sistemas-internos/apex/producao/sistemas/thot/arquivos/publicacoes/53729_1689657/Relatorio%20RAP_2026.pdf"
+  },
+  {
+   "id": "BR-ANTECIPAGOV",
+   "level": "national",
+   "status": "law",
+   "date": "2025-02-21",
+   "claim": "Federal suppliers may borrow up to 70% of what remains on a contract; follow-ons only with the same bank; the body pays into the linked account; no published operation volumes found.",
+   "source": "IN SEGES/MGI 82/2025",
+   "url": "https://okai.com.br/documento/2025-02-24/instrucao-normativa-seges-mgi-n%C2%BA-82-de-21-de-fevereiro-de-2025"
+  },
+  {
+   "id": "BR-BCB-RECEIVABLES",
+   "level": "national",
+   "status": "law",
+   "date": "2021-06-07",
+   "claim": "Registered card receivables are partitioned by authorized registries so the same receivable is not negotiated twice; electronic duplicatas (Lei 13.775/2018) launched in 2026 with the same aim. Government contract receivables are not covered by either.",
+   "source": "Banco Central do Brasil (Res. CMN 4.734/2019); B3",
+   "url": "https://b3.com.br/pt_br/noticias/duplicata-escritural.htm"
+  },
+  {
+   "id": "AL-DECREE-95019",
+   "level": "state",
+   "status": "law",
+   "date": "2023-12-28",
+   "claim": "Alagoas regulates price registration closely following the federal decree, mandates the federal Gestão de Atas tool (art. 24) and forbids state bodies from adhering to non-capital municipal records (art. 33).",
+   "source": "Decreto AL 95.019/2023",
+   "url": "https://www.legisweb.com.br/legislacao/?id=454107"
+  },
+  {
+   "id": "AL-ATA-USED-OUT-OF-STATE",
+   "level": "state",
+   "status": "official-data",
+   "date": "2026-05-25",
+   "claim": "An Alagoas central purchasing body record was adhered to by a police force of another state, showing state records circulate across jurisdictions.",
+   "source": "Termo de Adesão à Ata nº 693/2025 (PMGO)",
+   "url": "https://goias.gov.br/policiamilitar/wp-content/uploads/sites/67/2026/05/Termo-de-Adesao-a-Ata-no-693-2025.pdf"
+  },
+  {
+   "id": "AL-MPF-CHAMA",
+   "level": "state",
+   "status": "official-data",
+   "date": "2025-10-01",
+   "claim": "Federal prosecutors demanded that the State of Alagoas regularize transfers to an oncology hospital serving 47 municipalities, late since November 2024 (health transfers, not ordinary supplier purchases).",
+   "source": "MPF-AL",
+   "url": "https://www.mpf.mp.br/o-mpf/unidades/pr-al/noticias/mpf-exige-regularizacao-de-repasses-do-estado-de-alagoas-ao-hospital-chama-de-arapiraca"
+  },
+  {
+   "id": "MU-TCU-ROBOTICS",
+   "level": "municipal",
+   "status": "court",
+   "date": "2022-04-27",
+   "claim": "Several Alagoas and Pernambuco municipalities bought robotics kits by adhering to the same few municipal records; TCU suspended new federal transfers for the kits (Acórdão 914/2022).",
+   "source": "TCU TC 006.438/2022-9",
+   "url": "https://portal.tcu.gov.br/data/files/C5/D0/4C/40/3BFB781046756058F18818A8/006.438.2022-9%20assinado.pdf"
+  },
+  {
+   "id": "MU-TCESP-IRALC",
+   "level": "municipal",
+   "status": "official-data",
+   "date": "2026-07-20",
+   "claim": "338 of 643 São Paulo municipalities (52.6%) adhered to other entities' records; 22.5% of them without a preliminary study showing the adhesion was advantageous.",
+   "source": "TCE-SP, IRALC 2025",
+   "url": "https://www.tce.sp.gov.br/publicacoes/artigo-consorcios-intermunicipais-e-registro-precos-risco-portfolio-atas"
+  },
+  {
+   "id": "MU-TCERS-SCREENS",
+   "level": "municipal",
+   "status": "audit-finding",
+   "date": "2025-01-01",
+   "claim": "51 municipalities bought interactive screens from one supplier (about R$ 152M); one record was reused by at least 10 cities; audit estimated unit price about R$ 10k against R$ 32k paid.",
+   "source": "TCE-RS audit as reported by Extra Classe",
+   "url": "https://www.extraclasse.org.br/?p=111705"
+  },
+  {
+   "id": "MU-TCESP-VOTORANTIM",
+   "level": "municipal",
+   "status": "court",
+   "date": "2025-09-03",
+   "claim": "TCE-SP suspended R$ 7.7M of payments for school uniforms bought by adhering to another state's consortium record.",
+   "source": "TCE-SP",
+   "url": "https://tce.sp.gov.br/6524-conselheiro-bertaiolli-questiona-carona-para-inferno-com-atas-registro-precos"
+  },
+  {
+   "id": "MU-CNM-2025",
+   "level": "municipal",
+   "status": "survey",
+   "date": "2025-12-25",
+   "claim": "1,202 of 4,172 responding municipalities (28.8%) were behind on supplier payments; 31% expected to carry bills into 2026 without cash.",
+   "source": "CNM survey via Brasil 61",
+   "url": "https://brasil61.com/n/cerca-de-um-terco-das-prefeituras-estao-com-o-pagamento-de-fornecedores-atrasado-bras2515415"
+  },
+  {
+   "id": "FIELD-STATE-CPB",
+   "level": "field",
+   "status": "field-observation",
+   "date": "2026-10-09",
+   "claim": "At a state central purchasing body: one adhesion is recorded in the electronic process, in Compras.gov.br and in an internal control system or spreadsheets; supplier acceptance arrives by e-mail and is attached as PDF; an adhesion took 51 days from request to authorization; the 50% cap is rounded down; authorizations are rectified after budget review; balances are reserved and later written off or restored.",
+   "source": "Founder's operational knowledge (anonymized; internal documents not published)",
+   "url": ""
+  }
+ ]
+}

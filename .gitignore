@@ -7,3 +7,5 @@ test-ledger
 .yarn
 .surfpool
 client/.keys/
+__pycache__/
+*.pyc

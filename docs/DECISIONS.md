@@ -27,12 +27,21 @@
 | 2026-10-09 | Deployed to devnet (program `5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E`), authorized by the founder | SBPF v2 is enabled on devnet; the deployed bytes match the tested binary. 32-step scripted run recorded in `docs/DEVNET.md` |
 | 2026-10-09 | Refused steps in the demo are sent with preflight disabled | The program's rejection is then recorded on-chain and visible in the explorer, which is the evidence judges need |
 
+| 2026-10-09 | Priority order: evidenced gaps → business rules → framework, before more program features | Founder's direction: the MVP serves the thesis, not the reverse |
+| 2026-10-09 | Field knowledge enters the repository only as anonymized flows and dispatch templates | Internal documents stay private; the founder's operational knowledge is presented as such |
+| 2026-10-09 | Framework in dependency-free Python, with rules and evidence as data | Anyone can rerun the replays and economics; rules can be reviewed by lawyers without reading Rust |
+| 2026-10-09 | Government pays nothing; revenue from financiers (verification fee, take rate via licensed partner) | Removes the procurement barrier to adoption; the party that bears double-financing risk pays |
+| 2026-10-09 | Finding: rent is ~99% of on-chain cost per obligation | Measured on devnet. A close instruction for settled accounts becomes a requirement for scale |
+
 ## Pending
 
 - [x] Devnet deployment (authorized 2026-10-09)
 - [ ] Transfer the program's upgrade authority from the session's demo key to a wallet controlled by the founder
 - [ ] Restrict `init_registry` to the program's upgrade authority before any non-demo use (today the first caller becomes the registry authority; on devnet we initialized it right after deploying)
 - [ ] Validate the Alagoas profile and the questions in LEGAL_RULES.md with GARC/SEI staff
+- [ ] Program: participant quotas, supply authorization and rectification (specified as PROC-11/12 in the framework)
+- [ ] Program: close settled accounts to recover rent (economics finding)
+- [ ] Interviews: two receivables funds (FIDCs) and one factoring company on willingness to pay (H5, H8)
 - [ ] Concurrency demo on a real validator (two simultaneous acceptances for the last units)
 - [ ] Public verifier page that reads state directly from the chain
 - [ ] Validation interviews with procurement officers and financiers

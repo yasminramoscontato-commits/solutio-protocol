@@ -1,0 +1,30 @@
+{
+  "_note": "Illustrative scenario inputs, not forecasts. Every number marked 'assumption' is a choice to be validated; every number marked with an evidence id comes from evidence.json. Edit and rerun `python -m solutio_framework economics`.",
+  "fx": {
+    "brl_per_usd": {"value": 5.40, "kind": "assumption"},
+    "usd_per_sol": {"value": 150, "kind": "assumption", "sensitivity": [50, 150, 300]}
+  },
+  "anchors": {
+    "br_srp_contracting_brl_per_year": {"value": 470e9, "kind": "evidence", "evidence": "BR-TCU-547-2026"},
+    "br_federal_processed_unpaid_brl": {"value": 109.0e9, "kind": "evidence", "evidence": "BR-TESOURO-RAP-2026"},
+    "global_procurement_usd_per_year": {"value": 11e12, "kind": "evidence", "evidence": "GL-WB-PROCUREMENT"},
+    "global_factoring_eur_per_year": {"value": 4.039e12, "kind": "evidence", "evidence": "GL-FCI-FACTORING"}
+  },
+  "pricing": {
+    "government_fee_brl": {"value": 0, "kind": "assumption", "why": "Public bodies use the compliance layer free: no procurement process needed to adopt it."},
+    "verification_fee_brl_per_check": {"value": 4.0, "kind": "assumption", "why": "Paid by a financier before each financing decision."},
+    "checks_per_financed_obligation": {"value": 3, "kind": "assumption"},
+    "take_rate_on_financed_volume": {"value": 0.0035, "kind": "assumption", "why": "35 bps per operation, shared with a licensed financing partner."}
+  },
+  "operations": {
+    "average_obligation_brl": {"value": 40000, "kind": "assumption"},
+    "average_adhesion_obligations": {"value": 1, "kind": "assumption", "why": "One commitment note per executed adhesion."},
+    "close_accounts_after_settlement": {"value": false, "kind": "assumption", "why": "Rent is a refundable deposit, but the program has no close instruction yet, so it is counted as cost."}
+  },
+  "scenarios": [
+    {"name": "Pilot: one state central purchasing body", "market": "BR", "share_of_volume": 0.001, "share_financed": 0.10},
+    {"name": "Brazil: state central purchasing bodies", "market": "BR", "share_of_volume": 0.05, "share_financed": 0.10},
+    {"name": "Brazil: national (all spheres)", "market": "BR", "share_of_volume": 0.20, "share_financed": 0.15},
+    {"name": "Global: 0.1% of public procurement", "market": "GLOBAL", "share_of_volume": 0.001, "share_financed": 0.10}
+  ]
+}

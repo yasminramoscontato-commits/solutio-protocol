@@ -1,0 +1,294 @@
+{
+  "measured_at": "2026-10-09T20:30:51.734Z",
+  "program": "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E",
+  "steps": [
+    {
+      "label": "Initialize registry",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1046400,
+      "rent_lamports": 1041400,
+      "compute_units": 6274,
+      "signature": "53yatCzPTywiw9KtcwNkZLgWR1xLVRB1y3kfXudTpoAUKWoPMwvZdkvEiNHT7vZEhsaxz7N5uptNnE2cCv9pHzSd"
+    },
+    {
+      "label": "Register agency: DEMO Central de Compras mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 10513,
+      "signature": "3Lspcsapsopnqsbw8Aau3vkfN7ahn3FKgcFBq9W9YTeUdQTRoGhPmeE9ishhwAx2BUbQbDWv2xm3RQEYELzmYJUK"
+    },
+    {
+      "label": "Register agency: DEMO Prefeitura A mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 12105,
+      "signature": "gCWJupEC5bxHnUCLgyLLZdCR1F3n7tUZVSCcJ3RvaQrM5BVmqi8wf3nzLLfgDq1rsPeTwcges55PcJaHuQED7Tx"
+    },
+    {
+      "label": "Register agency: DEMO Prefeitura B mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 15105,
+      "signature": "4hmqGSL7aZXTLsWhszbVdVTZ3UyPz7L9dWSULRVhAnn8H1odik3xyYcUpHtNKTygcLWoHwzDmB4Gy9bGcJXb3LiV"
+    },
+    {
+      "label": "Register agency: DEMO Prefeitura C mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 10605,
+      "signature": "FeHZij1gAsKjfPMwUPd8mfpsyqRAYNdh2xztzXfGcuhhJdVSSBizrCpcBz44ZK3T6aV9em2ykXGuLBdVgy1uGmS"
+    },
+    {
+      "label": "Register agency: DEMO Prefeitura D mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 10605,
+      "signature": "4mQe18sGZFipbQU26wkFEEHZggTUmDr3aTUijQ2wmvh3SL1B4Egro9a7ptnmg7LCB3S93WtYsSp22YXmmsPcUjVV"
+    },
+    {
+      "label": "Register agency: DEMO Prefeitura E mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 10605,
+      "signature": "5c1WYy8qwwd3B6Q4nJGXKJMzt2D4QaZ8eerVZ4CiVb1wCdqW8YEV81tjAjoWWLKwM9FoDE1Pyf7XNdMbUtJSvzBG"
+    },
+    {
+      "label": "Register agency: DEMO Ministerio Federal mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 12011,
+      "signature": "gy1soro8izJcBrZHToF7wWtzoogt3qGxVWtEQm97KM5hZJFwY7UdcGtjbqB1njRbYCK6ikxGQQNHZzq59DMSHK8"
+    },
+    {
+      "label": "Register agency: DEMO Prefeitura do Interior mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 10579,
+      "signature": "2wJf9NbgZJF7VFZUYzNUGTDrjpHNNZ3wxx7Vj2mH5dHgFenW3uHD3ptTLCWFSW4xLcBNzB62TdBRrKXGi2eNZ6vh"
+    },
+    {
+      "label": "Register agency: DEMO Secretaria Estadual AL mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 5000,
+      "sponsor_spent_lamports": 1234360,
+      "rent_lamports": 1229360,
+      "compute_units": 16581,
+      "signature": "2KDfUon8vwAus4jjhtS2emi2BRz5rDYxGHGUNfnbsvnmKwX7kR6EfVvhfj7yZXCEEQTcRcXBNpiEDmfjSovpkDGn"
+    },
+    {
+      "label": "Create price record DEMO-ARP-mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 1630520,
+      "rent_lamports": 1620520,
+      "compute_units": 13022,
+      "signature": "48MMTpdcBQCyTvDbvXUHMvk4aQnYnKx1B5kyG3nySHmwjZY1TDs7m1TpBwMrf7qfyZVPYhxJ2JHyW3Fbw26aUKSv"
+    },
+    {
+      "label": "Add item 1: 100 registered, adhesion maximum 200",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 1122520,
+      "rent_lamports": 1112520,
+      "compute_units": 12935,
+      "signature": "BHhmLgxFhVDKwVwBg2jb9xGuWjy3QeUXu26kb3PrGm7KoHGdHV6ZMw2TFZDFc2nNFNkBdTxubhDstFmrxxy8ku3"
+    },
+    {
+      "label": "Prefeitura A requests 50 units",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 3200240,
+      "rent_lamports": 3190240,
+      "compute_units": 19057,
+      "signature": "63AusWmrcqVpeQm1PXpiqiNr9zmTMhii7WU2utiB1ShhTjjZK9aifvDmML3igCWDEJZiT16ddrgiivVcbWvaEazA"
+    },
+    {
+      "label": "Prefeitura A requests 1 units",
+      "outcome": "ExceedsIndividualCap",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 16100,
+      "signature": "3R3dziRTMvwdSnU5NcV9AUcVGG5X9NvoPPzQKAQe3PFJsz5fpJi3M5GN41phbRLX4tPyphrRPmtgYZRDAvnZ5PeH"
+    },
+    {
+      "label": "Prefeitura B requests 50 units",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 3200240,
+      "rent_lamports": 3190240,
+      "compute_units": 23557,
+      "signature": "3xX6oaTxyYQFkhnwCmnmjrbY6ke4YYKFpRpq6o4TFRax9Wx7MwmAjVMP9PvoCmvwBwcU1Xwizwcs9RnX9ArGRb44"
+    },
+    {
+      "label": "Prefeitura C requests 50 units",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 3200240,
+      "rent_lamports": 3190240,
+      "compute_units": 23557,
+      "signature": "U2nEjj9hST8DpDg4TRLrEoJjzqhdutk3BqBysZa8smwEm44X66DXRUKQEnXeHsHR5WbmTvBmmeVAqq1PiACEvqU"
+    },
+    {
+      "label": "Prefeitura D requests 50 units",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 3200240,
+      "rent_lamports": 3190240,
+      "compute_units": 19057,
+      "signature": "4tKuXBrrA7ZsjeihbmKinehES8JYiXSWnXUPcsYvkxXAHczgP9ycQSaLmGsyy5s17cVNgJ58Zbdjg45BQvAKtnYw"
+    },
+    {
+      "label": "Prefeitura E requests 1 units",
+      "outcome": "ExceedsGlobalCap",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 27462,
+      "signature": "iYRWRCAHm1s8hNRkSvQc2J7YTqthAWk55SmhyL3inkZRCjJXB5uiPGrneiAryLSJCEmSJc42zDBdEJ2aoYRn3bd"
+    },
+    {
+      "label": "Ministerio Federal requests 10 units",
+      "outcome": "FederalAdhesionForbidden",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 21344,
+      "signature": "2goH6bpJxFjQTzoSJxMUs4f2wugAspLQLNh9nyfEhCYUXC6nMYX6XqayZ4JUh448DbYP9DSryEAddmeDjjEcsncZ"
+    },
+    {
+      "label": "Create price record DEMO-ARP-MUN-mv1bjudp",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 1630520,
+      "rent_lamports": 1620520,
+      "compute_units": 13088,
+      "signature": "5335hhJwKZ9D2gD7EuEVmPEX7qJiFZoFfqnKULtgNn1hbT2s2xGib13JMPFyqot2FQKmPL76YDgtryjZoUgVCW6w"
+    },
+    {
+      "label": "Add item 1: 100 registered, adhesion maximum 200",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 1122520,
+      "rent_lamports": 1112520,
+      "compute_units": 13001,
+      "signature": "5JgnbGbsuMN2V71sb3qdaT9tHiDHidnanuSybQgYvMY1ULSfLWUzDxPXth1ZwnkWRuPfrnK47Mgtyj5qJsKtTDHs"
+    },
+    {
+      "label": "Secretaria Estadual (AL) requests 10 units",
+      "outcome": "MunicipalAdhesionForbidden",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 21454,
+      "signature": "374qWD2DnjqSeZLiEoE1B3m2p3mVegcXA6DfFaRR8bnwcGS7HZ1eaXJb5hSaoddEwvWjt5eYoXde6V4vEeBGfoy1"
+    },
+    {
+      "label": "Supplier accepts Prefeitura A's adhesion by signature",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 8426,
+      "signature": "4T9vgucdtQe3bjXe9rvnfDQqvCP3HiSA3aAiJFuYAQr8WEDfUchM5H8SL2EU6G8EN7e2n6BhjExZxZV2YPic21PL"
+    },
+    {
+      "label": "Managing agency authorizes 50 units",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 10914,
+      "signature": "5qcJKT3BBGz8BmtBa1s8Bwy7DGe3rXtmYquEnEhDW5gDgTEXF823wjcM6HFVNUXn4nb1LEutXExWTbfZj5xTodfr"
+    },
+    {
+      "label": "Prefeitura A executes the purchase (nota de empenho)",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 5836,
+      "signature": "55sspY9shTNnuUcG85y2G3RgdrC8o1NoXwrdAexBXPJUzzsnGHGuhNhRrig4Ayn5StXWBEnbWuUJspEApFSzTSUb"
+    },
+    {
+      "label": "Prefeitura A records a verified obligation of R$ 10.000,00",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 1970880,
+      "rent_lamports": 1960880,
+      "compute_units": 11190,
+      "signature": "x9KigLNK2C1uhSYzq7zuVNjKSGmKGMyRoGDsxYJ99mgKHr8nPCaruVkEgbxp5PyV6FkmJgyttSMu9xnLzxk559u"
+    },
+    {
+      "label": "Attach fiscal document (hash of the NF-e key)",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 1071720,
+      "rent_lamports": 1061720,
+      "compute_units": 13025,
+      "signature": "5nZG5zC37UJdbAXGNyT5DHE15WhK4afhXYMd8kdxdmWjpYwfVaBL9D5unwHgZ7Kk6eZML9Ydv7D3AeHKpLLB3BGi"
+    },
+    {
+      "label": "Designated verifier confirms eligibility",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 5239,
+      "signature": "4DBejkBZXyitjDpCw4ZFM3HohquwzXuznWwGvRBGoXVUeAzpC8QbdyWYkMWF8Nv7WpCfq7Tcpi6JXHGuwY95gRRd"
+    },
+    {
+      "label": "Financier A advances R$ 6.000,00 (creditor co-signs)",
+      "outcome": "ok",
+      "fee_lamports": 15000,
+      "sponsor_spent_lamports": 1300240,
+      "rent_lamports": 1285240,
+      "compute_units": 9877,
+      "signature": "3gVKDcQ5wVTt9URN3S6xJe7NTHjbijgFL2e6csbNpF9om6K1Lc3jkyPGC73qG5kUzg4TgboMSKsvDzrrXkk6Vbga"
+    },
+    {
+      "label": "Financier B advances R$ 4.000,00",
+      "outcome": "ok",
+      "fee_lamports": 15000,
+      "sponsor_spent_lamports": 1300240,
+      "rent_lamports": 1285240,
+      "compute_units": 9877,
+      "signature": "3oGwnzn1Udu4duxeHjGVPyo9uW5FTM3t9UE4d49gqxEUFCXNMn6QiQKUqhvn9csP53ruM5kMrqf5pB6JBz4fJ6mq"
+    },
+    {
+      "label": "Financier A tries to finance R$ 0,01 more",
+      "outcome": "ExceedsFinanceableBalance",
+      "fee_lamports": 15000,
+      "sponsor_spent_lamports": 15000,
+      "rent_lamports": 0,
+      "compute_units": 9529,
+      "signature": "2KoQGRQWVqLhTaVS16k4QHxxXkLrZ2UDGcKaPCPsQqrVHvg1DbmKV1HnycQ6RJu6FjU3b6v53Qc2YbmqKwmt4bxY"
+    },
+    {
+      "label": "Prefeitura A records payment of R$ 10.000,00",
+      "outcome": "ok",
+      "fee_lamports": 10000,
+      "sponsor_spent_lamports": 10000,
+      "rent_lamports": 0,
+      "compute_units": 5600,
+      "signature": "WsdmBccz5QVzMY2zgsH4hGSDq5aKeaaBnG1oocXseDJncv4189D4BoYkSx7799o99241YLLuGzgGDyx5PAvb1rm"
+    }
+  ]
+}

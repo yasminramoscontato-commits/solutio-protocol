@@ -20,13 +20,23 @@ Built for the Colosseum **Crypto World's Fair** hackathon (Solana track).
 | Module 2 — Obligations (single financing) | Implemented, 8 integration tests |
 | Integration test environment | LiteSVM (in-process Solana VM running the compiled program) |
 | Devnet deployment | **Live** — [`5cmBDMRd…jz9E`](https://explorer.solana.com/address/5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E?cluster=devnet); 32-transaction scripted run in [`docs/DEVNET.md`](docs/DEVNET.md) |
-| TypeScript client + IDL (`client/`) | Demo script used for the devnet run |
+| TypeScript client + IDL (`client/`) | Demo script used for the devnet run; cost measurement script |
+| Framework (`framework/`) | Evidence base, rulebook (24 rules across Brazil, Alagoas and the EU), reference engine, 12 scenario replays, unit economics from measured devnet costs; 22 tests |
 | Public verifier page | **Not yet** |
 | Financing pool (test stablecoin) | **Not started** — experimental, optional |
 
 Last full test run: 38 passed, 0 failed (2026-10-09). Devnet uses test SOL and DEMO identities with fictional names. No real funds, no real government data, no pilot or partnership is claimed.
 
 ---
+
+## Start here
+
+- [`docs/PROBLEM_CHAIN.md`](docs/PROBLEM_CHAIN.md): the problem from global to municipal, with every claim sourced.
+- [`docs/THESIS.md`](docs/THESIS.md): hypotheses and what is validated, partial or not yet validated.
+- [`docs/framework/RULEBOOK.md`](docs/framework/RULEBOOK.md): business rules and their legal sources.
+- [`docs/framework/SCENARIOS.md`](docs/framework/SCENARIOS.md): documented cases replayed through the rules.
+- [`docs/framework/ECONOMICS.md`](docs/framework/ECONOMICS.md): measured costs and revenue scenarios.
+- [`docs/field/OPERATIONAL_FLOWS.md`](docs/field/OPERATIONAL_FLOWS.md): how a state central purchasing body works today (anonymized).
 
 ## The problem
 
