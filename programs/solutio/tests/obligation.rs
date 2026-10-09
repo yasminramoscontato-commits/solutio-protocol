@@ -23,7 +23,7 @@ fn scenario() -> Scenario {
     let manager = env.new_agency(Sphere::State, "Central de Compras do Estado");
     let supplier = Keypair::new();
     let ata = env.create_ata(&manager, "ARP-001/2026", &supplier.pubkey(), 365);
-    let item = env.add_item(&manager, &ata, 1, 100, false);
+    let item = env.add_item(&manager, &ata, 1, 100, 200);
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     let req = env.full_adhesion(&manager, &supplier, &city, &ata, &item, 1, 8).unwrap();
     let obligation = env
@@ -147,35 +147,36 @@ fn financing_closes_once_the_debtor_starts_paying() {
 }
 
 #[test]
-fn an_obligation_can_only_derive_from_an_effective_adhesion() {
+fn an_obligation_can_only_derive_from_an_executed_adhesion() {
     let mut env = Env::new();
     let manager = env.new_agency(Sphere::State, "Central");
     let supplier = Keypair::new();
     let ata = env.create_ata(&manager, "ARP-002", &supplier.pubkey(), 365);
-    let item = env.add_item(&manager, &ata, 1, 100, false);
+    let item = env.add_item(&manager, &ata, 1, 100, 200);
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     let other_city = env.new_agency(Sphere::Municipal, "Prefeitura B");
 
-    // Requested but not yet approved and accepted.
-    let pending = env.request(&city, &ata, &item, 1, 10).unwrap();
+    // Requested, accepted and authorized, but not yet executed.
+    let req = env.request(&city, &ata, &item, 1, 10).unwrap();
+    env.supplier_respond(&supplier, &ata, &item, &city, &req, true).unwrap();
+    env.authorize(&manager, &ata, &item, &city, &req, 10, [0u8; 32]).unwrap();
     assert_eq!(
-        env.register_obligation(&city, "NE-1", &supplier.pubkey(), 1_000, Some(pending)),
+        env.register_obligation(&city, "NE-1", &supplier.pubkey(), 1_000, Some(req)),
         Err(code(ErrorCode::SourceAdhesionNotEffective))
     );
 
-    // Effective, but the obligation is claimed by a different debtor or creditor.
-    env.approve(&manager, &ata, &pending).unwrap();
-    env.accept(&supplier, &ata, &item, &city, &pending).unwrap();
+    // Executed, but claimed by a different debtor or creditor.
+    env.formalize(&city, &req).unwrap();
     assert_eq!(
-        env.register_obligation(&other_city, "NE-2", &supplier.pubkey(), 1_000, Some(pending)),
+        env.register_obligation(&other_city, "NE-2", &supplier.pubkey(), 1_000, Some(req)),
         Err(code(ErrorCode::SourceAdhesionMismatch))
     );
     let wrong_supplier = Keypair::new();
     assert_eq!(
-        env.register_obligation(&city, "NE-3", &wrong_supplier.pubkey(), 1_000, Some(pending)),
+        env.register_obligation(&city, "NE-3", &wrong_supplier.pubkey(), 1_000, Some(req)),
         Err(code(ErrorCode::SourceAdhesionMismatch))
     );
-    env.register_obligation(&city, "NE-4", &supplier.pubkey(), 1_000, Some(pending)).unwrap();
+    env.register_obligation(&city, "NE-4", &supplier.pubkey(), 1_000, Some(req)).unwrap();
 }
 
 #[test]

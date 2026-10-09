@@ -29,6 +29,20 @@ pub enum ErrorCode {
     InvalidRequestStatus,
     #[msg("Invalid validity window")]
     InvalidValidity,
+    #[msg("Price record is suspended or cancelled")]
+    AtaNotActive,
+    #[msg("The tender does not allow adhesions to this item")]
+    AdhesionsNotAllowed,
+    #[msg("The claimed exception to the art. 86 §5 cap does not apply")]
+    ExceptionNotApplicable,
+    #[msg("Maximum quantity for adhesions cannot exceed twice the registered quantity")]
+    InvalidMaxAdhesion,
+    #[msg("Decree 11.462/2023 art. 31 §2: the execution deadline has passed")]
+    ExecutionDeadlinePassed,
+    #[msg("The execution deadline has not passed yet")]
+    ExecutionDeadlineNotReached,
+    #[msg("Invalid execution deadline")]
+    InvalidDeadline,
 
     // ---- obligations / financing ----
     #[msg("Amount must be greater than zero")]
@@ -47,7 +61,7 @@ pub enum ErrorCode {
     ExceedsOutstanding,
     #[msg("Evidence hash is required")]
     MissingEvidence,
-    #[msg("Source adhesion is not effective")]
+    #[msg("Source adhesion has not been executed")]
     SourceAdhesionNotEffective,
     #[msg("Source adhesion does not match this debtor or creditor")]
     SourceAdhesionMismatch,
@@ -64,6 +78,9 @@ impl From<RuleViolation> for ErrorCode {
             RuleViolation::ExceedsGlobalCap => ErrorCode::ExceedsGlobalCap,
             RuleViolation::FederalAdhesionForbidden => ErrorCode::FederalAdhesionForbidden,
             RuleViolation::AtaNotInForce => ErrorCode::AtaNotInForce,
+            RuleViolation::AtaNotActive => ErrorCode::AtaNotActive,
+            RuleViolation::AdhesionsNotAllowed => ErrorCode::AdhesionsNotAllowed,
+            RuleViolation::ExceptionNotApplicable => ErrorCode::ExceptionNotApplicable,
             RuleViolation::ManagerCannotAdhere => ErrorCode::ManagerCannotAdhere,
             RuleViolation::Overflow => ErrorCode::Overflow,
         }

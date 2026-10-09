@@ -35,6 +35,9 @@ pub struct Registry {
 pub struct Agency {
     pub authority: Pubkey,
     pub sphere: Sphere,
+    /// Attested by the registry: relevant to the health-emergency exception
+    /// (Decree 11.462/2023, art. 32, §1).
+    pub is_health_ministry: bool,
     #[max_len(64)]
     pub name: String,
     pub active: bool,
@@ -45,12 +48,23 @@ pub struct Agency {
 // Module 1: Carona (price records and adhesions)
 // ---------------------------------------------------------------------------
 
+/// Status of a price record. Suspension models a supplier sanction during which
+/// no new contracts may derive from the record (Decree 11.462/2023, art. 28, §1);
+/// cancellation models arts. 28-29.
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq, InitSpace)]
+pub enum AtaStatus {
+    Active,
+    Suspended,
+    Cancelled,
+}
+
 /// A price-registration record (Ata de Registro de Preços).
 #[account]
 #[derive(InitSpace)]
 pub struct Ata {
     pub manager_agency: Pubkey,
     pub manager_sphere: Sphere,
+    pub manager_is_health_ministry: bool,
     /// Wallet of the registered supplier, who must accept each adhesion.
     pub supplier: Pubkey,
     /// Hash of the canonical identifier (e.g. the PNCP control number).
@@ -59,43 +73,73 @@ pub struct Ata {
     pub doc_hash: [u8; 32],
     pub valid_from: i64,
     pub valid_until: i64,
+    pub status: AtaStatus,
+    pub status_evidence_hash: [u8; 32],
     pub item_count: u16,
     pub bump: u8,
 }
 
 /// One item of a price record. `registered_qty` is immutable once created:
-/// there is deliberately no instruction to increase it (no "acréscimos").
+/// there is deliberately no instruction to increase it (Decree art. 23).
 #[account]
 #[derive(InitSpace)]
 pub struct AtaItem {
     pub ata: Pubkey,
     pub item_no: u16,
+    /// Quantity registered for the managing and participating agencies.
     pub registered_qty: u64,
+    /// Maximum quantity the tender allows for non-participants (Decree art. 15, XI).
+    /// Zero means the tender does not allow adhesions.
+    pub max_adhesion_qty: u64,
     /// Unit price in integer cents.
     pub unit_price: u64,
-    /// Sum of all effective adhesions to this item.
-    pub adhered_total: u64,
-    /// True when a statutory exception lifts the §5 global cap.
-    pub global_cap_exempt: bool,
+    /// Pending + authorized quantity of adhesions subject to the §5 cap.
+    pub committed_capped: u64,
+    /// Pending + authorized quantity of adhesions under a statutory exception.
+    pub committed_exempt: u64,
+    /// Quantity authorized by the manager (informational; includes exempt).
+    pub authorized_total: u64,
     pub bump: u8,
 }
 
-/// Cumulative quantity a given agency has adhered to on a given item (§4).
+/// Quantity a given agency has committed (pending + authorized) on an item (§4).
 #[account]
 #[derive(InitSpace)]
 pub struct AgencyItemUsage {
     pub item: Pubkey,
     pub agency: Pubkey,
-    pub consumed: u64,
+    pub committed: u64,
     pub bump: u8,
 }
 
+/// Exception to the §5 cap claimed by an adhesion (Decree 11.462/2023, art. 32).
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq, InitSpace)]
+pub enum AdhesionException {
+    None,
+    /// §1: emergency purchase of medicines or medical supplies under a record
+    /// managed by the Ministry of Health.
+    HealthEmergency,
+    /// §2: state, district or municipal adhesion required for voluntary
+    /// transfers executing a federal programme.
+    FederalProgramTransfer,
+}
+
+/// Lifecycle of an adhesion, in the order required by Decree 11.462/2023,
+/// art. 31, §1: the manager authorizes only after the supplier accepts.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq, InitSpace)]
 pub enum RequestStatus {
+    /// Requested by the agency; quantity reserved.
     Requested,
-    Approved,
-    Effective,
+    /// Accepted by the supplier; awaiting the manager.
+    SupplierAccepted,
+    /// Authorized by the manager; must be executed within the deadline.
+    Authorized,
+    /// Executed: contract or commitment note formalized within the deadline.
+    Executed,
+    /// Declined by the supplier or denied by the manager; quantity released.
     Rejected,
+    /// Not executed within the deadline; quantity released.
+    Lapsed,
 }
 
 #[account]
@@ -106,12 +150,21 @@ pub struct AdhesionRequest {
     pub adherent_agency: Pubkey,
     pub supplier: Pubkey,
     pub request_id: u64,
-    pub qty: u64,
+    pub requested_qty: u64,
+    pub authorized_qty: u64,
+    pub exception: AdhesionException,
     pub status: RequestStatus,
-    /// Hash of the agency's request (ofício / justification).
+    /// Hash of the request (justification of advantage, price compatibility,
+    /// and, for exceptions, the supporting evidence).
     pub evidence_hash: [u8; 32],
+    /// Hash of the manager's justification (required for partial authorization or denial).
+    pub decision_evidence_hash: [u8; 32],
+    /// Hash of the contract or commitment note that executed the adhesion.
+    pub execution_evidence_hash: [u8; 32],
     pub requested_at: i64,
-    pub decided_at: i64,
+    pub supplier_decided_at: i64,
+    pub authorized_at: i64,
+    pub execute_by: i64,
     pub bump: u8,
 }
 

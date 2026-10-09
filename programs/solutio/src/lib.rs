@@ -1,7 +1,8 @@
 //! Solutio — verifiable legal limits and single-financing control for public
 //! procurement obligations, on Solana.
 //!
-//! Module 1 (Carona) enforces Law 14.133/2021 art. 86 adhesion caps.
+//! Module 1 (Carona) enforces Law 14.133/2021 art. 86 adhesion caps, following
+//! the procedure of Decree 11.462/2023 arts. 31-33.
 //! Module 2 (Obligations) tracks verified government payment obligations and
 //! guarantees, within the protocol, that an eligible balance is never financed twice.
 //!
@@ -31,8 +32,13 @@ pub mod solutio {
         instructions::registry::handle_init_registry(ctx, eligibility_verifier)
     }
 
-    pub fn register_agency(ctx: Context<RegisterAgency>, sphere: Sphere, name: String) -> Result<()> {
-        instructions::registry::handle_register_agency(ctx, sphere, name)
+    pub fn register_agency(
+        ctx: Context<RegisterAgency>,
+        sphere: Sphere,
+        name: String,
+        is_health_ministry: bool,
+    ) -> Result<()> {
+        instructions::registry::handle_register_agency(ctx, sphere, name, is_health_ministry)
     }
 
     // ---- module 1: carona ----
@@ -51,31 +57,48 @@ pub mod solutio {
         ctx: Context<AddItem>,
         item_no: u16,
         registered_qty: u64,
+        max_adhesion_qty: u64,
         unit_price: u64,
-        global_cap_exempt: bool,
     ) -> Result<()> {
-        instructions::carona::handle_add_item(ctx, item_no, registered_qty, unit_price, global_cap_exempt)
+        instructions::carona::handle_add_item(ctx, item_no, registered_qty, max_adhesion_qty, unit_price)
+    }
+
+    pub fn set_ata_status(ctx: Context<SetAtaStatus>, status: AtaStatus, evidence_hash: [u8; 32]) -> Result<()> {
+        instructions::carona::handle_set_ata_status(ctx, status, evidence_hash)
     }
 
     pub fn request_adhesion(
         ctx: Context<RequestAdhesion>,
         request_id: u64,
         qty: u64,
+        exception: AdhesionException,
         evidence_hash: [u8; 32],
     ) -> Result<()> {
-        instructions::carona::handle_request_adhesion(ctx, request_id, qty, evidence_hash)
+        instructions::carona::handle_request_adhesion(ctx, request_id, qty, exception, evidence_hash)
     }
 
-    pub fn approve_adhesion(ctx: Context<DecideAdhesion>) -> Result<()> {
-        instructions::carona::handle_approve_adhesion(ctx)
+    pub fn supplier_respond(ctx: Context<SupplierRespond>, accept: bool) -> Result<()> {
+        instructions::carona::handle_supplier_respond(ctx, accept)
     }
 
-    pub fn reject_adhesion(ctx: Context<DecideAdhesion>) -> Result<()> {
-        instructions::carona::handle_reject_adhesion(ctx)
+    pub fn authorize_adhesion(ctx: Context<ManagerDecision>, authorized_qty: u64, evidence_hash: [u8; 32]) -> Result<()> {
+        instructions::carona::handle_authorize_adhesion(ctx, authorized_qty, evidence_hash)
     }
 
-    pub fn accept_adhesion(ctx: Context<AcceptAdhesion>) -> Result<()> {
-        instructions::carona::handle_accept_adhesion(ctx)
+    pub fn deny_adhesion(ctx: Context<ManagerDecision>, evidence_hash: [u8; 32]) -> Result<()> {
+        instructions::carona::handle_deny_adhesion(ctx, evidence_hash)
+    }
+
+    pub fn extend_execution(ctx: Context<ManagerDecision>, new_execute_by: i64) -> Result<()> {
+        instructions::carona::handle_extend_execution(ctx, new_execute_by)
+    }
+
+    pub fn formalize_adhesion(ctx: Context<FormalizeAdhesion>, evidence_hash: [u8; 32]) -> Result<()> {
+        instructions::carona::handle_formalize_adhesion(ctx, evidence_hash)
+    }
+
+    pub fn expire_adhesion(ctx: Context<ExpireAdhesion>) -> Result<()> {
+        instructions::carona::handle_expire_adhesion(ctx)
     }
 
     // ---- module 2: obligations ----

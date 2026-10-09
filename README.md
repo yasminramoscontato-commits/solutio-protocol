@@ -2,7 +2,7 @@
 
 **From public obligation to payment — verifiably.**
 
-Solutio is an open Solana protocol for public procurement obligations. It enforces statutory caps on shared government contracts, starting with Brazil's adhesion limits (Law 14.133/2021, art. 86), and records each government payment obligation through explicit, evidence-backed states. Within the protocol, a cap cannot be exceeded and an obligation's balance cannot be financed twice, even under concurrent requests. Anyone can verify that state on-chain without trusting our interface.
+Solutio is an open Solana protocol for public procurement obligations. It enforces statutory caps on shared government contracts, starting with Brazil's adhesion limits (Law 14.133/2021, art. 86, and Decree 11.462/2023, arts. 31–33), and records each government payment obligation through explicit, evidence-backed states. Within the protocol, a cap cannot be exceeded and an obligation's balance cannot be financed twice, even under concurrent requests. Anyone can verify that state on-chain without trusting our interface.
 
 > *Solutio* is the Roman-law term for the extinction of an obligation by payment.
 
@@ -15,15 +15,15 @@ Built for the Colosseum **Crypto World's Fair** hackathon (Solana track).
 | Component | Status |
 | --- | --- |
 | Anchor program (`programs/solutio`) | Implemented, builds for SBF |
-| Legal rules as pure functions (`rules.rs`) | Implemented, 11 unit tests incl. 2 randomized suites (2,000 sequences each) |
-| Module 1 — Carona (art. 86 caps) | Implemented, 12 integration tests |
+| Legal rules as pure functions (`rules.rs`) | Implemented, 12 unit tests incl. 2 randomized suites (2,000 sequences each) |
+| Module 1 — Carona (art. 86 + Decree 11.462/2023) | Implemented, 16 integration tests |
 | Module 2 — Obligations (single financing) | Implemented, 8 integration tests |
 | Integration test environment | LiteSVM (in-process Solana VM running the compiled program) |
 | Devnet deployment | **Not yet** |
 | Public verifier page | **Not yet** |
 | Financing pool (test stablecoin) | **Not started** — experimental, optional |
 
-Last full run: 31 passed, 0 failed (2026-10-09). No real funds, no real government data, no pilot or partnership is claimed.
+Last full run: 36 passed, 0 failed (2026-10-09). No real funds, no real government data, no pilot or partnership is claimed.
 
 ---
 
@@ -36,7 +36,7 @@ Two rules decide whether a public claim is sound, and both are hard to verify ac
 1. **Was the contract lawful?** Brazil lets non-participating agencies "ride" (*carona*) on another agency's price-registration record, but caps each rider at 50% of the registered quantity and all riders together at 2x (art. 86, §§4–5). The sum depends on decisions made by independent agencies, often at different levels of government, in systems that do not talk to each other.
 2. **Has the claim already been financed?** Financing the same receivable twice is the classic factoring fraud. A lender must confirm the claim is valid, unpaid and not already pledged.
 
-Similar state-run answers exist — Italy's PCC (2012), India's TReDS, Brazil's AntecipaGov (2021). Each runs inside one country's systems, for regulated financiers. Solutio explores a complementary layer: rules and balances that any party can verify, configurable per jurisdiction.
+Similar state-run answers exist — Italy's PCC (2012), India's TReDS, Brazil's AntecipaGov (2021). Each runs inside one country's systems, for regulated financiers. Brazil's federal *Gestão de Atas* tool already controls adhesion balances for records it hosts, but access requires a government login, the supplier's acceptance is an uploaded document, and records managed in state or municipal systems stay outside it. Solutio explores a complementary layer: rules and balances that any party can verify, with acceptance by signature, configurable per jurisdiction.
 
 ---
 
@@ -44,9 +44,11 @@ Similar state-run answers exist — Italy's PCC (2012), India's TReDS, Brazil's 
 
 **Guaranteed by the program, over its own recorded state:**
 
-- An adhesion becomes effective only with three signatures: the adhering agency (request), the managing agency (approval) and the registered supplier (acceptance).
-- No sequence of adhesions, including competing ones, exceeds art. 86 §4 (per agency) or §5 (per item) caps. Statutory exceptions lift §5 but never §4.
-- Federal agencies cannot adhere to state, district or municipal records (§8). Expired records accept nothing.
+- Adhesions follow the order of Decree 11.462/2023, art. 31: the agency requests, the **supplier accepts by signature**, and only then the managing agency authorizes, fully or partially with a recorded justification.
+- A request reserves quantity at once, as the federal *Gestão de Atas* tool does. No sequence of requests, including competing ones, exceeds §4 (50% per agency) or §5 (2x per item, or the lower maximum set by the tender).
+- Statutory exceptions (Ministry of Health emergencies, federal-programme transfers) lift §5 only when they apply, and never lift §4.
+- Federal agencies cannot adhere to state, district or municipal records (§8). Expired, suspended or cancelled records accept nothing.
+- An authorized adhesion must be executed within 90 days (extendable by the manager, never past validity); after that **anyone** can lapse it and its quantity returns to the pool.
 - An obligation is financeable only after a **separate** eligibility confirmation by a designated verifier, backed by attached fiscal documents. Verified (liquidated) ≠ eligible.
 - The cumulative financed amount never exceeds the eligible amount. A fiscal document can back only one obligation.
 - Financing requires the creditor's signature and evidence that the debtor was notified of the assignment.
@@ -66,10 +68,12 @@ Similar state-run answers exist — Italy's PCC (2012), India's TReDS, Brazil's 
 ```mermaid
 flowchart LR
   subgraph M1[Module 1 · Carona]
-    R[Adherent requests] --> A[Manager approves] --> S[Supplier accepts]
-    S --> C{Caps §4 · §5 · §8<br/>validity}
-    C -- ok --> E[Adhesion effective]
-    C -- no --> X[Rejected · balance intact]
+    R[Agency requests] --> C{Caps §4 · §5 · §8<br/>status · validity}
+    C -- no --> X[Refused · balance intact]
+    C -- ok, quantity reserved --> S[Supplier accepts]
+    S --> A[Manager authorizes<br/>full or partial]
+    A --> E[Executed within 90 days]
+    A -. deadline missed .-> L[Lapsed · quantity released]
   end
   subgraph M2[Module 2 · Obligations]
     V[Verified<br/>debtor recognizes debt] --> D[Fiscal documents attached]
@@ -82,7 +86,7 @@ flowchart LR
 ```
 
 - `src/rules.rs` — every legal and accounting rule as a pure function with no Solana dependency. Handlers only load accounts, call these functions and persist results.
-- `src/instructions/carona.rs` — price records, items, adhesion requests and the three-signature flow.
+- `src/instructions/carona.rs` — price records, items, reservation, supplier response, authorization, execution, lapse and record status.
 - `src/instructions/obligation.rs` — obligations, fiscal documents, eligibility, financing, reductions, payments.
 - `src/events.rs` — every transition emits an event, so history can be rebuilt from the ledger alone.
 
@@ -97,7 +101,7 @@ See [`docs/LEGAL_RULES.md`](docs/LEGAL_RULES.md) for the rule → code → test 
 Solana is the shared state between parties with no common operator: agencies at different levels of government, suppliers, financiers and auditors.
 
 - **The program, not a UI, enforces the rules.** A transaction that would breach a cap fails on-chain.
-- **Account-level write locking serializes conflicting writes.** Acceptances of the same item, or financings of the same obligation, are processed one after another, and each re-checks current state. See `race_for_the_last_units_only_one_can_win`.
+- **Account-level write locking serializes conflicting writes.** Requests for the same item, or financings of the same obligation, are processed one after another, and each re-checks current state. See `race_for_the_last_units_only_one_can_win`.
 - **Program-derived addresses** let anyone locate a record from public identifiers (price record, item, agency, obligation, document key).
 - **Fee-payer separation** lets officials sign without holding SOL (`agency_wallets_sign_without_holding_any_sol`).
 
@@ -122,8 +126,9 @@ cargo test -p solutio
 ## Known limitations
 
 - Identity: agencies are registered by a labeled **demo issuer**. Production would use credentials from an accountable authority (e.g. Solana Attestation Service issued by an audit court or state government) and multisig wallets per agency.
-- The statutory exception flag (§§6–7) is declared by the managing agency; it is not independently attested yet.
-- The 90-day window to execute an approved adhesion is not enforced yet.
+- Exceptions: the registry attests which agency is the Ministry of Health; the legal judgment that a purchase is an emergency or executes a federal programme stays human (evidence hash recorded).
+- Participating agencies (other than the manager) and quantity reallocation (*remanejamento*, Decree art. 30) are not modeled yet.
+- Decree 11.462/2023 is the federal regulation; state and municipal regulations become separate profiles once validated.
 - After the debtor's first payment, new financing is closed (simplifying policy for the MVP).
 - Open legal interpretation questions are listed in `docs/LEGAL_RULES.md`.
 

@@ -166,9 +166,13 @@ impl Env {
 
     /// Registers an agency whose signing wallet holds zero SOL.
     pub fn new_agency(&mut self, sphere: Sphere, name: &str) -> Keypair {
+        self.new_agency_ex(sphere, name, false)
+    }
+
+    pub fn new_agency_ex(&mut self, sphere: Sphere, name: &str, is_health_ministry: bool) -> Keypair {
         let authority = Keypair::new();
         let ix = self.ix(
-            solutio::instruction::RegisterAgency { sphere, name: name.to_string() },
+            solutio::instruction::RegisterAgency { sphere, name: name.to_string(), is_health_ministry },
             solutio::accounts::RegisterAgency {
                 payer: self.sponsor.pubkey(),
                 registry_authority: self.registry_authority.pubkey(),
@@ -208,14 +212,14 @@ impl Env {
         ata
     }
 
-    pub fn add_item(&mut self, manager: &Keypair, ata: &Pubkey, item_no: u16, qty: u64, exempt: bool) -> Pubkey {
+    pub fn try_add_item(&mut self, manager: &Keypair, ata: &Pubkey, item_no: u16, qty: u64, max_adhesion: u64) -> Result<Pubkey, u32> {
         let item = self.item_pda(ata, item_no);
         let ix = self.ix(
             solutio::instruction::AddItem {
                 item_no,
                 registered_qty: qty,
+                max_adhesion_qty: max_adhesion,
                 unit_price: 1_250,
-                global_cap_exempt: exempt,
             },
             solutio::accounts::AddItem {
                 payer: self.sponsor.pubkey(),
@@ -226,18 +230,42 @@ impl Env {
                 system_program: system_program::ID,
             },
         );
-        self.send(ix, &[manager]).unwrap();
-        item
+        self.send(ix, &[manager]).map(|_| item)
     }
 
-    pub fn request(&mut self, adherent: &Keypair, ata: &Pubkey, item: &Pubkey, request_id: u64, qty: u64) -> Result<Pubkey, u32> {
+    pub fn add_item(&mut self, manager: &Keypair, ata: &Pubkey, item_no: u16, qty: u64, max_adhesion: u64) -> Pubkey {
+        self.try_add_item(manager, ata, item_no, qty, max_adhesion).unwrap()
+    }
+
+    pub fn set_status(&mut self, manager: &Keypair, ata: &Pubkey, status: AtaStatus) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::SetAtaStatus { status, evidence_hash: hash("despacho-status") },
+            solutio::accounts::SetAtaStatus {
+                manager_authority: manager.pubkey(),
+                manager_agency: self.agency(&manager.pubkey()),
+                ata: *ata,
+            },
+        );
+        self.send(ix, &[manager])
+    }
+
+    pub fn request_ex(
+        &mut self,
+        adherent: &Keypair,
+        ata: &Pubkey,
+        item: &Pubkey,
+        request_id: u64,
+        qty: u64,
+        exception: AdhesionException,
+    ) -> Result<Pubkey, u32> {
         let agency = self.agency(&adherent.pubkey());
         let request = self.request_pda(item, &agency, request_id);
         let ix = self.ix(
             solutio::instruction::RequestAdhesion {
                 request_id,
                 qty,
-                evidence_hash: hash("oficio"),
+                exception,
+                evidence_hash: hash("oficio-justificativa"),
             },
             solutio::accounts::RequestAdhesion {
                 payer: self.sponsor.pubkey(),
@@ -253,41 +281,26 @@ impl Env {
         self.send(ix, &[adherent]).map(|_| request)
     }
 
-    pub fn approve(&mut self, manager: &Keypair, ata: &Pubkey, request: &Pubkey) -> Result<(), u32> {
-        let ix = self.ix(
-            solutio::instruction::ApproveAdhesion {},
-            solutio::accounts::DecideAdhesion {
-                manager_authority: manager.pubkey(),
-                manager_agency: self.agency(&manager.pubkey()),
-                ata: *ata,
-                request: *request,
-            },
-        );
-        self.send(ix, &[manager])
+    pub fn request(&mut self, adherent: &Keypair, ata: &Pubkey, item: &Pubkey, request_id: u64, qty: u64) -> Result<Pubkey, u32> {
+        self.request_ex(adherent, ata, item, request_id, qty, AdhesionException::None)
     }
 
-    pub fn reject(&mut self, manager: &Keypair, ata: &Pubkey, request: &Pubkey) -> Result<(), u32> {
-        let ix = self.ix(
-            solutio::instruction::RejectAdhesion {},
-            solutio::accounts::DecideAdhesion {
-                manager_authority: manager.pubkey(),
-                manager_agency: self.agency(&manager.pubkey()),
-                ata: *ata,
-                request: *request,
-            },
-        );
-        self.send(ix, &[manager])
-    }
-
-    pub fn accept(&mut self, supplier: &Keypair, ata: &Pubkey, item: &Pubkey, adherent: &Keypair, request: &Pubkey) -> Result<(), u32> {
+    pub fn supplier_respond(
+        &mut self,
+        supplier: &Keypair,
+        ata: &Pubkey,
+        item: &Pubkey,
+        adherent: &Keypair,
+        request: &Pubkey,
+        accept: bool,
+    ) -> Result<(), u32> {
         let agency = self.agency(&adherent.pubkey());
         let ix = self.ix(
-            solutio::instruction::AcceptAdhesion {},
-            solutio::accounts::AcceptAdhesion {
+            solutio::instruction::SupplierRespond { accept },
+            solutio::accounts::SupplierRespond {
                 supplier: supplier.pubkey(),
                 ata: *ata,
                 item: *item,
-                adherent_agency: agency,
                 usage: self.usage_pda(item, &agency),
                 request: *request,
             },
@@ -295,7 +308,72 @@ impl Env {
         self.send(ix, &[supplier])
     }
 
-    /// request -> approve -> accept, returning the request address.
+    fn decision_accounts(&self, manager: &Keypair, ata: &Pubkey, item: &Pubkey, adherent: &Keypair, request: &Pubkey) -> solutio::accounts::ManagerDecision {
+        let agency = self.agency(&adherent.pubkey());
+        solutio::accounts::ManagerDecision {
+            manager_authority: manager.pubkey(),
+            manager_agency: self.agency(&manager.pubkey()),
+            ata: *ata,
+            item: *item,
+            usage: self.usage_pda(item, &agency),
+            request: *request,
+        }
+    }
+
+    pub fn authorize(
+        &mut self,
+        manager: &Keypair,
+        ata: &Pubkey,
+        item: &Pubkey,
+        adherent: &Keypair,
+        request: &Pubkey,
+        qty: u64,
+        evidence: [u8; 32],
+    ) -> Result<(), u32> {
+        let accounts = self.decision_accounts(manager, ata, item, adherent, request);
+        let ix = self.ix(solutio::instruction::AuthorizeAdhesion { authorized_qty: qty, evidence_hash: evidence }, accounts);
+        self.send(ix, &[manager])
+    }
+
+    pub fn deny(&mut self, manager: &Keypair, ata: &Pubkey, item: &Pubkey, adherent: &Keypair, request: &Pubkey) -> Result<(), u32> {
+        let accounts = self.decision_accounts(manager, ata, item, adherent, request);
+        let ix = self.ix(solutio::instruction::DenyAdhesion { evidence_hash: hash("motivacao") }, accounts);
+        self.send(ix, &[manager])
+    }
+
+    pub fn extend(&mut self, manager: &Keypair, ata: &Pubkey, item: &Pubkey, adherent: &Keypair, request: &Pubkey, new_execute_by: i64) -> Result<(), u32> {
+        let accounts = self.decision_accounts(manager, ata, item, adherent, request);
+        let ix = self.ix(solutio::instruction::ExtendExecution { new_execute_by }, accounts);
+        self.send(ix, &[manager])
+    }
+
+    pub fn formalize(&mut self, adherent: &Keypair, request: &Pubkey) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::FormalizeAdhesion { evidence_hash: hash("nota-de-empenho") },
+            solutio::accounts::FormalizeAdhesion {
+                adherent_authority: adherent.pubkey(),
+                adherent_agency: self.agency(&adherent.pubkey()),
+                request: *request,
+            },
+        );
+        self.send(ix, &[adherent])
+    }
+
+    /// Permissionless: only the sponsor (fee payer) signs.
+    pub fn expire(&mut self, item: &Pubkey, adherent: &Keypair, request: &Pubkey) -> Result<(), u32> {
+        let agency = self.agency(&adherent.pubkey());
+        let ix = self.ix(
+            solutio::instruction::ExpireAdhesion {},
+            solutio::accounts::ExpireAdhesion {
+                item: *item,
+                usage: self.usage_pda(item, &agency),
+                request: *request,
+            },
+        );
+        self.send(ix, &[])
+    }
+
+    /// request -> supplier accepts -> manager authorizes in full -> agency executes.
     pub fn full_adhesion(
         &mut self,
         manager: &Keypair,
@@ -307,8 +385,9 @@ impl Env {
         qty: u64,
     ) -> Result<Pubkey, u32> {
         let req = self.request(adherent, ata, item, request_id, qty)?;
-        self.approve(manager, ata, &req)?;
-        self.accept(supplier, ata, item, adherent, &req)?;
+        self.supplier_respond(supplier, ata, item, adherent, &req, true)?;
+        self.authorize(manager, ata, item, adherent, &req, qty, [0u8; 32])?;
+        self.formalize(adherent, &req)?;
         Ok(req)
     }
 

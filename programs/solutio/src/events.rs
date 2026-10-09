@@ -2,6 +2,8 @@
 //! from the ledger by anyone, without trusting a Solutio interface.
 use anchor_lang::prelude::*;
 
+use crate::state::{AdhesionException, AtaStatus};
+
 #[event]
 pub struct AgencyRegistered {
     pub agency: Pubkey,
@@ -19,7 +21,13 @@ pub struct AtaCreated {
 pub struct ItemRegistered {
     pub item: Pubkey,
     pub registered_qty: u64,
-    pub global_cap_exempt: bool,
+    pub max_adhesion_qty: u64,
+}
+
+#[event]
+pub struct AtaStatusChanged {
+    pub ata: Pubkey,
+    pub status: AtaStatus,
 }
 
 #[event]
@@ -28,26 +36,43 @@ pub struct AdhesionRequested {
     pub item: Pubkey,
     pub adherent_agency: Pubkey,
     pub qty: u64,
+    pub exception: AdhesionException,
+    pub item_committed_capped: u64,
 }
 
 #[event]
-pub struct AdhesionApproved {
+pub struct SupplierResponded {
+    pub request: Pubkey,
+    pub accepted: bool,
+}
+
+#[event]
+pub struct AdhesionAuthorized {
+    pub request: Pubkey,
+    pub authorized_qty: u64,
+    pub execute_by: i64,
+}
+
+#[event]
+pub struct AdhesionDenied {
     pub request: Pubkey,
 }
 
 #[event]
-pub struct AdhesionRejected {
+pub struct ExecutionExtended {
+    pub request: Pubkey,
+    pub execute_by: i64,
+}
+
+#[event]
+pub struct AdhesionExecuted {
     pub request: Pubkey,
 }
 
 #[event]
-pub struct AdhesionEffective {
+pub struct AdhesionLapsed {
     pub request: Pubkey,
-    pub item: Pubkey,
-    pub adherent_agency: Pubkey,
-    pub qty: u64,
-    pub agency_total: u64,
-    pub item_total: u64,
+    pub released_qty: u64,
 }
 
 #[event]

@@ -5,11 +5,18 @@
 //! its legal source (see `docs/LEGAL_RULES.md`). Instruction handlers only load
 //! accounts, call these functions, and persist the result.
 
-use crate::state::Sphere;
+use crate::state::{AdhesionException, Sphere};
 
 // ---------------------------------------------------------------------------
-// Module 1: Carona — adhesion limits (Law 14.133/2021, art. 86)
+// Module 1: Carona — adhesion limits
+// Law 14.133/2021, art. 86, regulated (federal sphere) by Decree 11.462/2023,
+// arts. 31-33. Balance accounting mirrors the federal "Gestão de Atas" tool:
+// quantities awaiting authorization already count against the caps.
 // ---------------------------------------------------------------------------
+
+/// Art. 31, §2 of Decree 11.462/2023: after authorization, the non-participant
+/// must execute the purchase within ninety days, within the record's validity.
+pub const EXECUTION_WINDOW_SECS: i64 = 90 * 86_400;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RuleViolation {
@@ -18,12 +25,16 @@ pub enum RuleViolation {
     ExceedsGlobalCap,
     FederalAdhesionForbidden,
     AtaNotInForce,
+    AtaNotActive,
+    AdhesionsNotAllowed,
+    ExceptionNotApplicable,
     ManagerCannotAdhere,
     Overflow,
 }
 
-/// Art. 86, §4: each non-participating agency may adhere to at most 50% of the
-/// quantity registered for the managing and participating agencies.
+/// Art. 86, §4 (Decree art. 32, I): each non-participating agency may adhere to
+/// at most 50% of the quantity registered for the managing and participating
+/// agencies.
 ///
 /// Rounding of odd quantities is an open legal question (see LEGAL_RULES.md).
 /// We use the floor, the conservative reading: it never authorizes more than
@@ -32,32 +43,70 @@ pub fn individual_cap(registered_qty: u64) -> u64 {
     registered_qty / 2
 }
 
-/// Art. 86, §5: the sum of all adhesions to an item may not exceed twice the
-/// quantity registered for that item, regardless of how many agencies adhere.
-pub fn global_cap(registered_qty: u64) -> Option<u64> {
-    registered_qty.checked_mul(2)
+/// Art. 86, §5 (Decree art. 32, II): all adhesions to an item together may not
+/// exceed twice its registered quantity. The tender may set a lower maximum for
+/// non-participants (Decree art. 15, XI); zero means adhesions are not allowed.
+pub fn adhesion_cap(registered_qty: u64, max_adhesion_qty: u64) -> Option<u64> {
+    Some(registered_qty.checked_mul(2)?.min(max_adhesion_qty))
 }
 
-/// Snapshot of everything needed to decide whether an adhesion is lawful.
+/// Whether a claimed exception to the §5 cap applies (Decree art. 32, §§1-2):
+/// - emergency purchase of medicines and medical supplies under a record
+///   managed by the Ministry of Health;
+/// - state, district or municipal adhesion required for voluntary transfers
+///   executing a federal programme.
+pub fn exception_applies(
+    exception: AdhesionException,
+    adherent_sphere: Sphere,
+    manager_is_health_ministry: bool,
+) -> bool {
+    match exception {
+        AdhesionException::None => true,
+        AdhesionException::HealthEmergency => manager_is_health_ministry,
+        AdhesionException::FederalProgramTransfer => adherent_sphere != Sphere::Federal,
+    }
+}
+
+/// Snapshot of everything needed to decide whether a quantity may be reserved.
 #[derive(Debug, Clone, Copy)]
-pub struct AdhesionCheck {
+pub struct ReserveCheck {
     pub registered_qty: u64,
-    pub item_adhered_total: u64,
-    pub agency_consumed: u64,
+    pub max_adhesion_qty: u64,
+    /// Quantity committed by adhesions subject to the §5 cap (pending + authorized).
+    pub committed_capped: u64,
+    /// Quantity this agency already committed on this item (all adhesions).
+    pub agency_committed: u64,
     pub requested_qty: u64,
-    pub global_cap_exempt: bool,
+    pub exception: AdhesionException,
     pub manager_sphere: Sphere,
+    pub manager_is_health_ministry: bool,
     pub adherent_sphere: Sphere,
     pub adherent_is_manager: bool,
+    pub ata_active: bool,
     pub now: i64,
     pub valid_from: i64,
     pub valid_until: i64,
 }
 
-/// Returns the new (agency_consumed, item_adhered_total) if the adhesion is lawful.
-pub fn check_adhesion(c: &AdhesionCheck) -> Result<(u64, u64), RuleViolation> {
+/// Result of a lawful reservation: new per-agency total and how much of the
+/// quantity counts toward the §5 cap.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Reservation {
+    pub agency_committed: u64,
+    pub capped_delta: u64,
+    pub exempt_delta: u64,
+}
+
+/// Decides whether a request can reserve quantity. Reservation happens when the
+/// request is made, as in the federal system ("saldo para adesões" already
+/// discounts quantities awaiting authorization), so the first lawful request
+/// gets the balance and later ones see it as taken.
+pub fn check_reservation(c: &ReserveCheck) -> Result<Reservation, RuleViolation> {
     if c.requested_qty == 0 {
         return Err(RuleViolation::InvalidQuantity);
+    }
+    if !c.ata_active {
+        return Err(RuleViolation::AtaNotActive);
     }
     if c.adherent_is_manager {
         return Err(RuleViolation::ManagerCannotAdhere);
@@ -65,30 +114,50 @@ pub fn check_adhesion(c: &AdhesionCheck) -> Result<(u64, u64), RuleViolation> {
     if c.now < c.valid_from || c.now > c.valid_until {
         return Err(RuleViolation::AtaNotInForce);
     }
-    // §8: federal bodies may not adhere to non-federal price records.
+    // Art. 86, §8 (Decree art. 33).
     if c.adherent_sphere == Sphere::Federal && c.manager_sphere != Sphere::Federal {
         return Err(RuleViolation::FederalAdhesionForbidden);
     }
-    // §4: individual cap. Applies even when the item is exempt from §5.
-    let new_agency = c
-        .agency_consumed
+    if c.max_adhesion_qty == 0 {
+        return Err(RuleViolation::AdhesionsNotAllowed);
+    }
+    if !exception_applies(c.exception, c.adherent_sphere, c.manager_is_health_ministry) {
+        return Err(RuleViolation::ExceptionNotApplicable);
+    }
+    // §4 applies to every adhesion, exceptions included.
+    let agency_committed = c
+        .agency_committed
         .checked_add(c.requested_qty)
         .ok_or(RuleViolation::Overflow)?;
-    if new_agency > individual_cap(c.registered_qty) {
+    if agency_committed > individual_cap(c.registered_qty) {
         return Err(RuleViolation::ExceedsIndividualCap);
     }
-    // §5: global cap, unless a statutory exception applies (§§6-7).
-    let new_total = c
-        .item_adhered_total
+    if c.exception != AdhesionException::None {
+        // Exempt adhesions are tracked separately and do not consume the §5 pool.
+        return Ok(Reservation {
+            agency_committed,
+            capped_delta: 0,
+            exempt_delta: c.requested_qty,
+        });
+    }
+    let cap = adhesion_cap(c.registered_qty, c.max_adhesion_qty).ok_or(RuleViolation::Overflow)?;
+    let new_capped = c
+        .committed_capped
         .checked_add(c.requested_qty)
         .ok_or(RuleViolation::Overflow)?;
-    if !c.global_cap_exempt {
-        let cap = global_cap(c.registered_qty).ok_or(RuleViolation::Overflow)?;
-        if new_total > cap {
-            return Err(RuleViolation::ExceedsGlobalCap);
-        }
+    if new_capped > cap {
+        return Err(RuleViolation::ExceedsGlobalCap);
     }
-    Ok((new_agency, new_total))
+    Ok(Reservation {
+        agency_committed,
+        capped_delta: c.requested_qty,
+        exempt_delta: 0,
+    })
+}
+
+/// Deadline to execute an authorized adhesion: ninety days, never past validity.
+pub fn execution_deadline(authorized_at: i64, valid_until: i64) -> i64 {
+    authorized_at.saturating_add(EXECUTION_WINDOW_SECS).min(valid_until)
 }
 
 // ---------------------------------------------------------------------------
@@ -261,20 +330,27 @@ pub fn apply_payment(b: Balances, amount: u64) -> Result<Balances, LedgerViolati
 mod tests {
     use super::*;
 
-    fn base() -> AdhesionCheck {
-        AdhesionCheck {
+    fn base() -> ReserveCheck {
+        ReserveCheck {
             registered_qty: 100,
-            item_adhered_total: 0,
-            agency_consumed: 0,
+            max_adhesion_qty: 200,
+            committed_capped: 0,
+            agency_committed: 0,
             requested_qty: 10,
-            global_cap_exempt: false,
+            exception: AdhesionException::None,
             manager_sphere: Sphere::State,
+            manager_is_health_ministry: false,
             adherent_sphere: Sphere::Municipal,
             adherent_is_manager: false,
+            ata_active: true,
             now: 1_000,
             valid_from: 0,
             valid_until: 2_000,
         }
+    }
+
+    fn reserved(qty: u64, agency: u64) -> Result<Reservation, RuleViolation> {
+        Ok(Reservation { agency_committed: agency, capped_delta: qty, exempt_delta: 0 })
     }
 
     #[test]
@@ -282,81 +358,100 @@ mod tests {
         assert_eq!(individual_cap(100), 50);
         assert_eq!(individual_cap(75), 37);
         assert_eq!(individual_cap(1), 0);
-        let ok = AdhesionCheck { requested_qty: 50, ..base() };
-        assert_eq!(check_adhesion(&ok), Ok((50, 50)));
-        let over = AdhesionCheck { requested_qty: 51, ..base() };
-        assert_eq!(check_adhesion(&over), Err(RuleViolation::ExceedsIndividualCap));
-        let cumulative = AdhesionCheck { agency_consumed: 45, requested_qty: 6, ..base() };
-        assert_eq!(check_adhesion(&cumulative), Err(RuleViolation::ExceedsIndividualCap));
+        assert_eq!(check_reservation(&ReserveCheck { requested_qty: 50, ..base() }), reserved(50, 50));
+        assert_eq!(
+            check_reservation(&ReserveCheck { requested_qty: 51, ..base() }),
+            Err(RuleViolation::ExceedsIndividualCap)
+        );
+        // Pending and authorized quantities of the same agency count together.
+        assert_eq!(
+            check_reservation(&ReserveCheck { agency_committed: 45, requested_qty: 6, ..base() }),
+            Err(RuleViolation::ExceedsIndividualCap)
+        );
     }
 
     #[test]
-    fn art86_par5_global_cap_is_twice_registered() {
-        let at_cap = AdhesionCheck { item_adhered_total: 150, requested_qty: 50, ..base() };
-        assert_eq!(check_adhesion(&at_cap), Ok((50, 200)));
-        let over = AdhesionCheck { item_adhered_total: 151, requested_qty: 50, ..base() };
-        assert_eq!(check_adhesion(&over), Err(RuleViolation::ExceedsGlobalCap));
+    fn art86_par5_cap_is_twice_registered_or_the_tender_maximum() {
+        assert_eq!(adhesion_cap(100, 200), Some(200));
+        assert_eq!(adhesion_cap(100, 500), Some(200), "the tender cannot raise the statutory cap");
+        assert_eq!(adhesion_cap(100, 80), Some(80));
+        let at_cap = ReserveCheck { committed_capped: 150, requested_qty: 50, ..base() };
+        assert_eq!(check_reservation(&at_cap), reserved(50, 50));
+        let over = ReserveCheck { committed_capped: 151, requested_qty: 50, ..base() };
+        assert_eq!(check_reservation(&over), Err(RuleViolation::ExceedsGlobalCap));
+        let tender_limit = ReserveCheck { max_adhesion_qty: 80, committed_capped: 40, requested_qty: 41, ..base() };
+        assert_eq!(check_reservation(&tender_limit), Err(RuleViolation::ExceedsGlobalCap));
+        let closed = ReserveCheck { max_adhesion_qty: 0, ..base() };
+        assert_eq!(check_reservation(&closed), Err(RuleViolation::AdhesionsNotAllowed));
     }
 
     #[test]
-    fn art86_exception_lifts_par5_but_not_par4() {
-        let exempt = AdhesionCheck {
-            item_adhered_total: 500,
+    fn exceptions_lift_par5_only_and_only_when_applicable() {
+        // Health emergency: only under a record managed by the Ministry of Health.
+        let health = ReserveCheck {
+            exception: AdhesionException::HealthEmergency,
+            committed_capped: 200,
             requested_qty: 50,
-            global_cap_exempt: true,
             ..base()
         };
-        assert_eq!(check_adhesion(&exempt), Ok((50, 550)));
-        let still_par4 = AdhesionCheck { requested_qty: 51, ..exempt };
-        assert_eq!(check_adhesion(&still_par4), Err(RuleViolation::ExceedsIndividualCap));
+        assert_eq!(check_reservation(&health), Err(RuleViolation::ExceptionNotApplicable));
+        let health_ms = ReserveCheck { manager_is_health_ministry: true, ..health };
+        assert_eq!(
+            check_reservation(&health_ms),
+            Ok(Reservation { agency_committed: 50, capped_delta: 0, exempt_delta: 50 })
+        );
+        // §4 still applies under an exception.
+        assert_eq!(
+            check_reservation(&ReserveCheck { requested_qty: 51, ..health_ms }),
+            Err(RuleViolation::ExceedsIndividualCap)
+        );
+        // Federal-programme transfers: state, district or municipal adherents only.
+        let transfer = ReserveCheck {
+            exception: AdhesionException::FederalProgramTransfer,
+            committed_capped: 200,
+            ..base()
+        };
+        assert!(check_reservation(&transfer).is_ok());
+        let federal_transfer = ReserveCheck {
+            adherent_sphere: Sphere::Federal,
+            manager_sphere: Sphere::Federal,
+            ..transfer
+        };
+        assert_eq!(check_reservation(&federal_transfer), Err(RuleViolation::ExceptionNotApplicable));
     }
 
     #[test]
     fn art86_par8_federal_cannot_adhere_to_non_federal() {
         for manager in [Sphere::State, Sphere::District, Sphere::Municipal] {
-            let c = AdhesionCheck {
-                manager_sphere: manager,
-                adherent_sphere: Sphere::Federal,
-                ..base()
-            };
-            assert_eq!(check_adhesion(&c), Err(RuleViolation::FederalAdhesionForbidden));
+            let c = ReserveCheck { manager_sphere: manager, adherent_sphere: Sphere::Federal, ..base() };
+            assert_eq!(check_reservation(&c), Err(RuleViolation::FederalAdhesionForbidden));
         }
-        let fed_to_fed = AdhesionCheck {
-            manager_sphere: Sphere::Federal,
-            adherent_sphere: Sphere::Federal,
-            ..base()
-        };
-        assert!(check_adhesion(&fed_to_fed).is_ok());
-        let muni_to_fed = AdhesionCheck {
-            manager_sphere: Sphere::Federal,
-            adherent_sphere: Sphere::Municipal,
-            ..base()
-        };
-        assert!(check_adhesion(&muni_to_fed).is_ok());
+        let fed_to_fed = ReserveCheck { manager_sphere: Sphere::Federal, adherent_sphere: Sphere::Federal, ..base() };
+        assert!(check_reservation(&fed_to_fed).is_ok());
+        let muni_to_fed = ReserveCheck { manager_sphere: Sphere::Federal, ..base() };
+        assert!(check_reservation(&muni_to_fed).is_ok());
     }
 
     #[test]
-    fn validity_window_and_basic_guards() {
+    fn status_validity_and_basic_guards() {
+        assert_eq!(check_reservation(&ReserveCheck { ata_active: false, ..base() }), Err(RuleViolation::AtaNotActive));
+        assert_eq!(check_reservation(&ReserveCheck { now: 2_001, ..base() }), Err(RuleViolation::AtaNotInForce));
+        assert_eq!(check_reservation(&ReserveCheck { now: -1, ..base() }), Err(RuleViolation::AtaNotInForce));
+        assert_eq!(check_reservation(&ReserveCheck { requested_qty: 0, ..base() }), Err(RuleViolation::InvalidQuantity));
         assert_eq!(
-            check_adhesion(&AdhesionCheck { now: 2_001, ..base() }),
-            Err(RuleViolation::AtaNotInForce)
-        );
-        assert_eq!(
-            check_adhesion(&AdhesionCheck { now: -1, ..base() }),
-            Err(RuleViolation::AtaNotInForce)
-        );
-        assert_eq!(
-            check_adhesion(&AdhesionCheck { requested_qty: 0, ..base() }),
-            Err(RuleViolation::InvalidQuantity)
-        );
-        assert_eq!(
-            check_adhesion(&AdhesionCheck { adherent_is_manager: true, ..base() }),
+            check_reservation(&ReserveCheck { adherent_is_manager: true, ..base() }),
             Err(RuleViolation::ManagerCannotAdhere)
         );
         assert_eq!(
-            check_adhesion(&AdhesionCheck { agency_consumed: u64::MAX, ..base() }),
+            check_reservation(&ReserveCheck { agency_committed: u64::MAX, ..base() }),
             Err(RuleViolation::Overflow)
         );
+    }
+
+    #[test]
+    fn execution_deadline_is_ninety_days_capped_by_validity() {
+        assert_eq!(execution_deadline(0, i64::MAX), 90 * 86_400);
+        assert_eq!(execution_deadline(0, 10 * 86_400), 10 * 86_400);
     }
 
     /// Deterministic pseudo-random generator so the randomized tests are reproducible.
@@ -371,31 +466,41 @@ mod tests {
         }
     }
 
-    /// Randomized check: no sequence of accepted adhesions ever breaks §4 or §5.
+    /// Randomized check: across random reservations and releases (denials,
+    /// partial authorizations, lapses), §4 and §5 hold at every step.
     #[test]
-    fn randomized_adhesion_sequences_never_break_caps() {
+    fn randomized_reservations_and_releases_never_break_caps() {
         let mut rng = Lcg(42);
         for _ in 0..2_000 {
             let registered = 1 + rng.below(500);
+            let max_adh = rng.below(registered * 2 + 50);
             let agencies = 1 + rng.below(8) as usize;
-            let mut consumed = vec![0u64; agencies];
-            let mut total = 0u64;
-            for _ in 0..40 {
+            let mut committed = vec![0u64; agencies];
+            let mut capped = 0u64;
+            for _ in 0..60 {
                 let a = rng.below(agencies as u64) as usize;
-                let c = AdhesionCheck {
-                    registered_qty: registered,
-                    item_adhered_total: total,
-                    agency_consumed: consumed[a],
-                    requested_qty: 1 + rng.below(registered),
-                    ..base()
-                };
-                if let Ok((new_agency, new_total)) = check_adhesion(&c) {
-                    consumed[a] = new_agency;
-                    total = new_total;
+                if rng.below(4) == 0 && committed[a] > 0 {
+                    // Release part of this agency's commitment.
+                    let r = 1 + rng.below(committed[a]);
+                    committed[a] -= r;
+                    capped -= r;
+                } else {
+                    let c = ReserveCheck {
+                        registered_qty: registered,
+                        max_adhesion_qty: max_adh,
+                        committed_capped: capped,
+                        agency_committed: committed[a],
+                        requested_qty: 1 + rng.below(registered),
+                        ..base()
+                    };
+                    if let Ok(r) = check_reservation(&c) {
+                        committed[a] = r.agency_committed;
+                        capped += r.capped_delta;
+                    }
                 }
-                assert!(consumed[a] <= individual_cap(registered));
-                assert!(total <= registered * 2);
-                assert_eq!(total, consumed.iter().sum::<u64>());
+                assert!(committed[a] <= individual_cap(registered));
+                assert!(capped <= adhesion_cap(registered, max_adh).unwrap());
+                assert_eq!(capped, committed.iter().sum::<u64>());
             }
         }
     }

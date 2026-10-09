@@ -32,7 +32,7 @@ pub struct RegisterObligation<'info> {
         bump
     )]
     pub obligation: Account<'info, Obligation>,
-    /// Optional: the effective adhesion this obligation derives from.
+    /// Optional: the executed adhesion this obligation derives from.
     pub source_request: Option<Account<'info, AdhesionRequest>>,
     pub system_program: Program<'info, System>,
 }
@@ -50,7 +50,7 @@ pub fn handle_register_obligation(
 
     let source = match &ctx.accounts.source_request {
         Some(req) => {
-            require!(req.status == RequestStatus::Effective, ErrorCode::SourceAdhesionNotEffective);
+            require!(req.status == RequestStatus::Executed, ErrorCode::SourceAdhesionNotEffective);
             require!(
                 req.adherent_agency == debtor_key && req.supplier == creditor,
                 ErrorCode::SourceAdhesionMismatch
