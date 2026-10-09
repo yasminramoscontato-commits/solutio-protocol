@@ -77,6 +77,7 @@ pub fn handle_create_ata(
     ata.manager_agency = manager.key();
     ata.manager_sphere = manager.sphere;
     ata.manager_is_health_ministry = manager.is_health_ministry;
+    ata.manager_is_state_capital = manager.is_state_capital;
     ata.supplier = supplier;
     ata.ata_id = ata_id;
     ata.doc_hash = doc_hash;
@@ -258,7 +259,9 @@ pub fn handle_request_adhesion(
         exception,
         manager_sphere: ata.manager_sphere,
         manager_is_health_ministry: ata.manager_is_health_ministry,
+        manager_is_state_capital: ata.manager_is_state_capital,
         adherent_sphere: agency.sphere,
+        adherent_profile: agency.profile,
         adherent_is_manager: agency.key() == ata.manager_agency,
         ata_active: ata.status == AtaStatus::Active,
         now,

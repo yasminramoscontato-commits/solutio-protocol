@@ -218,6 +218,49 @@ fn federal_programme_transfer_exception_is_for_subnational_agencies_only() {
     );
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     env.request_ex(&city, &ata, &item, 1, 10, AdhesionException::FederalProgramTransfer).unwrap();
+
+    // Art. 86 §6 lifts §5 only for records of the federal Executive: a state
+    // programme cannot claim it, even when the state requires the adhesion.
+    let state = env.new_agency(Sphere::State, "Central de Compras do Estado");
+    let state_ata = env.create_ata(&state, "ARP-EST-1", &supplier.pubkey(), 365);
+    let state_item = env.add_item(&state, &state_ata, 1, 100, 200);
+    assert_eq!(
+        env.request_ex(&city, &state_ata, &state_item, 1, 10, AdhesionException::FederalProgramTransfer),
+        Err(code(ErrorCode::ExceptionNotApplicable))
+    );
+}
+
+#[test]
+fn alagoas_profile_blocks_state_adhesion_to_non_capital_municipal_records() {
+    let mut env = Env::new();
+    let supplier = Keypair::new();
+    let plain = AgencyAttributes { is_health_ministry: false, is_state_capital: false, profile: RuleProfile::Baseline };
+    let interior = env.new_agency(Sphere::Municipal, "Prefeitura do Interior");
+    let capital = env.new_agency_with(
+        Sphere::Municipal,
+        "Prefeitura da Capital",
+        AgencyAttributes { is_state_capital: true, ..plain },
+    );
+    let interior_ata = env.create_ata(&interior, "ARP-MUN-1", &supplier.pubkey(), 365);
+    let interior_item = env.add_item(&interior, &interior_ata, 1, 100, 200);
+    let capital_ata = env.create_ata(&capital, "ARP-MUN-2", &supplier.pubkey(), 365);
+    let capital_item = env.add_item(&capital, &capital_ata, 1, 100, 200);
+
+    // Decree 95.019/2023 art. 33 governs Alagoas state agencies.
+    let al_secretariat = env.new_agency_with(
+        Sphere::State,
+        "Secretaria Estadual (AL)",
+        AgencyAttributes { profile: RuleProfile::Alagoas, ..plain },
+    );
+    assert_eq!(
+        env.request(&al_secretariat, &interior_ata, &interior_item, 1, 10),
+        Err(code(ErrorCode::MunicipalAdhesionForbidden))
+    );
+    env.request(&al_secretariat, &capital_ata, &capital_item, 1, 10).unwrap();
+
+    // A state agency under the federal baseline has no such restriction.
+    let other_state = env.new_agency(Sphere::State, "Secretaria Estadual (baseline)");
+    env.request(&other_state, &interior_ata, &interior_item, 1, 10).unwrap();
 }
 
 #[test]

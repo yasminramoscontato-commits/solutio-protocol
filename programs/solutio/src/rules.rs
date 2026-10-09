@@ -5,7 +5,7 @@
 //! its legal source (see `docs/LEGAL_RULES.md`). Instruction handlers only load
 //! accounts, call these functions, and persist the result.
 
-use crate::state::{AdhesionException, Sphere};
+use crate::state::{AdhesionException, RuleProfile, Sphere};
 
 // ---------------------------------------------------------------------------
 // Module 1: Carona — adhesion limits
@@ -29,6 +29,7 @@ pub enum RuleViolation {
     AdhesionsNotAllowed,
     ExceptionNotApplicable,
     ManagerCannotAdhere,
+    MunicipalAdhesionForbidden,
     Overflow,
 }
 
@@ -50,20 +51,43 @@ pub fn adhesion_cap(registered_qty: u64, max_adhesion_qty: u64) -> Option<u64> {
     Some(registered_qty.checked_mul(2)?.min(max_adhesion_qty))
 }
 
-/// Whether a claimed exception to the §5 cap applies (Decree art. 32, §§1-2):
+/// Whether a claimed exception to the §5 cap applies:
 /// - emergency purchase of medicines and medical supplies under a record
-///   managed by the Ministry of Health;
+///   managed by the Ministry of Health (art. 86, §7; Decree art. 32, §1);
 /// - state, district or municipal adhesion required for voluntary transfers
-///   executing a federal programme.
+///   executing a federal programme (art. 86, §6). The statute lifts the §5 cap
+///   only for records managed by the **federal** Executive: a state decree that
+///   lets the state require municipal adhesion for its own transfers (e.g.
+///   Alagoas Decree 95.019/2023, art. 32, §2) does not lift the cap.
 pub fn exception_applies(
     exception: AdhesionException,
     adherent_sphere: Sphere,
+    manager_sphere: Sphere,
     manager_is_health_ministry: bool,
 ) -> bool {
     match exception {
         AdhesionException::None => true,
         AdhesionException::HealthEmergency => manager_is_health_ministry,
-        AdhesionException::FederalProgramTransfer => adherent_sphere != Sphere::Federal,
+        AdhesionException::FederalProgramTransfer => {
+            adherent_sphere != Sphere::Federal && manager_sphere == Sphere::Federal
+        }
+    }
+}
+
+/// Restrictions that a sphere's own regulation adds on top of the statute.
+/// Alagoas Decree 95.019/2023, art. 33: state agencies may not adhere to
+/// records managed by municipal agencies, except those of state capitals.
+pub fn profile_allows(
+    adherent_profile: RuleProfile,
+    adherent_sphere: Sphere,
+    manager_sphere: Sphere,
+    manager_is_state_capital: bool,
+) -> bool {
+    match adherent_profile {
+        RuleProfile::Baseline => true,
+        RuleProfile::Alagoas => !(adherent_sphere == Sphere::State
+            && manager_sphere == Sphere::Municipal
+            && !manager_is_state_capital),
     }
 }
 
@@ -80,7 +104,9 @@ pub struct ReserveCheck {
     pub exception: AdhesionException,
     pub manager_sphere: Sphere,
     pub manager_is_health_ministry: bool,
+    pub manager_is_state_capital: bool,
     pub adherent_sphere: Sphere,
+    pub adherent_profile: RuleProfile,
     pub adherent_is_manager: bool,
     pub ata_active: bool,
     pub now: i64,
@@ -118,10 +144,13 @@ pub fn check_reservation(c: &ReserveCheck) -> Result<Reservation, RuleViolation>
     if c.adherent_sphere == Sphere::Federal && c.manager_sphere != Sphere::Federal {
         return Err(RuleViolation::FederalAdhesionForbidden);
     }
+    if !profile_allows(c.adherent_profile, c.adherent_sphere, c.manager_sphere, c.manager_is_state_capital) {
+        return Err(RuleViolation::MunicipalAdhesionForbidden);
+    }
     if c.max_adhesion_qty == 0 {
         return Err(RuleViolation::AdhesionsNotAllowed);
     }
-    if !exception_applies(c.exception, c.adherent_sphere, c.manager_is_health_ministry) {
+    if !exception_applies(c.exception, c.adherent_sphere, c.manager_sphere, c.manager_is_health_ministry) {
         return Err(RuleViolation::ExceptionNotApplicable);
     }
     // §4 applies to every adhesion, exceptions included.
@@ -340,7 +369,9 @@ mod tests {
             exception: AdhesionException::None,
             manager_sphere: Sphere::State,
             manager_is_health_ministry: false,
+            manager_is_state_capital: false,
             adherent_sphere: Sphere::Municipal,
+            adherent_profile: RuleProfile::Baseline,
             adherent_is_manager: false,
             ata_active: true,
             now: 1_000,
@@ -405,13 +436,18 @@ mod tests {
             check_reservation(&ReserveCheck { requested_qty: 51, ..health_ms }),
             Err(RuleViolation::ExceedsIndividualCap)
         );
-        // Federal-programme transfers: state, district or municipal adherents only.
+        // Federal-programme transfers (art. 86 §6): only under a record managed
+        // by the federal Executive, and only for non-federal adherents.
         let transfer = ReserveCheck {
             exception: AdhesionException::FederalProgramTransfer,
             committed_capped: 200,
+            manager_sphere: Sphere::Federal,
             ..base()
         };
         assert!(check_reservation(&transfer).is_ok());
+        // A state programme (e.g. Alagoas Decree 95.019 art. 32 §2) does not lift §5.
+        let state_programme = ReserveCheck { manager_sphere: Sphere::State, ..transfer };
+        assert_eq!(check_reservation(&state_programme), Err(RuleViolation::ExceptionNotApplicable));
         let federal_transfer = ReserveCheck {
             adherent_sphere: Sphere::Federal,
             manager_sphere: Sphere::Federal,
@@ -430,6 +466,27 @@ mod tests {
         assert!(check_reservation(&fed_to_fed).is_ok());
         let muni_to_fed = ReserveCheck { manager_sphere: Sphere::Federal, ..base() };
         assert!(check_reservation(&muni_to_fed).is_ok());
+    }
+
+    #[test]
+    fn alagoas_art33_state_cannot_adhere_to_municipal_records_except_capitals() {
+        let al_state = ReserveCheck {
+            adherent_sphere: Sphere::State,
+            adherent_profile: RuleProfile::Alagoas,
+            manager_sphere: Sphere::Municipal,
+            ..base()
+        };
+        assert_eq!(check_reservation(&al_state), Err(RuleViolation::MunicipalAdhesionForbidden));
+        let capital = ReserveCheck { manager_is_state_capital: true, ..al_state };
+        assert!(check_reservation(&capital).is_ok());
+        // The restriction is Alagoas's own: the federal baseline has no such rule.
+        let baseline = ReserveCheck { adherent_profile: RuleProfile::Baseline, ..al_state };
+        assert!(check_reservation(&baseline).is_ok());
+        // It restricts state agencies only, and only toward municipal records.
+        let al_to_state = ReserveCheck { manager_sphere: Sphere::State, ..al_state };
+        assert!(check_reservation(&al_to_state).is_ok());
+        let muni_under_al = ReserveCheck { adherent_sphere: Sphere::Municipal, ..al_state };
+        assert!(check_reservation(&muni_under_al).is_ok());
     }
 
     #[test]

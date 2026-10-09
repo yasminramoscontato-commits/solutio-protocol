@@ -56,13 +56,15 @@ pub fn handle_register_agency(
     ctx: Context<RegisterAgency>,
     sphere: Sphere,
     name: String,
-    is_health_ministry: bool,
+    attributes: AgencyAttributes,
 ) -> Result<()> {
     require!(name.len() <= 64, ErrorCode::InvalidQuantity);
     let agency = &mut ctx.accounts.agency;
     agency.authority = ctx.accounts.agency_authority.key();
     agency.sphere = sphere;
-    agency.is_health_ministry = is_health_ministry;
+    agency.is_health_ministry = attributes.is_health_ministry;
+    agency.is_state_capital = attributes.is_state_capital;
+    agency.profile = attributes.profile;
     agency.name = name;
     agency.active = true;
     agency.bump = ctx.bumps.agency;

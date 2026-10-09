@@ -170,9 +170,14 @@ impl Env {
     }
 
     pub fn new_agency_ex(&mut self, sphere: Sphere, name: &str, is_health_ministry: bool) -> Keypair {
+        let attributes = AgencyAttributes { is_health_ministry, is_state_capital: false, profile: RuleProfile::Baseline };
+        self.new_agency_with(sphere, name, attributes)
+    }
+
+    pub fn new_agency_with(&mut self, sphere: Sphere, name: &str, attributes: AgencyAttributes) -> Keypair {
         let authority = Keypair::new();
         let ix = self.ix(
-            solutio::instruction::RegisterAgency { sphere, name: name.to_string(), is_health_ministry },
+            solutio::instruction::RegisterAgency { sphere, name: name.to_string(), attributes },
             solutio::accounts::RegisterAgency {
                 payer: self.sponsor.pubkey(),
                 registry_authority: self.registry_authority.pubkey(),

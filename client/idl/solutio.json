@@ -1,0 +1,3099 @@
+{
+  "address": "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E",
+  "metadata": {
+    "name": "solutio",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Solutio: verifiable legal limits and single-financing control for public procurement obligations"
+  },
+  "instructions": [
+    {
+      "name": "add_item",
+      "discriminator": [
+        225,
+        38,
+        79,
+        147,
+        116,
+        142,
+        147,
+        57
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "manager_authority",
+          "signer": true
+        },
+        {
+          "name": "manager_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "manager_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ata",
+          "writable": true
+        },
+        {
+          "name": "item",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  116,
+                  101,
+                  109
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "ata"
+              },
+              {
+                "kind": "arg",
+                "path": "item_no"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "item_no",
+          "type": "u16"
+        },
+        {
+          "name": "registered_qty",
+          "type": "u64"
+        },
+        {
+          "name": "max_adhesion_qty",
+          "type": "u64"
+        },
+        {
+          "name": "unit_price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "attach_fiscal_document",
+      "discriminator": [
+        159,
+        74,
+        8,
+        228,
+        220,
+        245,
+        141,
+        76
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "debtor_authority",
+          "signer": true
+        },
+        {
+          "name": "debtor_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "debtor_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "obligation",
+          "writable": true
+        },
+        {
+          "name": "fiscal_document",
+          "docs": [
+            "Derived from the document key hash: a document can back only one obligation."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  115,
+                  99,
+                  97,
+                  108,
+                  95,
+                  100,
+                  111,
+                  99
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "doc_key_hash"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "doc_key_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "authorize_adhesion",
+      "discriminator": [
+        187,
+        36,
+        76,
+        162,
+        124,
+        2,
+        104,
+        71
+      ],
+      "accounts": [
+        {
+          "name": "manager_authority",
+          "signer": true
+        },
+        {
+          "name": "manager_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "manager_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ata"
+        },
+        {
+          "name": "item",
+          "writable": true
+        },
+        {
+          "name": "usage",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  97,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "item"
+              },
+              {
+                "kind": "account",
+                "path": "request.adherent_agency",
+                "account": "AdhesionRequest"
+              }
+            ]
+          }
+        },
+        {
+          "name": "request",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "authorized_qty",
+          "type": "u64"
+        },
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_ata",
+      "discriminator": [
+        26,
+        102,
+        168,
+        62,
+        117,
+        72,
+        168,
+        17
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "manager_authority",
+          "signer": true
+        },
+        {
+          "name": "manager_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "manager_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "manager_agency"
+              },
+              {
+                "kind": "arg",
+                "path": "ata_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "ata_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "supplier",
+          "type": "pubkey"
+        },
+        {
+          "name": "doc_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "valid_from",
+          "type": "i64"
+        },
+        {
+          "name": "valid_until",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "deny_adhesion",
+      "discriminator": [
+        37,
+        254,
+        76,
+        29,
+        85,
+        12,
+        95,
+        29
+      ],
+      "accounts": [
+        {
+          "name": "manager_authority",
+          "signer": true
+        },
+        {
+          "name": "manager_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "manager_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ata"
+        },
+        {
+          "name": "item",
+          "writable": true
+        },
+        {
+          "name": "usage",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  97,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "item"
+              },
+              {
+                "kind": "account",
+                "path": "request.adherent_agency",
+                "account": "AdhesionRequest"
+              }
+            ]
+          }
+        },
+        {
+          "name": "request",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "expire_adhesion",
+      "discriminator": [
+        168,
+        91,
+        135,
+        68,
+        243,
+        38,
+        141,
+        196
+      ],
+      "accounts": [
+        {
+          "name": "item",
+          "writable": true
+        },
+        {
+          "name": "usage",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  97,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "item"
+              },
+              {
+                "kind": "account",
+                "path": "request.adherent_agency",
+                "account": "AdhesionRequest"
+              }
+            ]
+          }
+        },
+        {
+          "name": "request",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "extend_execution",
+      "discriminator": [
+        151,
+        241,
+        39,
+        42,
+        216,
+        146,
+        193,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "manager_authority",
+          "signer": true
+        },
+        {
+          "name": "manager_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "manager_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ata"
+        },
+        {
+          "name": "item",
+          "writable": true
+        },
+        {
+          "name": "usage",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  97,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "item"
+              },
+              {
+                "kind": "account",
+                "path": "request.adherent_agency",
+                "account": "AdhesionRequest"
+              }
+            ]
+          }
+        },
+        {
+          "name": "request",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "new_execute_by",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "finance",
+      "discriminator": [
+        133,
+        139,
+        130,
+        178,
+        62,
+        177,
+        62,
+        115
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "financier",
+          "signer": true
+        },
+        {
+          "name": "creditor",
+          "docs": [
+            "The creditor (supplier) must consent to the assignment."
+          ],
+          "signer": true
+        },
+        {
+          "name": "obligation",
+          "writable": true
+        },
+        {
+          "name": "financing",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  110,
+                  97,
+                  110,
+                  99,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "obligation"
+              },
+              {
+                "kind": "arg",
+                "path": "financing_no"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "financing_no",
+          "type": "u32"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "notice_evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "formalize_adhesion",
+      "discriminator": [
+        95,
+        6,
+        4,
+        110,
+        175,
+        145,
+        71,
+        228
+      ],
+      "accounts": [
+        {
+          "name": "adherent_authority",
+          "signer": true
+        },
+        {
+          "name": "adherent_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "adherent_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "request",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "init_registry",
+      "discriminator": [
+        131,
+        22,
+        4,
+        103,
+        24,
+        94,
+        163,
+        239
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "eligibility_verifier",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "mark_eligible",
+      "discriminator": [
+        53,
+        39,
+        116,
+        128,
+        184,
+        136,
+        247,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "verifier",
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "obligation",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "eligible_amount",
+          "type": "u64"
+        },
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "record_payment",
+      "discriminator": [
+        226,
+        154,
+        10,
+        27,
+        9,
+        14,
+        148,
+        137
+      ],
+      "accounts": [
+        {
+          "name": "debtor_authority",
+          "signer": true
+        },
+        {
+          "name": "debtor_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "debtor_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "obligation",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "record_reduction",
+      "discriminator": [
+        49,
+        217,
+        135,
+        117,
+        23,
+        124,
+        120,
+        164
+      ],
+      "accounts": [
+        {
+          "name": "debtor_authority",
+          "signer": true
+        },
+        {
+          "name": "debtor_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "debtor_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "obligation",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_agency",
+      "discriminator": [
+        102,
+        193,
+        24,
+        185,
+        91,
+        84,
+        85,
+        245
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "registry_authority",
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "agency_authority"
+        },
+        {
+          "name": "agency",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agency_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "sphere",
+          "type": {
+            "defined": {
+              "name": "Sphere"
+            }
+          }
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "attributes",
+          "type": {
+            "defined": {
+              "name": "AgencyAttributes"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "register_obligation",
+      "discriminator": [
+        91,
+        22,
+        111,
+        125,
+        229,
+        32,
+        1,
+        115
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "debtor_authority",
+          "signer": true
+        },
+        {
+          "name": "debtor_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "debtor_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "obligation",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  98,
+                  108,
+                  105,
+                  103,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "debtor_agency"
+              },
+              {
+                "kind": "arg",
+                "path": "obligation_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "source_request",
+          "docs": [
+            "Optional: the executed adhesion this obligation derives from."
+          ],
+          "optional": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "obligation_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "creditor",
+          "type": "pubkey"
+        },
+        {
+          "name": "verified_amount",
+          "type": "u64"
+        },
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "request_adhesion",
+      "discriminator": [
+        24,
+        249,
+        195,
+        42,
+        185,
+        149,
+        215,
+        224
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "docs": [
+            "Pays rent and fees. May be a sponsor: the agency signer needs no SOL."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "adherent_authority",
+          "signer": true
+        },
+        {
+          "name": "adherent_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "adherent_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ata"
+        },
+        {
+          "name": "item",
+          "writable": true
+        },
+        {
+          "name": "usage",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  97,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "item"
+              },
+              {
+                "kind": "account",
+                "path": "adherent_agency"
+              }
+            ]
+          }
+        },
+        {
+          "name": "request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  113,
+                  117,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "item"
+              },
+              {
+                "kind": "account",
+                "path": "adherent_agency"
+              },
+              {
+                "kind": "arg",
+                "path": "request_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "request_id",
+          "type": "u64"
+        },
+        {
+          "name": "qty",
+          "type": "u64"
+        },
+        {
+          "name": "exception",
+          "type": {
+            "defined": {
+              "name": "AdhesionException"
+            }
+          }
+        },
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "set_ata_status",
+      "discriminator": [
+        220,
+        93,
+        189,
+        200,
+        43,
+        187,
+        0,
+        244
+      ],
+      "accounts": [
+        {
+          "name": "manager_authority",
+          "signer": true
+        },
+        {
+          "name": "manager_agency",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "manager_authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ata",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "status",
+          "type": {
+            "defined": {
+              "name": "AtaStatus"
+            }
+          }
+        },
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "supplier_respond",
+      "discriminator": [
+        47,
+        39,
+        254,
+        188,
+        34,
+        112,
+        210,
+        75
+      ],
+      "accounts": [
+        {
+          "name": "supplier",
+          "signer": true
+        },
+        {
+          "name": "ata"
+        },
+        {
+          "name": "item",
+          "writable": true
+        },
+        {
+          "name": "usage",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  115,
+                  97,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "item"
+              },
+              {
+                "kind": "account",
+                "path": "request.adherent_agency",
+                "account": "AdhesionRequest"
+              }
+            ]
+          }
+        },
+        {
+          "name": "request",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "accept",
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AdhesionRequest",
+      "discriminator": [
+        198,
+        21,
+        233,
+        216,
+        22,
+        21,
+        131,
+        127
+      ]
+    },
+    {
+      "name": "Agency",
+      "discriminator": [
+        190,
+        253,
+        179,
+        184,
+        231,
+        128,
+        71,
+        112
+      ]
+    },
+    {
+      "name": "AgencyItemUsage",
+      "discriminator": [
+        75,
+        69,
+        23,
+        0,
+        208,
+        68,
+        135,
+        172
+      ]
+    },
+    {
+      "name": "Ata",
+      "discriminator": [
+        188,
+        137,
+        232,
+        219,
+        163,
+        122,
+        141,
+        172
+      ]
+    },
+    {
+      "name": "AtaItem",
+      "discriminator": [
+        235,
+        111,
+        12,
+        180,
+        19,
+        219,
+        63,
+        13
+      ]
+    },
+    {
+      "name": "Financing",
+      "discriminator": [
+        191,
+        25,
+        85,
+        90,
+        193,
+        75,
+        73,
+        75
+      ]
+    },
+    {
+      "name": "FiscalDocument",
+      "discriminator": [
+        221,
+        215,
+        131,
+        88,
+        144,
+        96,
+        255,
+        67
+      ]
+    },
+    {
+      "name": "Obligation",
+      "discriminator": [
+        168,
+        206,
+        141,
+        106,
+        88,
+        76,
+        172,
+        167
+      ]
+    },
+    {
+      "name": "Registry",
+      "discriminator": [
+        47,
+        174,
+        110,
+        246,
+        184,
+        182,
+        252,
+        218
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AdhesionAuthorized",
+      "discriminator": [
+        159,
+        108,
+        97,
+        161,
+        14,
+        136,
+        30,
+        227
+      ]
+    },
+    {
+      "name": "AdhesionDenied",
+      "discriminator": [
+        129,
+        1,
+        247,
+        103,
+        66,
+        36,
+        111,
+        21
+      ]
+    },
+    {
+      "name": "AdhesionExecuted",
+      "discriminator": [
+        220,
+        13,
+        122,
+        235,
+        52,
+        154,
+        243,
+        59
+      ]
+    },
+    {
+      "name": "AdhesionLapsed",
+      "discriminator": [
+        149,
+        158,
+        167,
+        44,
+        149,
+        134,
+        209,
+        178
+      ]
+    },
+    {
+      "name": "AdhesionRequested",
+      "discriminator": [
+        126,
+        111,
+        203,
+        188,
+        221,
+        155,
+        188,
+        191
+      ]
+    },
+    {
+      "name": "AgencyRegistered",
+      "discriminator": [
+        5,
+        236,
+        30,
+        187,
+        211,
+        118,
+        185,
+        67
+      ]
+    },
+    {
+      "name": "AtaCreated",
+      "discriminator": [
+        61,
+        117,
+        8,
+        85,
+        99,
+        70,
+        18,
+        123
+      ]
+    },
+    {
+      "name": "AtaStatusChanged",
+      "discriminator": [
+        191,
+        172,
+        116,
+        144,
+        220,
+        1,
+        222,
+        220
+      ]
+    },
+    {
+      "name": "EligibilityConfirmed",
+      "discriminator": [
+        127,
+        46,
+        135,
+        154,
+        29,
+        169,
+        106,
+        125
+      ]
+    },
+    {
+      "name": "ExecutionExtended",
+      "discriminator": [
+        76,
+        150,
+        230,
+        193,
+        139,
+        233,
+        143,
+        120
+      ]
+    },
+    {
+      "name": "FiscalDocumentAttached",
+      "discriminator": [
+        122,
+        199,
+        187,
+        20,
+        174,
+        164,
+        244,
+        62
+      ]
+    },
+    {
+      "name": "ItemRegistered",
+      "discriminator": [
+        212,
+        48,
+        51,
+        91,
+        71,
+        14,
+        217,
+        44
+      ]
+    },
+    {
+      "name": "ObligationFinanced",
+      "discriminator": [
+        199,
+        202,
+        136,
+        140,
+        17,
+        139,
+        112,
+        193
+      ]
+    },
+    {
+      "name": "ObligationRegistered",
+      "discriminator": [
+        75,
+        152,
+        100,
+        207,
+        213,
+        32,
+        251,
+        93
+      ]
+    },
+    {
+      "name": "PaymentRecorded",
+      "discriminator": [
+        214,
+        3,
+        212,
+        116,
+        135,
+        35,
+        104,
+        98
+      ]
+    },
+    {
+      "name": "ReductionRecorded",
+      "discriminator": [
+        50,
+        237,
+        45,
+        154,
+        66,
+        239,
+        150,
+        58
+      ]
+    },
+    {
+      "name": "SupplierResponded",
+      "discriminator": [
+        214,
+        244,
+        184,
+        165,
+        165,
+        87,
+        234,
+        182
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Signer is not authorized for this action"
+    },
+    {
+      "code": 6001,
+      "name": "AgencyInactive",
+      "msg": "Agency is not active in the registry"
+    },
+    {
+      "code": 6002,
+      "name": "AccountMismatch",
+      "msg": "Supplied account does not belong to this record"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidQuantity",
+      "msg": "Quantity must be greater than zero"
+    },
+    {
+      "code": 6004,
+      "name": "ExceedsIndividualCap",
+      "msg": "Art. 86 §4: adhesion would exceed 50% of the registered quantity for this agency"
+    },
+    {
+      "code": 6005,
+      "name": "ExceedsGlobalCap",
+      "msg": "Art. 86 §5: adhesions would exceed twice the registered quantity of this item"
+    },
+    {
+      "code": 6006,
+      "name": "FederalAdhesionForbidden",
+      "msg": "Art. 86 §8: federal agencies cannot adhere to state, district or municipal price records"
+    },
+    {
+      "code": 6007,
+      "name": "AtaNotInForce",
+      "msg": "Price record is not in force at this time"
+    },
+    {
+      "code": 6008,
+      "name": "ManagerCannotAdhere",
+      "msg": "The managing agency cannot adhere to its own price record"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidRequestStatus",
+      "msg": "Adhesion request is not in the required status"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidValidity",
+      "msg": "Invalid validity window"
+    },
+    {
+      "code": 6011,
+      "name": "AtaNotActive",
+      "msg": "Price record is suspended or cancelled"
+    },
+    {
+      "code": 6012,
+      "name": "AdhesionsNotAllowed",
+      "msg": "The tender does not allow adhesions to this item"
+    },
+    {
+      "code": 6013,
+      "name": "ExceptionNotApplicable",
+      "msg": "The claimed exception to the art. 86 §5 cap does not apply"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidMaxAdhesion",
+      "msg": "Maximum quantity for adhesions cannot exceed twice the registered quantity"
+    },
+    {
+      "code": 6015,
+      "name": "ExecutionDeadlinePassed",
+      "msg": "Decree 11.462/2023 art. 31 §2: the execution deadline has passed"
+    },
+    {
+      "code": 6016,
+      "name": "ExecutionDeadlineNotReached",
+      "msg": "The execution deadline has not passed yet"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidDeadline",
+      "msg": "Invalid execution deadline"
+    },
+    {
+      "code": 6018,
+      "name": "MunicipalAdhesionForbidden",
+      "msg": "Alagoas Decree 95.019/2023 art. 33: state agencies cannot adhere to municipal records other than those of state capitals"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6020,
+      "name": "ExceedsVerifiedAmount",
+      "msg": "Amount exceeds the verified (liquidated) amount of the obligation"
+    },
+    {
+      "code": 6021,
+      "name": "ExceedsDocumentedAmount",
+      "msg": "Eligible amount cannot exceed the amount backed by attached fiscal documents"
+    },
+    {
+      "code": 6022,
+      "name": "EligibilityBelowFinanced",
+      "msg": "Eligible amount cannot be set below the amount already financed"
+    },
+    {
+      "code": 6023,
+      "name": "ExceedsFinanceableBalance",
+      "msg": "Financing would exceed the obligation's remaining financeable balance"
+    },
+    {
+      "code": 6024,
+      "name": "ObligationNotFinanceable",
+      "msg": "Obligation is not open for financing in its current status"
+    },
+    {
+      "code": 6025,
+      "name": "ExceedsOutstanding",
+      "msg": "Amount exceeds the obligation's outstanding balance"
+    },
+    {
+      "code": 6026,
+      "name": "MissingEvidence",
+      "msg": "Evidence hash is required"
+    },
+    {
+      "code": 6027,
+      "name": "SourceAdhesionNotEffective",
+      "msg": "Source adhesion has not been executed"
+    },
+    {
+      "code": 6028,
+      "name": "SourceAdhesionMismatch",
+      "msg": "Source adhesion does not match this debtor or creditor"
+    },
+    {
+      "code": 6029,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "AdhesionAuthorized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request",
+            "type": "pubkey"
+          },
+          {
+            "name": "authorized_qty",
+            "type": "u64"
+          },
+          {
+            "name": "execute_by",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdhesionDenied",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdhesionException",
+      "docs": [
+        "Exception to the §5 cap claimed by an adhesion (Decree 11.462/2023, art. 32)."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "HealthEmergency"
+          },
+          {
+            "name": "FederalProgramTransfer"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdhesionExecuted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdhesionLapsed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request",
+            "type": "pubkey"
+          },
+          {
+            "name": "released_qty",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdhesionRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "item",
+            "type": "pubkey"
+          },
+          {
+            "name": "adherent_agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "supplier",
+            "type": "pubkey"
+          },
+          {
+            "name": "request_id",
+            "type": "u64"
+          },
+          {
+            "name": "requested_qty",
+            "type": "u64"
+          },
+          {
+            "name": "authorized_qty",
+            "type": "u64"
+          },
+          {
+            "name": "exception",
+            "type": {
+              "defined": {
+                "name": "AdhesionException"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "RequestStatus"
+              }
+            }
+          },
+          {
+            "name": "evidence_hash",
+            "docs": [
+              "Hash of the request (justification of advantage, price compatibility,",
+              "and, for exceptions, the supporting evidence)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "decision_evidence_hash",
+            "docs": [
+              "Hash of the manager's justification (required for partial authorization or denial)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "execution_evidence_hash",
+            "docs": [
+              "Hash of the contract or commitment note that executed the adhesion."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "requested_at",
+            "type": "i64"
+          },
+          {
+            "name": "supplier_decided_at",
+            "type": "i64"
+          },
+          {
+            "name": "authorized_at",
+            "type": "i64"
+          },
+          {
+            "name": "execute_by",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AdhesionRequested",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request",
+            "type": "pubkey"
+          },
+          {
+            "name": "item",
+            "type": "pubkey"
+          },
+          {
+            "name": "adherent_agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "qty",
+            "type": "u64"
+          },
+          {
+            "name": "exception",
+            "type": {
+              "defined": {
+                "name": "AdhesionException"
+              }
+            }
+          },
+          {
+            "name": "item_committed_capped",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Agency",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "sphere",
+            "type": {
+              "defined": {
+                "name": "Sphere"
+              }
+            }
+          },
+          {
+            "name": "is_health_ministry",
+            "docs": [
+              "Attested by the registry: relevant to the health-emergency exception",
+              "(Decree 11.462/2023, art. 32, §1)."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "is_state_capital",
+            "docs": [
+              "Attested by the registry: the municipality is a state capital",
+              "(Alagoas Decree 95.019/2023, art. 33)."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "profile",
+            "docs": [
+              "Regulation that governs this agency when it adheres to a record."
+            ],
+            "type": {
+              "defined": {
+                "name": "RuleProfile"
+              }
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgencyAttributes",
+      "docs": [
+        "A public agency recognized by the registry. `authority` is the wallet that",
+        "signs on its behalf (in production, a multisig).",
+        "Facts about an agency attested by the registry issuer when it is registered."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "is_health_ministry",
+            "type": "bool"
+          },
+          {
+            "name": "is_state_capital",
+            "type": "bool"
+          },
+          {
+            "name": "profile",
+            "type": {
+              "defined": {
+                "name": "RuleProfile"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgencyItemUsage",
+      "docs": [
+        "Quantity a given agency has committed (pending + authorized) on an item (§4)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "item",
+            "type": "pubkey"
+          },
+          {
+            "name": "agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "committed",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgencyRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ata",
+      "docs": [
+        "A price-registration record (Ata de Registro de Preços)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "manager_agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "manager_sphere",
+            "type": {
+              "defined": {
+                "name": "Sphere"
+              }
+            }
+          },
+          {
+            "name": "manager_is_health_ministry",
+            "type": "bool"
+          },
+          {
+            "name": "manager_is_state_capital",
+            "type": "bool"
+          },
+          {
+            "name": "supplier",
+            "docs": [
+              "Wallet of the registered supplier, who must accept each adhesion."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "ata_id",
+            "docs": [
+              "Hash of the canonical identifier (e.g. the PNCP control number)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "doc_hash",
+            "docs": [
+              "Hash of the published record document."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "valid_from",
+            "type": "i64"
+          },
+          {
+            "name": "valid_until",
+            "type": "i64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "AtaStatus"
+              }
+            }
+          },
+          {
+            "name": "status_evidence_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "item_count",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AtaCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "manager_agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "supplier",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AtaItem",
+      "docs": [
+        "One item of a price record. `registered_qty` is immutable once created:",
+        "there is deliberately no instruction to increase it (Decree art. 23)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "item_no",
+            "type": "u16"
+          },
+          {
+            "name": "registered_qty",
+            "docs": [
+              "Quantity registered for the managing and participating agencies."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "max_adhesion_qty",
+            "docs": [
+              "Maximum quantity the tender allows for non-participants (Decree art. 15, XI).",
+              "Zero means the tender does not allow adhesions."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "unit_price",
+            "docs": [
+              "Unit price in integer cents."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "committed_capped",
+            "docs": [
+              "Pending + authorized quantity of adhesions subject to the §5 cap."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "committed_exempt",
+            "docs": [
+              "Pending + authorized quantity of adhesions under a statutory exception."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "authorized_total",
+            "docs": [
+              "Quantity authorized by the manager (informational; includes exempt)."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AtaStatus",
+      "docs": [
+        "Status of a price record. Suspension models a supplier sanction during which",
+        "no new contracts may derive from the record (Decree 11.462/2023, art. 28, §1);",
+        "cancellation models arts. 28-29."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Suspended"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AtaStatusChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "AtaStatus"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "EligibilityConfirmed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "obligation",
+            "type": "pubkey"
+          },
+          {
+            "name": "eligible_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ExecutionExtended",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request",
+            "type": "pubkey"
+          },
+          {
+            "name": "execute_by",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Financing",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "obligation",
+            "type": "pubkey"
+          },
+          {
+            "name": "financier",
+            "type": "pubkey"
+          },
+          {
+            "name": "financing_no",
+            "type": "u32"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "notice_evidence_hash",
+            "docs": [
+              "Hash of the evidence that the debtor was notified of the assignment."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FiscalDocument",
+      "docs": [
+        "A fiscal document (e.g. NF-e) bound to exactly one obligation. Its address is",
+        "derived from the hash of the document key, so the same document cannot be",
+        "attached to a second obligation inside the protocol."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "obligation",
+            "type": "pubkey"
+          },
+          {
+            "name": "doc_key_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FiscalDocumentAttached",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "obligation",
+            "type": "pubkey"
+          },
+          {
+            "name": "fiscal_document",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ItemRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "item",
+            "type": "pubkey"
+          },
+          {
+            "name": "registered_qty",
+            "type": "u64"
+          },
+          {
+            "name": "max_adhesion_qty",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Obligation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "debtor_agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "creditor",
+            "type": "pubkey"
+          },
+          {
+            "name": "obligation_id",
+            "docs": [
+              "Hash of the canonical administrative identifier (e.g. managing unit + commitment number + fiscal year)."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "verified_amount",
+            "type": "u64"
+          },
+          {
+            "name": "documented_amount",
+            "type": "u64"
+          },
+          {
+            "name": "reductions",
+            "type": "u64"
+          },
+          {
+            "name": "eligible_amount",
+            "type": "u64"
+          },
+          {
+            "name": "financed_amount",
+            "type": "u64"
+          },
+          {
+            "name": "paid_amount",
+            "type": "u64"
+          },
+          {
+            "name": "financing_count",
+            "type": "u32"
+          },
+          {
+            "name": "document_count",
+            "type": "u32"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ObligationStatus"
+              }
+            }
+          },
+          {
+            "name": "evidence_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "eligibility_evidence_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "source_request",
+            "docs": [
+              "Adhesion this obligation derives from, or the default key if none."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ObligationFinanced",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "obligation",
+            "type": "pubkey"
+          },
+          {
+            "name": "financing",
+            "type": "pubkey"
+          },
+          {
+            "name": "financier",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "financed_total",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ObligationRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "obligation",
+            "type": "pubkey"
+          },
+          {
+            "name": "debtor_agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "creditor",
+            "type": "pubkey"
+          },
+          {
+            "name": "verified_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ObligationStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Verified"
+          },
+          {
+            "name": "Eligible"
+          },
+          {
+            "name": "Financed"
+          },
+          {
+            "name": "Impaired"
+          },
+          {
+            "name": "Settled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PaymentRecorded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "obligation",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "settled",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReductionRecorded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "obligation",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "impaired",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Registry",
+      "docs": [
+        "Singleton configuration. In the MVP the registry authority is a clearly",
+        "labeled demo issuer standing in for a real credential issuer (for example an",
+        "audit court or a state government using the Solana Attestation Service)."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "eligibility_verifier",
+            "docs": [
+              "Signer allowed to confirm that an obligation is eligible for assignment."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "agency_count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequestStatus",
+      "docs": [
+        "Lifecycle of an adhesion, in the order required by Decree 11.462/2023,",
+        "art. 31, §1: the manager authorizes only after the supplier accepts."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Requested"
+          },
+          {
+            "name": "SupplierAccepted"
+          },
+          {
+            "name": "Authorized"
+          },
+          {
+            "name": "Executed"
+          },
+          {
+            "name": "Rejected"
+          },
+          {
+            "name": "Lapsed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RuleProfile",
+      "docs": [
+        "Which procurement regulation governs an agency's own conduct as an adherent.",
+        "Law 14.133/2021 applies to everyone; each sphere regulates art. 86 for itself."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Baseline"
+          },
+          {
+            "name": "Alagoas"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sphere",
+      "docs": [
+        "Level of government an agency belongs to (relevant to Law 14.133/2021, art. 86, §8)."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Federal"
+          },
+          {
+            "name": "State"
+          },
+          {
+            "name": "District"
+          },
+          {
+            "name": "Municipal"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SupplierResponded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request",
+            "type": "pubkey"
+          },
+          {
+            "name": "accepted",
+            "type": "bool"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "AGENCY_SEED",
+      "type": "bytes",
+      "value": "[97, 103, 101, 110, 99, 121]"
+    },
+    {
+      "name": "ATA_SEED",
+      "type": "bytes",
+      "value": "[97, 116, 97]"
+    },
+    {
+      "name": "FINANCING_SEED",
+      "type": "bytes",
+      "value": "[102, 105, 110, 97, 110, 99, 105, 110, 103]"
+    },
+    {
+      "name": "FISCAL_DOC_SEED",
+      "type": "bytes",
+      "value": "[102, 105, 115, 99, 97, 108, 95, 100, 111, 99]"
+    },
+    {
+      "name": "ITEM_SEED",
+      "type": "bytes",
+      "value": "[105, 116, 101, 109]"
+    },
+    {
+      "name": "OBLIGATION_SEED",
+      "type": "bytes",
+      "value": "[111, 98, 108, 105, 103, 97, 116, 105, 111, 110]"
+    },
+    {
+      "name": "REGISTRY_SEED",
+      "type": "bytes",
+      "value": "[114, 101, 103, 105, 115, 116, 114, 121]"
+    },
+    {
+      "name": "REQUEST_SEED",
+      "type": "bytes",
+      "value": "[114, 101, 113, 117, 101, 115, 116]"
+    },
+    {
+      "name": "USAGE_SEED",
+      "type": "bytes",
+      "value": "[117, 115, 97, 103, 101]"
+    }
+  ]
+}

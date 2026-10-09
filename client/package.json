@@ -1,0 +1,13 @@
+{
+  "name": "solutio-client",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "demo": "node devnet-demo.mjs"
+  },
+  "dependencies": {
+    "@anchor-lang/core": "1.2.1",
+    "@solana/web3.js": "1.98.4"
+  }
+}

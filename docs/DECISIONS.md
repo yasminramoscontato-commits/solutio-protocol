@@ -22,10 +22,17 @@
 | 2026-10-09 | Monetary values in integer cents (u64); no floating point | Exact arithmetic for public money |
 | 2026-10-09 | No token as business model | Revenue must come from verification and financing volume, not from a speculative asset |
 | 2026-10-09 | Apache-2.0 license | Permissive, with an explicit patent grant |
+| 2026-10-09 | Fix: the federal-programme exception requires a federally managed record | Law art. 86 §6 lifts §5 only for records of the federal Executive; the first version accepted it for any manager |
+| 2026-10-09 | Rule profiles per agency (`Baseline`, `Alagoas`), attested by the registry | Each sphere regulates art. 86 for itself; the adherent's regulation decides whom it may adhere to. Alagoas art. 33 is the first rule that differs from the federal one |
+| 2026-10-09 | Deployed to devnet (program `5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E`), authorized by the founder | SBPF v2 is enabled on devnet; the deployed bytes match the tested binary. 32-step scripted run recorded in `docs/DEVNET.md` |
+| 2026-10-09 | Refused steps in the demo are sent with preflight disabled | The program's rejection is then recorded on-chain and visible in the explorer, which is the evidence judges need |
 
 ## Pending
 
-- [ ] Devnet deployment (requires explicit authorization from the founder)
+- [x] Devnet deployment (authorized 2026-10-09)
+- [ ] Transfer the program's upgrade authority from the session's demo key to a wallet controlled by the founder
+- [ ] Restrict `init_registry` to the program's upgrade authority before any non-demo use (today the first caller becomes the registry authority; on devnet we initialized it right after deploying)
+- [ ] Validate the Alagoas profile and the questions in LEGAL_RULES.md with GARC/SEI staff
 - [ ] Concurrency demo on a real validator (two simultaneous acceptances for the last units)
 - [ ] Public verifier page that reads state directly from the chain
 - [ ] Validation interviews with procurement officers and financiers

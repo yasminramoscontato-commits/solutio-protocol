@@ -36,9 +36,9 @@ pub mod solutio {
         ctx: Context<RegisterAgency>,
         sphere: Sphere,
         name: String,
-        is_health_ministry: bool,
+        attributes: AgencyAttributes,
     ) -> Result<()> {
-        instructions::registry::handle_register_agency(ctx, sphere, name, is_health_ministry)
+        instructions::registry::handle_register_agency(ctx, sphere, name, attributes)
     }
 
     // ---- module 1: carona ----

@@ -11,6 +11,17 @@ pub enum Sphere {
     Municipal,
 }
 
+/// Which procurement regulation governs an agency's own conduct as an adherent.
+/// Law 14.133/2021 applies to everyone; each sphere regulates art. 86 for itself.
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq, InitSpace)]
+pub enum RuleProfile {
+    /// Law 14.133/2021 art. 86 as regulated federally by Decree 11.462/2023.
+    Baseline,
+    /// State of Alagoas, Decree 95.019/2023 (adds the art. 33 restriction on
+    /// adhering to municipal records).
+    Alagoas,
+}
+
 // ---------------------------------------------------------------------------
 // Registry and identities
 // ---------------------------------------------------------------------------
@@ -30,6 +41,14 @@ pub struct Registry {
 
 /// A public agency recognized by the registry. `authority` is the wallet that
 /// signs on its behalf (in production, a multisig).
+/// Facts about an agency attested by the registry issuer when it is registered.
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AgencyAttributes {
+    pub is_health_ministry: bool,
+    pub is_state_capital: bool,
+    pub profile: RuleProfile,
+}
+
 #[account]
 #[derive(InitSpace)]
 pub struct Agency {
@@ -38,6 +57,11 @@ pub struct Agency {
     /// Attested by the registry: relevant to the health-emergency exception
     /// (Decree 11.462/2023, art. 32, §1).
     pub is_health_ministry: bool,
+    /// Attested by the registry: the municipality is a state capital
+    /// (Alagoas Decree 95.019/2023, art. 33).
+    pub is_state_capital: bool,
+    /// Regulation that governs this agency when it adheres to a record.
+    pub profile: RuleProfile,
     #[max_len(64)]
     pub name: String,
     pub active: bool,
@@ -65,6 +89,7 @@ pub struct Ata {
     pub manager_agency: Pubkey,
     pub manager_sphere: Sphere,
     pub manager_is_health_ministry: bool,
+    pub manager_is_state_capital: bool,
     /// Wallet of the registered supplier, who must accept each adhesion.
     pub supplier: Pubkey,
     /// Hash of the canonical identifier (e.g. the PNCP control number).

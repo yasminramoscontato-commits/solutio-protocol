@@ -43,6 +43,8 @@ pub enum ErrorCode {
     ExecutionDeadlineNotReached,
     #[msg("Invalid execution deadline")]
     InvalidDeadline,
+    #[msg("Alagoas Decree 95.019/2023 art. 33: state agencies cannot adhere to municipal records other than those of state capitals")]
+    MunicipalAdhesionForbidden,
 
     // ---- obligations / financing ----
     #[msg("Amount must be greater than zero")]
@@ -82,6 +84,7 @@ impl From<RuleViolation> for ErrorCode {
             RuleViolation::AdhesionsNotAllowed => ErrorCode::AdhesionsNotAllowed,
             RuleViolation::ExceptionNotApplicable => ErrorCode::ExceptionNotApplicable,
             RuleViolation::ManagerCannotAdhere => ErrorCode::ManagerCannotAdhere,
+            RuleViolation::MunicipalAdhesionForbidden => ErrorCode::MunicipalAdhesionForbidden,
             RuleViolation::Overflow => ErrorCode::Overflow,
         }
     }
