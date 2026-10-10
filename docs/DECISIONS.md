@@ -33,16 +33,24 @@
 | 2026-10-09 | Government pays nothing; revenue from financiers (verification fee, take rate via licensed partner) | Removes the procurement barrier to adoption; the party that bears double-financing risk pays |
 | 2026-10-09 | Finding: rent is ~99% of on-chain cost per obligation | Measured on devnet. A close instruction for settled accounts becomes a requirement for scale |
 
+| 2026-10-09 | Security audit (Solana AI Kit checklist) remediated: H-1, M-1, M-2, M-3, L-2, L-3, L-5 | See `docs/security-audit-2026-10-09.md`, Remediation |
+| 2026-10-09 | `init_if_needed` kept for `AgencyItemUsage` (kit rule exception) | The usage PDA is unique per item and agency and the handler initializes it only when `usage.item` is the default key; a separate instruction would add a transaction to every first request |
+| 2026-10-09 | Close instructions recover rent only for terminal records; fiscal-document markers and executed adhesions are never closed | Closing a marker would let the same invoice back a new obligation; executed adhesions are the provenance obligations cite |
+| 2026-10-09 | Build with `opt-level = "s"` | Keeps the program near its original size so devnet upgrades need less rent; all tests pass with the same results |
+| 2026-10-09 | Concurrency is tested with transactions submitted in parallel to a validator, not in LiteSVM | LiteSVM executes sequentially; only a validator shows several transactions contending for the same account in one slot |
+
 ## Pending
 
 - [x] Devnet deployment (authorized 2026-10-09)
 - [ ] Transfer the program's upgrade authority from the session's demo key to a wallet controlled by the founder
-- [ ] Restrict `init_registry` to the program's upgrade authority before any non-demo use (today the first caller becomes the registry authority; on devnet we initialized it right after deploying)
+- [x] Restrict `init_registry` to the program's upgrade authority (audit H-1)
 - [ ] Validate the Alagoas profile and the questions in LEGAL_RULES.md with GARC/SEI staff
 - [ ] Program: participant quotas, supply authorization and rectification (specified as PROC-11/12 in the framework)
-- [ ] Program: close settled accounts to recover rent (economics finding)
+- [x] Program: close settled accounts to recover rent (implemented; recovers part of the deposit, see ECONOMICS.md)
+- [ ] Upgrade the devnet program to the audited version and rerun the demo and the concurrency test there
+- [ ] Verifiable build, CI, fuzzing, emergency pause (audit, still open)
 - [ ] Interviews: two receivables funds (FIDCs) and one factoring company on willingness to pay (H5, H8)
-- [ ] Concurrency demo on a real validator (two simultaneous acceptances for the last units)
+- [x] Concurrency test on a validator (local validator: 6 requests in one slot, 4 accepted; 2 financings, 1 accepted). Devnet rerun pending
 - [ ] Public verifier page that reads state directly from the chain
 - [ ] Validation interviews with procurement officers and financiers
 - [ ] Optional: financing pool with a test stablecoin

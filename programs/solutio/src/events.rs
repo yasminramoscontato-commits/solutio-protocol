@@ -118,3 +118,26 @@ pub struct PaymentRecorded {
     pub amount: u64,
     pub settled: bool,
 }
+
+/// role: 0 = registry authority, 1 = eligibility verifier.
+#[event]
+pub struct RegistryKeyChanged {
+    pub role: u8,
+    pub previous: Pubkey,
+    pub current: Pubkey,
+}
+
+#[event]
+pub struct AgencyStatusChanged {
+    pub agency: Pubkey,
+    pub active: bool,
+}
+
+/// kind: 0 = adhesion request, 1 = financing, 2 = obligation.
+#[event]
+pub struct AccountClosed {
+    pub account: Pubkey,
+    pub kind: u8,
+    pub refunded_to: Pubkey,
+    pub lamports: u64,
+}

@@ -32,6 +32,18 @@ pub mod solutio {
         instructions::registry::handle_init_registry(ctx, eligibility_verifier)
     }
 
+    pub fn set_eligibility_verifier(ctx: Context<RegistryAdmin>, new_verifier: Pubkey) -> Result<()> {
+        instructions::registry::handle_set_eligibility_verifier(ctx, new_verifier)
+    }
+
+    pub fn set_registry_authority(ctx: Context<SetRegistryAuthority>) -> Result<()> {
+        instructions::registry::handle_set_registry_authority(ctx)
+    }
+
+    pub fn set_agency_active(ctx: Context<SetAgencyActive>, active: bool) -> Result<()> {
+        instructions::registry::handle_set_agency_active(ctx, active)
+    }
+
     pub fn register_agency(
         ctx: Context<RegisterAgency>,
         sphere: Sphere,
@@ -81,7 +93,11 @@ pub mod solutio {
         instructions::carona::handle_supplier_respond(ctx, accept)
     }
 
-    pub fn authorize_adhesion(ctx: Context<ManagerDecision>, authorized_qty: u64, evidence_hash: [u8; 32]) -> Result<()> {
+    pub fn authorize_adhesion(
+        ctx: Context<ManagerDecision>,
+        authorized_qty: u64,
+        evidence_hash: [u8; 32],
+    ) -> Result<()> {
         instructions::carona::handle_authorize_adhesion(ctx, authorized_qty, evidence_hash)
     }
 
@@ -101,6 +117,10 @@ pub mod solutio {
         instructions::carona::handle_expire_adhesion(ctx)
     }
 
+    pub fn close_request(ctx: Context<CloseRequest>) -> Result<()> {
+        instructions::carona::handle_close_request(ctx)
+    }
+
     // ---- module 2: obligations ----
     pub fn register_obligation(
         ctx: Context<RegisterObligation>,
@@ -109,7 +129,13 @@ pub mod solutio {
         verified_amount: u64,
         evidence_hash: [u8; 32],
     ) -> Result<()> {
-        instructions::obligation::handle_register_obligation(ctx, obligation_id, creditor, verified_amount, evidence_hash)
+        instructions::obligation::handle_register_obligation(
+            ctx,
+            obligation_id,
+            creditor,
+            verified_amount,
+            evidence_hash,
+        )
     }
 
     pub fn attach_fiscal_document(
@@ -139,5 +165,13 @@ pub mod solutio {
 
     pub fn record_payment(ctx: Context<DebtorUpdate>, amount: u64, evidence_hash: [u8; 32]) -> Result<()> {
         instructions::obligation::handle_record_payment(ctx, amount, evidence_hash)
+    }
+
+    pub fn close_financing(ctx: Context<CloseFinancing>) -> Result<()> {
+        instructions::obligation::handle_close_financing(ctx)
+    }
+
+    pub fn close_obligation(ctx: Context<CloseObligation>) -> Result<()> {
+        instructions::obligation::handle_close_obligation(ctx)
     }
 }

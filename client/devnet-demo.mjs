@@ -9,84 +9,14 @@
 //
 // Usage: node devnet-demo.mjs   (needs ~/.config/solana/devnet-deployer.json funded on devnet)
 
-import fs from "node:fs";
-import path from "node:path";
-import os from "node:os";
-import crypto from "node:crypto";
-import { fileURLToPath } from "node:url";
-import anchor from "@anchor-lang/core";
-import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import {
+  BN, PROGRAM_ID, RPC, SystemProgram, agencyPda, ataPda, connection, financingPda, fiscalDocPda, itemPda, key,
+  obligationPda, program, programDataPda, recorder, registryPda, requestPda, sha, sponsor, usagePda,
+} from "./lib.mjs";
 
-const { AnchorProvider, Program, Wallet, BN } = anchor;
-const here = path.dirname(fileURLToPath(import.meta.url));
-const RPC = process.env.SOLUTIO_RPC ?? "https://api.devnet.solana.com";
-const idl = JSON.parse(fs.readFileSync(path.join(here, "idl/solutio.json"), "utf8"));
-const PROGRAM_ID = new PublicKey(idl.address);
-
-// ---------- keys ----------
-const keyDir = path.join(here, ".keys");
-fs.mkdirSync(keyDir, { recursive: true });
-function key(name) {
-  const f = path.join(keyDir, `${name}.json`);
-  if (!fs.existsSync(f)) fs.writeFileSync(f, JSON.stringify(Array.from(Keypair.generate().secretKey)));
-  return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(f, "utf8"))));
-}
-const sponsor = Keypair.fromSecretKey(
-  Uint8Array.from(JSON.parse(fs.readFileSync(path.join(os.homedir(), ".config/solana/devnet-deployer.json"), "utf8"))),
-);
-
-const connection = new Connection(RPC, "confirmed");
-const provider = new AnchorProvider(connection, new Wallet(sponsor), { commitment: "confirmed" });
-const program = new Program(idl, provider);
-
-// ---------- helpers ----------
-const sha = (s) => Array.from(crypto.createHash("sha256").update(s).digest());
-const pda = (...seeds) => PublicKey.findProgramAddressSync(seeds, PROGRAM_ID)[0];
-const u16 = (n) => { const b = Buffer.alloc(2); b.writeUInt16LE(n); return b; };
-const u32 = (n) => { const b = Buffer.alloc(4); b.writeUInt32LE(n); return b; };
-const u64 = (n) => { const b = Buffer.alloc(8); b.writeBigUInt64LE(BigInt(n)); return b; };
-const enc = (s) => Buffer.from(s);
-
-const registryPda = pda(enc("registry"));
-const agencyPda = (auth) => pda(enc("agency"), auth.toBuffer());
-const ataPda = (mgr, id) => pda(enc("ata"), mgr.toBuffer(), Buffer.from(id));
-const itemPda = (ata, n) => pda(enc("item"), ata.toBuffer(), u16(n));
-const usagePda = (item, ag) => pda(enc("usage"), item.toBuffer(), ag.toBuffer());
-const requestPda = (item, ag, id) => pda(enc("request"), item.toBuffer(), ag.toBuffer(), u64(id));
-const obligationPda = (debtor, id) => pda(enc("obligation"), debtor.toBuffer(), Buffer.from(id));
-const fiscalDocPda = (h) => pda(enc("fiscal_doc"), Buffer.from(h));
-const financingPda = (ob, n) => pda(enc("financing"), ob.toBuffer(), u32(n));
-
-const errorsByCode = Object.fromEntries((idl.errors ?? []).map((e) => [e.code, e]));
-const explorer = (sig) => `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
-
-const runFile = path.join(here, "devnet-run.json");
-const run = { rpc: RPC, program: PROGRAM_ID.toBase58(), started_at: new Date().toISOString(), steps: [] };
-
-/** Sends one instruction (sponsor pays) and records the on-chain outcome. */
-async function step(label, basis, expect, builder, signers = []) {
-  const ix = await builder.instruction();
-  const tx = new Transaction().add(ix);
-  tx.feePayer = sponsor.publicKey;
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
-  tx.recentBlockhash = blockhash;
-  tx.sign(sponsor, ...signers);
-  const sig = await connection.sendRawTransaction(tx.serialize(), { skipPreflight: expect !== "ok" });
-  await connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, "confirmed");
-  const info = await connection.getTransaction(sig, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
-  const err = info?.meta?.err ?? null;
-  let outcome = "ok";
-  if (err) {
-    const custom = err?.InstructionError?.[1]?.Custom;
-    outcome = custom !== undefined ? errorsByCode[custom]?.name ?? `Custom(${custom})` : JSON.stringify(err);
-  }
-  const pass = expect === outcome;
-  run.steps.push({ label, basis, expected: expect, outcome, pass, signature: sig, explorer: explorer(sig) });
-  fs.writeFileSync(runFile, JSON.stringify(run, null, 2));
-  console.log(`${pass ? "✔" : "✘"} ${label} — ${outcome}\n    ${explorer(sig)}`);
-  if (!pass) throw new Error(`Unexpected outcome for "${label}": expected ${expect}, got ${outcome}`);
-  return sig;
-}
+const { run, save, step } = recorder("devnet-run.json");
+/** R$ 200,00 per unit, in cents: 50 units = R$ 10.000,00. */
+const UNIT_PRICE = 20_000;
 
 const plain = { isHealthMinistry: false, isStateCapital: false, profile: { baseline: {} } };
 async function registerAgency(kp, sphere, name, attributes = plain) {
@@ -112,7 +42,7 @@ async function createAta(manager, label, supplier) {
 async function addItem(manager, ata, itemNo, qty, maxAdhesion) {
   const item = itemPda(ata, itemNo);
   await step(`Add item ${itemNo}: ${qty} registered, adhesion maximum ${maxAdhesion}`, "Decree 11.462 art. 15 XI; art. 86 §5", "ok",
-    program.methods.addItem(itemNo, new BN(qty), new BN(maxAdhesion), new BN(1_250)).accountsStrict({
+    program.methods.addItem(itemNo, new BN(qty), new BN(maxAdhesion), new BN(UNIT_PRICE)).accountsStrict({
       payer: sponsor.publicKey, managerAuthority: manager.publicKey, managerAgency: agencyPda(manager.publicKey),
       ata, item, systemProgram: SystemProgram.programId,
     }), [manager]);
@@ -147,7 +77,8 @@ async function main() {
   if (!(await connection.getAccountInfo(registryPda))) {
     await step("Initialize registry", "Demo issuer; designates the eligibility verifier", "ok",
       program.methods.initRegistry(verifier.publicKey).accountsStrict({
-        payer: sponsor.publicKey, authority: sponsor.publicKey, registry: registryPda, systemProgram: SystemProgram.programId,
+        payer: sponsor.publicKey, authority: sponsor.publicKey, program: PROGRAM_ID, programData: programDataPda,
+        registry: registryPda, systemProgram: SystemProgram.programId,
       }));
   }
 
@@ -177,6 +108,14 @@ async function main() {
   await requestAdhesion(stateSecretariat, "Secretaria Estadual (AL)", interiorAta, interiorItem, 1, 10,
     "Alagoas Decree 95.019/2023 art. 33: state agency to a non-capital municipal record", "MunicipalAdhesionForbidden");
 
+  const cityD = agencyPda(cities[3].publicKey);
+  const reqD = requestPda(item, cityD, 1);
+  await step("Supplier declines Prefeitura D's adhesion: its 50 units return to the pool", "Decree 11.462 art. 31 III (supplier acceptance)", "ok",
+    program.methods.supplierRespond(false).accountsStrict({ supplier: supplier.publicKey, ata, item, usage: usagePda(item, cityD), request: reqD }),
+    [supplier]);
+  await step("Anyone closes the rejected request; rent returns to the sponsor", "Rent recovery (no state of value is lost)", "ok",
+    program.methods.closeRequest().accountsStrict({ request: reqD, rentPayer: sponsor.publicKey }));
+
   const cityA = agencyPda(cities[0].publicKey);
   await step("Supplier accepts Prefeitura A's adhesion by signature", "Decree 11.462 art. 31 §1 (acceptance before authorization)", "ok",
     program.methods.supplierRespond(true).accountsStrict({ supplier: supplier.publicKey, ata, item, usage: usagePda(item, cityA), request: reqA }),
@@ -187,7 +126,7 @@ async function main() {
     }), [central]);
   await step("Prefeitura A executes the purchase (nota de empenho)", "Decree 11.462 art. 34", "ok",
     program.methods.formalizeAdhesion(sha("nota-de-empenho-A")).accountsStrict({
-      adherentAuthority: cities[0].publicKey, adherentAgency: cityA, request: reqA,
+      adherentAuthority: cities[0].publicKey, adherentAgency: cityA, ata, request: reqA,
     }), [cities[0]]);
 
   // Module 2 — Obligations
@@ -197,6 +136,12 @@ async function main() {
     program.methods.registerObligation(obId, supplier.publicKey, new BN(1_000_000), sha("liquidacao-A")).accountsStrict({
       payer: sponsor.publicKey, debtorAuthority: cities[0].publicKey, debtorAgency: cityA, obligation, sourceRequest: reqA,
       systemProgram: SystemProgram.programId,
+    }), [cities[0]]);
+  const obId2 = sha(`DEMO-NE-2-${tag}`);
+  await step("A second obligation citing the same adhesion, R$ 0,01 beyond its value", "Obligations ≤ authorized quantity × unit price (50 × R$ 200,00)", "ExceedsAdhesionValue",
+    program.methods.registerObligation(obId2, supplier.publicKey, new BN(1), sha("liquidacao-A2")).accountsStrict({
+      payer: sponsor.publicKey, debtorAuthority: cities[0].publicKey, debtorAgency: cityA, obligation: obligationPda(cityA, obId2),
+      sourceRequest: reqA, systemProgram: SystemProgram.programId,
     }), [cities[0]]);
   const nfe = sha(`DEMO-NFE-${tag}`);
   await step("Attach fiscal document (hash of the NF-e key)", "One document backs one obligation (PDA by document hash)", "ok",
@@ -224,14 +169,21 @@ async function main() {
       debtorAuthority: cities[0].publicKey, debtorAgency: cityA, obligation,
     }), [cities[0]]);
 
+  for (const n of [0, 1]) {
+    await step(`Anyone closes financing #${n} of the settled obligation; rent returns to the sponsor`, "Rent recovery after settlement", "ok",
+      program.methods.closeFinancing().accountsStrict({ obligation, financing: financingPda(obligation, n), rentPayer: sponsor.publicKey }));
+  }
+  await step("Anyone closes the settled obligation; its fiscal document stays as the anti-reuse marker", "Rent recovery after settlement", "ok",
+    program.methods.closeObligation().accountsStrict({ obligation, rentPayer: sponsor.publicKey }));
+
   // Agencies never held SOL.
   const balances = await Promise.all([central, ...cities, supplier, fundA].map((k) => connection.getBalance(k.publicKey)));
   run.agency_wallet_lamports = balances;
   run.accounts = { registry: registryPda.toBase58(), ata: ata.toBase58(), item: item.toBase58(), obligation: obligation.toBase58() };
   run.finished_at = new Date().toISOString();
-  fs.writeFileSync(runFile, JSON.stringify(run, null, 2));
+  save();
   console.log(`\nSigner wallets' SOL balances (lamports): ${balances.join(", ")}`);
-  console.log(`All ${run.steps.length} steps matched expectations. Log: ${runFile}`);
+  console.log(`All ${run.steps.length} steps matched expectations. Log: client/devnet-run.json`);
 }
 
 function skipIfExists(e) {

@@ -135,3 +135,26 @@ What holds up well: every state account is a typed `Account<T>` (owner and discr
 ## Verdict
 
 **Not ready for an external audit yet; fine for the devnet demo.** Before any non-demo use: fix H-1, M-1, M-2 and M-3, close the formatting and negative-test gaps, and adopt a verifiable build. None of the findings lets a third party exceed an art. 86 cap or finance the same balance twice in the current devnet deployment; the Medium findings are about trusted parties (registered agencies, key holders) and about rules the documentation claims but the program does not yet enforce.
+
+## Remediation — 2026-10-09
+
+Fixed in the program and covered by `programs/solutio/tests/security.rs` (all LiteSVM suites were run in this session: 13 rules + 17 Carona + 8 Obligations + 13 security = 51 passing).
+
+| Finding | Fix | Test |
+| --- | --- | --- |
+| H-1 | `init_registry` requires the program's upgrade authority (`Program<Solutio>` + `ProgramData` constraints) | `h1_only_the_upgrade_authority_can_initialize_the_registry` |
+| M-1 | `set_eligibility_verifier`, `set_registry_authority` (old and new key both sign), `set_agency_active`; every agency-signed instruction now checks `active` | `m1_the_eligibility_verifier_can_be_replaced`, `m1_registry_authority_rotation_needs_both_keys_and_moves_power`, `m1_a_revoked_agency_cannot_sign_anything` |
+| M-2 | `AdhesionRequest` stores `unit_price` and `obligated_amount`; obligations citing it stay within `authorized_qty × unit_price` | `m2_obligations_cannot_exceed_the_value_of_their_source_adhesion` |
+| M-3 | `formalize_adhesion` takes the record and refuses unless it is active. Legal reading: executing an authorized adhesion is a new contract, which art. 28 §1 forbids during suspension; the 90-day clock keeps running and the manager may extend after reactivation | `m3_no_execution_while_the_record_is_suspended` |
+| L-1 | Kept `init_if_needed` for the usage account; the exception and its guard are recorded in `DECISIONS.md` | existing Carona tests |
+| L-2 | `expire_adhesion` also lapses requests pending for more than 90 days (`RESPONSE_WINDOW_SECS`, a design choice recorded in `LEGAL_RULES.md`) | `l2_unanswered_requests_lapse_after_the_response_window` |
+| L-3 | `add_item` requires an active record in force; `extend_execution` requires an active record | `l3_no_items_on_a_cancelled_record`, `m3_…` |
+| L-4 | Open: needs an issuer attestation for fiscal documents. Recorded as a known limitation | — |
+| L-5 | `NameTooLong`, appended at the end of the error enum | `l5_long_agency_names_get_their_own_error` |
+| Info 2, 3 | `checked_sub`; `debug_assert` removed | clippy |
+| Info 7 | `close_request` (rejected or lapsed), `close_financing` and `close_obligation` (settled), rent back to the stored `rent_payer`; fiscal documents and executed adhesions are never closed | `closing_returns_rent_only_for_terminal_records`, `a_rejected_request_can_be_closed_by_anyone` |
+| Negative coverage | Tests now hit `AccountMismatch`, `AgencyInactive`, `InvalidValidity`, `InvalidAmount` | `an_item_from_another_record_is_rejected_as_a_mismatch`, `invalid_validity_and_zero_amounts_are_refused` |
+| fmt | `rustfmt.toml` with `max_width = 120`; `cargo fmt --check` passes | — |
+| Anchor.toml | `[programs.devnet]` added | — |
+
+Still open: verifiable build, CI, fuzzing, emergency pause, `emit_cpi!`, upgrade-authority transfer, L-4, and `Overflow` coverage (unreachable with realistic inputs).

@@ -70,6 +70,18 @@ pub enum ErrorCode {
 
     #[msg("Arithmetic overflow")]
     Overflow,
+
+    // ---- appended after the first devnet deployment, so earlier codes keep their numbers ----
+    #[msg("Agency name is longer than 64 bytes")]
+    NameTooLong,
+    #[msg("Obligations citing this adhesion would exceed its authorized value")]
+    ExceedsAdhesionValue,
+    #[msg("Only terminal records can be closed")]
+    NotClosable,
+    #[msg("Close every financing of this obligation first")]
+    OpenFinancings,
+    #[msg("The response window of this pending request has not passed yet")]
+    ResponseWindowOpen,
 }
 
 impl From<RuleViolation> for ErrorCode {

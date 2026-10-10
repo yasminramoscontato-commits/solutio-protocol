@@ -9,3 +9,4 @@ test-ledger
 client/.keys/
 __pycache__/
 *.pyc
+client/*.localnet.json

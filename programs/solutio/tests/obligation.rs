@@ -25,23 +25,43 @@ fn scenario() -> Scenario {
     let ata = env.create_ata(&manager, "ARP-001/2026", &supplier.pubkey(), 365);
     let item = env.add_item(&manager, &ata, 1, 100, 200);
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
-    let req = env.full_adhesion(&manager, &supplier, &city, &ata, &item, 1, 8).unwrap();
+    let req = env
+        .full_adhesion(&manager, &supplier, &city, &ata, &item, 1, 8)
+        .unwrap();
     let obligation = env
         .register_obligation(&city, "UG-1/2026NE000123", &supplier.pubkey(), BRL_10K, Some(req))
         .unwrap();
-    Scenario { env, city, supplier, obligation }
+    Scenario {
+        env,
+        city,
+        supplier,
+        obligation,
+    }
 }
 
 #[test]
 fn full_lifecycle_finances_once_then_settles() {
-    let Scenario { mut env, city, supplier, obligation } = scenario();
-    env.attach_doc(&city, &obligation, "NFE-35261012345678000199550010000001231000001234", BRL_10K).unwrap();
+    let Scenario {
+        mut env,
+        city,
+        supplier,
+        obligation,
+    } = scenario();
+    env.attach_doc(
+        &city,
+        &obligation,
+        "NFE-35261012345678000199550010000001231000001234",
+        BRL_10K,
+    )
+    .unwrap();
     env.mark_eligible(&obligation, BRL_10K).unwrap();
 
     let fund_a = Keypair::new();
     let fund_b = Keypair::new();
-    env.finance(&fund_a, &supplier, &obligation, 600_000, hash("notificacao-1")).unwrap();
-    env.finance(&fund_b, &supplier, &obligation, 400_000, hash("notificacao-2")).unwrap();
+    env.finance(&fund_a, &supplier, &obligation, 600_000, hash("notificacao-1"))
+        .unwrap();
+    env.finance(&fund_b, &supplier, &obligation, 400_000, hash("notificacao-2"))
+        .unwrap();
     // The eligible balance is exhausted: any further financing is refused.
     assert_eq!(
         env.finance(&fund_a, &supplier, &obligation, 1, hash("notificacao-3")),
@@ -62,7 +82,12 @@ fn full_lifecycle_finances_once_then_settles() {
 
 #[test]
 fn verified_is_not_eligible_eligibility_is_a_separate_signed_step() {
-    let Scenario { mut env, city, supplier, obligation } = scenario();
+    let Scenario {
+        mut env,
+        city,
+        supplier,
+        obligation,
+    } = scenario();
     let fund = Keypair::new();
     // Verified (liquidated) but not confirmed eligible: cannot be financed.
     assert_eq!(
@@ -70,11 +95,17 @@ fn verified_is_not_eligible_eligibility_is_a_separate_signed_step() {
         Err(code(ErrorCode::ObligationNotFinanceable))
     );
     // Eligibility must be backed by fiscal documents.
-    assert_eq!(env.mark_eligible(&obligation, 500_000), Err(code(ErrorCode::ExceedsDocumentedAmount)));
+    assert_eq!(
+        env.mark_eligible(&obligation, 500_000),
+        Err(code(ErrorCode::ExceedsDocumentedAmount))
+    );
     env.attach_doc(&city, &obligation, "NFE-A", 500_000).unwrap();
     // Only the designated verifier can confirm eligibility.
     let stranger = Keypair::new();
-    assert_eq!(env.mark_eligible_as(&stranger, &obligation, 500_000), Err(code(ErrorCode::Unauthorized)));
+    assert_eq!(
+        env.mark_eligible_as(&stranger, &obligation, 500_000),
+        Err(code(ErrorCode::Unauthorized))
+    );
     env.mark_eligible(&obligation, 500_000).unwrap();
     // Financing is capped by eligibility, not by the verified amount.
     assert_eq!(
@@ -86,7 +117,12 @@ fn verified_is_not_eligible_eligibility_is_a_separate_signed_step() {
 
 #[test]
 fn the_same_fiscal_document_cannot_back_two_obligations() {
-    let Scenario { mut env, city, supplier, obligation } = scenario();
+    let Scenario {
+        mut env,
+        city,
+        supplier,
+        obligation,
+    } = scenario();
     let nfe = "NFE-35261012345678000199550010000001231000001234";
     env.attach_doc(&city, &obligation, nfe, 400_000).unwrap();
     let second = env
@@ -103,7 +139,12 @@ fn the_same_fiscal_document_cannot_back_two_obligations() {
 
 #[test]
 fn financing_requires_the_creditor_and_notice_evidence() {
-    let Scenario { mut env, city, supplier, obligation } = scenario();
+    let Scenario {
+        mut env,
+        city,
+        supplier,
+        obligation,
+    } = scenario();
     env.attach_doc(&city, &obligation, "NFE-A", BRL_10K).unwrap();
     env.mark_eligible(&obligation, BRL_10K).unwrap();
     let fund = Keypair::new();
@@ -120,7 +161,12 @@ fn financing_requires_the_creditor_and_notice_evidence() {
 
 #[test]
 fn a_disallowance_after_financing_marks_the_obligation_impaired() {
-    let Scenario { mut env, city, supplier, obligation } = scenario();
+    let Scenario {
+        mut env,
+        city,
+        supplier,
+        obligation,
+    } = scenario();
     env.attach_doc(&city, &obligation, "NFE-A", BRL_10K).unwrap();
     env.mark_eligible(&obligation, BRL_10K).unwrap();
     let fund = Keypair::new();
@@ -138,7 +184,12 @@ fn a_disallowance_after_financing_marks_the_obligation_impaired() {
 
 #[test]
 fn financing_closes_once_the_debtor_starts_paying() {
-    let Scenario { mut env, city, supplier, obligation } = scenario();
+    let Scenario {
+        mut env,
+        city,
+        supplier,
+        obligation,
+    } = scenario();
     env.attach_doc(&city, &obligation, "NFE-A", BRL_10K).unwrap();
     env.mark_eligible(&obligation, BRL_10K).unwrap();
     env.pay(&city, &obligation, 100_000).unwrap();
@@ -159,7 +210,8 @@ fn an_obligation_can_only_derive_from_an_executed_adhesion() {
     // Requested, accepted and authorized, but not yet executed.
     let req = env.request(&city, &ata, &item, 1, 10).unwrap();
     env.supplier_respond(&supplier, &ata, &item, &city, &req, true).unwrap();
-    env.authorize(&manager, &ata, &item, &city, &req, 10, [0u8; 32]).unwrap();
+    env.authorize(&manager, &ata, &item, &city, &req, 10, [0u8; 32])
+        .unwrap();
     assert_eq!(
         env.register_obligation(&city, "NE-1", &supplier.pubkey(), 1_000, Some(req)),
         Err(code(ErrorCode::SourceAdhesionNotEffective))
@@ -176,13 +228,22 @@ fn an_obligation_can_only_derive_from_an_executed_adhesion() {
         env.register_obligation(&city, "NE-3", &wrong_supplier.pubkey(), 1_000, Some(req)),
         Err(code(ErrorCode::SourceAdhesionMismatch))
     );
-    env.register_obligation(&city, "NE-4", &supplier.pubkey(), 1_000, Some(req)).unwrap();
+    env.register_obligation(&city, "NE-4", &supplier.pubkey(), 1_000, Some(req))
+        .unwrap();
 }
 
 #[test]
 fn only_the_debtor_can_record_payments_and_reductions() {
-    let Scenario { mut env, obligation, .. } = scenario();
+    let Scenario {
+        mut env, obligation, ..
+    } = scenario();
     let other_city = env.new_agency(Sphere::Municipal, "Prefeitura B");
-    assert_eq!(env.pay(&other_city, &obligation, 1_000), Err(code(ErrorCode::Unauthorized)));
-    assert_eq!(env.reduce(&other_city, &obligation, 1_000), Err(code(ErrorCode::Unauthorized)));
+    assert_eq!(
+        env.pay(&other_city, &obligation, 1_000),
+        Err(code(ErrorCode::Unauthorized))
+    );
+    assert_eq!(
+        env.reduce(&other_city, &obligation, 1_000),
+        Err(code(ErrorCode::Unauthorized))
+    );
 }

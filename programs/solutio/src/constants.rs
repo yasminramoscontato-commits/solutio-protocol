@@ -18,3 +18,8 @@ pub const OBLIGATION_SEED: &[u8] = b"obligation";
 pub const FISCAL_DOC_SEED: &[u8] = b"fiscal_doc";
 #[constant]
 pub const FINANCING_SEED: &[u8] = b"financing";
+
+/// Days a pending request (awaiting the supplier or the manager) keeps its
+/// reserved quantity before anyone may lapse it. Design choice, not a legal
+/// deadline: it stops an unanswered request from holding the balance forever.
+pub const RESPONSE_WINDOW_SECS: i64 = 90 * 86_400;

@@ -26,7 +26,13 @@ fn scenario(registered: u64, max_adhesion: u64) -> Scenario {
     let supplier = Keypair::new();
     let ata = env.create_ata(&manager, "ARP-001/2026", &supplier.pubkey(), 365);
     let item = env.add_item(&manager, &ata, 1, registered, max_adhesion);
-    Scenario { env, manager, supplier, ata, item }
+    Scenario {
+        env,
+        manager,
+        supplier,
+        ata,
+        item,
+    }
 }
 
 fn standard() -> Scenario {
@@ -35,7 +41,13 @@ fn standard() -> Scenario {
 
 #[test]
 fn decree_order_supplier_accepts_before_the_manager_authorizes() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     let req = env.request(&city, &ata, &item, 1, 30).unwrap();
 
@@ -46,7 +58,10 @@ fn decree_order_supplier_accepts_before_the_manager_authorizes() {
     );
     // Only the registered supplier can respond.
     let impostor = Keypair::new();
-    assert_eq!(env.supplier_respond(&impostor, &ata, &item, &city, &req, true), Err(code(ErrorCode::Unauthorized)));
+    assert_eq!(
+        env.supplier_respond(&impostor, &ata, &item, &city, &req, true),
+        Err(code(ErrorCode::Unauthorized))
+    );
     env.supplier_respond(&supplier, &ata, &item, &city, &req, true).unwrap();
     // Only the managing agency can authorize.
     let other_state = env.new_agency(Sphere::State, "Outro Estado");
@@ -54,7 +69,8 @@ fn decree_order_supplier_accepts_before_the_manager_authorizes() {
         env.authorize(&other_state, &ata, &item, &city, &req, 30, [0u8; 32]),
         Err(code(ErrorCode::Unauthorized))
     );
-    env.authorize(&manager, &ata, &item, &city, &req, 30, [0u8; 32]).unwrap();
+    env.authorize(&manager, &ata, &item, &city, &req, 30, [0u8; 32])
+        .unwrap();
     env.formalize(&city, &req).unwrap();
 
     let r: AdhesionRequest = env.fetch(&req);
@@ -71,14 +87,23 @@ fn pending_requests_reserve_quantity_as_in_the_federal_system() {
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     env.request(&city, &ata, &item, 1, 40).unwrap();
     // Nothing approved yet, but the pending 40 already counts against §4.
-    assert_eq!(env.request(&city, &ata, &item, 2, 11), Err(code(ErrorCode::ExceedsIndividualCap)));
+    assert_eq!(
+        env.request(&city, &ata, &item, 2, 11),
+        Err(code(ErrorCode::ExceedsIndividualCap))
+    );
     let it: AtaItem = env.fetch(&item);
     assert_eq!(it.committed_capped, 40);
 }
 
 #[test]
 fn partial_authorization_releases_the_remainder_and_requires_justification() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     let req = env.request(&city, &ata, &item, 1, 17).unwrap();
     env.supplier_respond(&supplier, &ata, &item, &city, &req, true).unwrap();
@@ -91,7 +116,8 @@ fn partial_authorization_releases_the_remainder_and_requires_justification() {
         env.authorize(&manager, &ata, &item, &city, &req, 18, [0u8; 32]),
         Err(code(ErrorCode::InvalidQuantity))
     );
-    env.authorize(&manager, &ata, &item, &city, &req, 10, hash("motivacao-parcial")).unwrap();
+    env.authorize(&manager, &ata, &item, &city, &req, 10, hash("motivacao-parcial"))
+        .unwrap();
     let it: AtaItem = env.fetch(&item);
     assert_eq!(it.committed_capped, 10);
     let usage: AgencyItemUsage = env.fetch(&env.usage_pda(&item, &env.agency(&city.pubkey())));
@@ -100,12 +126,20 @@ fn partial_authorization_releases_the_remainder_and_requires_justification() {
 
 #[test]
 fn declined_and_denied_requests_release_their_reservation() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     let declined = env.request(&city, &ata, &item, 1, 50).unwrap();
-    env.supplier_respond(&supplier, &ata, &item, &city, &declined, false).unwrap();
+    env.supplier_respond(&supplier, &ata, &item, &city, &declined, false)
+        .unwrap();
     let denied = env.request(&city, &ata, &item, 2, 50).unwrap();
-    env.supplier_respond(&supplier, &ata, &item, &city, &denied, true).unwrap();
+    env.supplier_respond(&supplier, &ata, &item, &city, &denied, true)
+        .unwrap();
     env.deny(&manager, &ata, &item, &city, &denied).unwrap();
     assert_eq!(
         env.authorize(&manager, &ata, &item, &city, &denied, 50, [0u8; 32]),
@@ -119,37 +153,76 @@ fn declined_and_denied_requests_release_their_reservation() {
 
 #[test]
 fn art86_par4_each_agency_is_capped_at_half_the_registered_quantity() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
-    assert_eq!(env.request(&city, &ata, &item, 1, 51), Err(code(ErrorCode::ExceedsIndividualCap)));
-    env.full_adhesion(&manager, &supplier, &city, &ata, &item, 2, 30).unwrap();
-    env.full_adhesion(&manager, &supplier, &city, &ata, &item, 3, 20).unwrap();
-    assert_eq!(env.request(&city, &ata, &item, 4, 1), Err(code(ErrorCode::ExceedsIndividualCap)));
+    assert_eq!(
+        env.request(&city, &ata, &item, 1, 51),
+        Err(code(ErrorCode::ExceedsIndividualCap))
+    );
+    env.full_adhesion(&manager, &supplier, &city, &ata, &item, 2, 30)
+        .unwrap();
+    env.full_adhesion(&manager, &supplier, &city, &ata, &item, 3, 20)
+        .unwrap();
+    assert_eq!(
+        env.request(&city, &ata, &item, 4, 1),
+        Err(code(ErrorCode::ExceedsIndividualCap))
+    );
 }
 
 #[test]
 fn art86_par5_total_adhesions_are_capped_at_twice_the_registered_quantity() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     for (i, name) in ["A", "B", "C", "D"].iter().enumerate() {
         let city = env.new_agency(Sphere::Municipal, name);
-        env.full_adhesion(&manager, &supplier, &city, &ata, &item, i as u64, 50).unwrap();
+        env.full_adhesion(&manager, &supplier, &city, &ata, &item, i as u64, 50)
+            .unwrap();
     }
     let fifth = env.new_agency(Sphere::Municipal, "E");
-    assert_eq!(env.request(&fifth, &ata, &item, 9, 1), Err(code(ErrorCode::ExceedsGlobalCap)));
+    assert_eq!(
+        env.request(&fifth, &ata, &item, 9, 1),
+        Err(code(ErrorCode::ExceedsGlobalCap))
+    );
 }
 
 #[test]
 fn the_tender_can_set_a_lower_maximum_or_forbid_adhesions() {
-    let Scenario { mut env, manager, ata, item, .. } = scenario(100, 60);
+    let Scenario {
+        mut env,
+        manager,
+        ata,
+        item,
+        ..
+    } = scenario(100, 60);
     let a = env.new_agency(Sphere::Municipal, "A");
     let b = env.new_agency(Sphere::Municipal, "B");
     env.request(&a, &ata, &item, 1, 50).unwrap();
-    assert_eq!(env.request(&b, &ata, &item, 1, 11), Err(code(ErrorCode::ExceedsGlobalCap)));
+    assert_eq!(
+        env.request(&b, &ata, &item, 1, 11),
+        Err(code(ErrorCode::ExceedsGlobalCap))
+    );
     // A maximum above the statutory 2x is refused at registration.
-    assert_eq!(env.try_add_item(&manager, &ata, 2, 100, 201), Err(code(ErrorCode::InvalidMaxAdhesion)));
+    assert_eq!(
+        env.try_add_item(&manager, &ata, 2, 100, 201),
+        Err(code(ErrorCode::InvalidMaxAdhesion))
+    );
     // Zero means the tender does not allow adhesions.
     let closed = env.add_item(&manager, &ata, 3, 100, 0);
-    assert_eq!(env.request(&a, &ata, &closed, 2, 1), Err(code(ErrorCode::AdhesionsNotAllowed)));
+    assert_eq!(
+        env.request(&a, &ata, &closed, 2, 1),
+        Err(code(ErrorCode::AdhesionsNotAllowed))
+    );
 }
 
 /// Two agencies race for the last 50 units. The first lawful request reserves
@@ -157,15 +230,25 @@ fn the_tender_can_set_a_lower_maximum_or_forbid_adhesions() {
 /// return and the second agency can try again.
 #[test]
 fn race_for_the_last_units_only_one_can_win() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     for (i, name) in ["A", "B", "C"].iter().enumerate() {
         let city = env.new_agency(Sphere::Municipal, name);
-        env.full_adhesion(&manager, &supplier, &city, &ata, &item, i as u64, 50).unwrap();
+        env.full_adhesion(&manager, &supplier, &city, &ata, &item, i as u64, 50)
+            .unwrap();
     }
     let d = env.new_agency(Sphere::Municipal, "D");
     let e = env.new_agency(Sphere::Municipal, "E");
     let req_d = env.request(&d, &ata, &item, 1, 50).unwrap();
-    assert_eq!(env.request(&e, &ata, &item, 1, 50), Err(code(ErrorCode::ExceedsGlobalCap)));
+    assert_eq!(
+        env.request(&e, &ata, &item, 1, 50),
+        Err(code(ErrorCode::ExceedsGlobalCap))
+    );
 
     env.deny(&manager, &ata, &item, &d, &req_d).unwrap();
     env.request(&e, &ata, &item, 2, 50).unwrap();
@@ -189,11 +272,16 @@ fn health_emergency_exception_requires_a_ministry_of_health_record() {
     let ms_item = env.add_item(&ms, &ms_ata, 1, 100, 200);
     for (i, name) in ["A", "B", "C", "D"].iter().enumerate() {
         let c = env.new_agency(Sphere::Municipal, name);
-        env.full_adhesion(&ms, &supplier, &c, &ms_ata, &ms_item, i as u64, 50).unwrap();
+        env.full_adhesion(&ms, &supplier, &c, &ms_ata, &ms_item, i as u64, 50)
+            .unwrap();
     }
     let emergency = env.new_agency(Sphere::State, "Secretaria Estadual de Saude");
-    assert_eq!(env.request(&emergency, &ms_ata, &ms_item, 1, 10), Err(code(ErrorCode::ExceedsGlobalCap)));
-    env.request_ex(&emergency, &ms_ata, &ms_item, 2, 50, AdhesionException::HealthEmergency).unwrap();
+    assert_eq!(
+        env.request(&emergency, &ms_ata, &ms_item, 1, 10),
+        Err(code(ErrorCode::ExceedsGlobalCap))
+    );
+    env.request_ex(&emergency, &ms_ata, &ms_item, 2, 50, AdhesionException::HealthEmergency)
+        .unwrap();
     // §4 still applies under the exception.
     assert_eq!(
         env.request_ex(&emergency, &ms_ata, &ms_item, 3, 1, AdhesionException::HealthEmergency),
@@ -217,7 +305,8 @@ fn federal_programme_transfer_exception_is_for_subnational_agencies_only() {
         Err(code(ErrorCode::ExceptionNotApplicable))
     );
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
-    env.request_ex(&city, &ata, &item, 1, 10, AdhesionException::FederalProgramTransfer).unwrap();
+    env.request_ex(&city, &ata, &item, 1, 10, AdhesionException::FederalProgramTransfer)
+        .unwrap();
 
     // Art. 86 §6 lifts §5 only for records of the federal Executive: a state
     // programme cannot claim it, even when the state requires the adhesion.
@@ -225,7 +314,14 @@ fn federal_programme_transfer_exception_is_for_subnational_agencies_only() {
     let state_ata = env.create_ata(&state, "ARP-EST-1", &supplier.pubkey(), 365);
     let state_item = env.add_item(&state, &state_ata, 1, 100, 200);
     assert_eq!(
-        env.request_ex(&city, &state_ata, &state_item, 1, 10, AdhesionException::FederalProgramTransfer),
+        env.request_ex(
+            &city,
+            &state_ata,
+            &state_item,
+            1,
+            10,
+            AdhesionException::FederalProgramTransfer
+        ),
         Err(code(ErrorCode::ExceptionNotApplicable))
     );
 }
@@ -234,12 +330,19 @@ fn federal_programme_transfer_exception_is_for_subnational_agencies_only() {
 fn alagoas_profile_blocks_state_adhesion_to_non_capital_municipal_records() {
     let mut env = Env::new();
     let supplier = Keypair::new();
-    let plain = AgencyAttributes { is_health_ministry: false, is_state_capital: false, profile: RuleProfile::Baseline };
+    let plain = AgencyAttributes {
+        is_health_ministry: false,
+        is_state_capital: false,
+        profile: RuleProfile::Baseline,
+    };
     let interior = env.new_agency(Sphere::Municipal, "Prefeitura do Interior");
     let capital = env.new_agency_with(
         Sphere::Municipal,
         "Prefeitura da Capital",
-        AgencyAttributes { is_state_capital: true, ..plain },
+        AgencyAttributes {
+            is_state_capital: true,
+            ..plain
+        },
     );
     let interior_ata = env.create_ata(&interior, "ARP-MUN-1", &supplier.pubkey(), 365);
     let interior_item = env.add_item(&interior, &interior_ata, 1, 100, 200);
@@ -250,13 +353,17 @@ fn alagoas_profile_blocks_state_adhesion_to_non_capital_municipal_records() {
     let al_secretariat = env.new_agency_with(
         Sphere::State,
         "Secretaria Estadual (AL)",
-        AgencyAttributes { profile: RuleProfile::Alagoas, ..plain },
+        AgencyAttributes {
+            profile: RuleProfile::Alagoas,
+            ..plain
+        },
     );
     assert_eq!(
         env.request(&al_secretariat, &interior_ata, &interior_item, 1, 10),
         Err(code(ErrorCode::MunicipalAdhesionForbidden))
     );
-    env.request(&al_secretariat, &capital_ata, &capital_item, 1, 10).unwrap();
+    env.request(&al_secretariat, &capital_ata, &capital_item, 1, 10)
+        .unwrap();
 
     // A state agency under the federal baseline has no such restriction.
     let other_state = env.new_agency(Sphere::State, "Secretaria Estadual (baseline)");
@@ -267,38 +374,61 @@ fn alagoas_profile_blocks_state_adhesion_to_non_capital_municipal_records() {
 fn art86_par8_federal_agency_cannot_adhere_to_a_state_record() {
     let Scenario { mut env, ata, item, .. } = standard();
     let federal = env.new_agency(Sphere::Federal, "Ministerio X");
-    assert_eq!(env.request(&federal, &ata, &item, 1, 10), Err(code(ErrorCode::FederalAdhesionForbidden)));
+    assert_eq!(
+        env.request(&federal, &ata, &item, 1, 10),
+        Err(code(ErrorCode::FederalAdhesionForbidden))
+    );
 }
 
 #[test]
 fn the_manager_cannot_adhere_to_its_own_record() {
-    let Scenario { mut env, manager, ata, item, .. } = standard();
-    assert_eq!(env.request(&manager, &ata, &item, 1, 10), Err(code(ErrorCode::ManagerCannotAdhere)));
+    let Scenario {
+        mut env,
+        manager,
+        ata,
+        item,
+        ..
+    } = standard();
+    assert_eq!(
+        env.request(&manager, &ata, &item, 1, 10),
+        Err(code(ErrorCode::ManagerCannotAdhere))
+    );
 }
 
 #[test]
 fn ninety_day_execution_window_extension_and_lapse() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     let a = env.new_agency(Sphere::Municipal, "A");
     let b = env.new_agency(Sphere::Municipal, "B");
     let req_a = env.request(&a, &ata, &item, 1, 40).unwrap();
     let req_b = env.request(&b, &ata, &item, 1, 40).unwrap();
     for (agency, req) in [(&a, &req_a), (&b, &req_b)] {
         env.supplier_respond(&supplier, &ata, &item, agency, req, true).unwrap();
-        env.authorize(&manager, &ata, &item, agency, req, 40, [0u8; 32]).unwrap();
+        env.authorize(&manager, &ata, &item, agency, req, 40, [0u8; 32])
+            .unwrap();
     }
     let r: AdhesionRequest = env.fetch(&req_a);
     assert_eq!(r.execute_by, r.authorized_at + 90 * DAY);
 
     // Nobody can lapse an adhesion before its deadline.
-    assert_eq!(env.expire(&item, &a, &req_a), Err(code(ErrorCode::ExecutionDeadlineNotReached)));
+    assert_eq!(
+        env.expire(&item, &a, &req_a),
+        Err(code(ErrorCode::ExecutionDeadlineNotReached))
+    );
     // The manager extends A's deadline (art. 31 §3), but never past validity.
     let ata_acc: Ata = env.fetch(&ata);
     assert_eq!(
         env.extend(&manager, &ata, &item, &a, &req_a, ata_acc.valid_until + 1),
         Err(code(ErrorCode::InvalidDeadline))
     );
-    env.extend(&manager, &ata, &item, &a, &req_a, r.execute_by + 30 * DAY).unwrap();
+    env.extend(&manager, &ata, &item, &a, &req_a, r.execute_by + 30 * DAY)
+        .unwrap();
 
     let t = env.now() + 100 * DAY;
     env.set_time(t);
@@ -316,29 +446,51 @@ fn ninety_day_execution_window_extension_and_lapse() {
 
 #[test]
 fn suspended_or_cancelled_records_accept_no_new_adhesions() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     let req = env.request(&city, &ata, &item, 1, 10).unwrap();
     env.supplier_respond(&supplier, &ata, &item, &city, &req, true).unwrap();
 
     env.set_status(&manager, &ata, AtaStatus::Suspended).unwrap();
-    assert_eq!(env.request(&city, &ata, &item, 2, 10), Err(code(ErrorCode::AtaNotActive)));
+    assert_eq!(
+        env.request(&city, &ata, &item, 2, 10),
+        Err(code(ErrorCode::AtaNotActive))
+    );
     assert_eq!(
         env.authorize(&manager, &ata, &item, &city, &req, 10, [0u8; 32]),
         Err(code(ErrorCode::AtaNotActive))
     );
     env.set_status(&manager, &ata, AtaStatus::Active).unwrap();
-    env.authorize(&manager, &ata, &item, &city, &req, 10, [0u8; 32]).unwrap();
+    env.authorize(&manager, &ata, &item, &city, &req, 10, [0u8; 32])
+        .unwrap();
 
     env.set_status(&manager, &ata, AtaStatus::Cancelled).unwrap();
-    assert_eq!(env.request(&city, &ata, &item, 3, 10), Err(code(ErrorCode::AtaNotActive)));
+    assert_eq!(
+        env.request(&city, &ata, &item, 3, 10),
+        Err(code(ErrorCode::AtaNotActive))
+    );
     // Cancellation is final.
-    assert_eq!(env.set_status(&manager, &ata, AtaStatus::Active), Err(code(ErrorCode::AtaNotActive)));
+    assert_eq!(
+        env.set_status(&manager, &ata, AtaStatus::Active),
+        Err(code(ErrorCode::AtaNotActive))
+    );
 }
 
 #[test]
 fn expired_record_rejects_requests_and_late_authorizations() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     let req = env.request(&city, &ata, &item, 1, 10).unwrap();
     env.supplier_respond(&supplier, &ata, &item, &city, &req, true).unwrap();
@@ -348,15 +500,25 @@ fn expired_record_rejects_requests_and_late_authorizations() {
         env.authorize(&manager, &ata, &item, &city, &req, 10, [0u8; 32]),
         Err(code(ErrorCode::AtaNotInForce))
     );
-    assert_eq!(env.request(&city, &ata, &item, 2, 10), Err(code(ErrorCode::AtaNotInForce)));
+    assert_eq!(
+        env.request(&city, &ata, &item, 2, 10),
+        Err(code(ErrorCode::AtaNotInForce))
+    );
 }
 
 #[test]
 fn agency_wallets_sign_without_holding_any_sol() {
-    let Scenario { mut env, manager, supplier, ata, item } = standard();
+    let Scenario {
+        mut env,
+        manager,
+        supplier,
+        ata,
+        item,
+    } = standard();
     let city = env.new_agency(Sphere::Municipal, "Prefeitura A");
     assert_eq!(env.lamports(&city.pubkey()), 0);
-    env.full_adhesion(&manager, &supplier, &city, &ata, &item, 1, 10).unwrap();
+    env.full_adhesion(&manager, &supplier, &city, &ata, &item, 1, 10)
+        .unwrap();
     // Every fee and rent deposit was paid by the sponsor.
     assert_eq!(env.lamports(&city.pubkey()), 0);
     assert_eq!(env.lamports(&manager.pubkey()), 0);

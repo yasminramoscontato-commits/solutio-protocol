@@ -5,7 +5,7 @@
 
 use anchor_lang::{
     prelude::{Clock, Pubkey},
-    solana_program::{instruction::Instruction, system_program},
+    solana_program::{bpf_loader_upgradeable, instruction::Instruction, system_program},
     AccountDeserialize, InstructionData, ToAccountMetas,
 };
 use litesvm::LiteSVM;
@@ -16,6 +16,8 @@ use solana_transaction::versioned::VersionedTransaction;
 use solutio::{constants::*, error::ErrorCode, state::*};
 
 pub const DAY: i64 = 86_400;
+/// R$ 1.250,00 per unit, in cents.
+pub const UNIT_PRICE: u64 = 125_000;
 
 pub struct Env {
     pub svm: LiteSVM,
@@ -42,6 +44,15 @@ pub fn code(e: ErrorCode) -> u32 {
 
 impl Env {
     pub fn new() -> Self {
+        let mut env = Self::new_uninitialized();
+        let ra = env.registry_authority.insecure_clone();
+        let v = env.verifier.pubkey();
+        env.init_registry(&ra, v).unwrap();
+        env
+    }
+
+    /// Program loaded with `registry_authority` as its upgrade authority, registry not initialized.
+    pub fn new_uninitialized() -> Self {
         let program_id = solutio::id();
         let mut svm = LiteSVM::new();
         let bytes = include_bytes!(concat!(env!("CARGO_TARGET_TMPDIR"), "/../deploy/solutio.so"));
@@ -56,23 +67,104 @@ impl Env {
             verifier: Keypair::new(),
         };
         env.set_time(1_000 * DAY);
-        let ix = Instruction::new_with_bytes(
-            program_id,
-            &solutio::instruction::InitRegistry {
-                eligibility_verifier: env.verifier.pubkey(),
-            }
-            .data(),
-            solutio::accounts::InitRegistry {
-                payer: env.sponsor.pubkey(),
-                authority: env.registry_authority.pubkey(),
-                registry: env.registry(),
-                system_program: system_program::ID,
-            }
-            .to_account_metas(None),
-        );
-        let ra = env.registry_authority.insecure_clone();
-        env.send(ix, &[&ra]).unwrap();
+        // LiteSVM deploys with no upgrade authority; set it in the ProgramData
+        // header (bincode: u32 tag, u64 slot, Option<Pubkey>).
+        let pd = env.program_data();
+        let mut acc = env.svm.get_account(&pd).unwrap();
+        acc.data[12] = 1;
+        acc.data[13..45].copy_from_slice(env.registry_authority.pubkey().as_ref());
+        env.svm.set_account(pd, acc).unwrap();
         env
+    }
+
+    pub fn program_data(&self) -> Pubkey {
+        Pubkey::find_program_address(&[self.program_id.as_ref()], &bpf_loader_upgradeable::ID).0
+    }
+
+    pub fn init_registry(&mut self, authority: &Keypair, verifier: Pubkey) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::InitRegistry {
+                eligibility_verifier: verifier,
+            },
+            solutio::accounts::InitRegistry {
+                payer: self.sponsor.pubkey(),
+                authority: authority.pubkey(),
+                program: self.program_id,
+                program_data: self.program_data(),
+                registry: self.registry(),
+                system_program: system_program::ID,
+            },
+        );
+        self.send(ix, &[authority])
+    }
+
+    pub fn set_verifier(&mut self, signer: &Keypair, new_verifier: Pubkey) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::SetEligibilityVerifier { new_verifier },
+            solutio::accounts::RegistryAdmin {
+                registry_authority: signer.pubkey(),
+                registry: self.registry(),
+            },
+        );
+        self.send(ix, &[signer])
+    }
+
+    pub fn set_registry_authority(&mut self, current: &Keypair, new: &Keypair) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::SetRegistryAuthority {},
+            solutio::accounts::SetRegistryAuthority {
+                registry_authority: current.pubkey(),
+                new_authority: new.pubkey(),
+                registry: self.registry(),
+            },
+        );
+        self.send(ix, &[current, new])
+    }
+
+    pub fn set_agency_active(&mut self, signer: &Keypair, agency_authority: &Pubkey, active: bool) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::SetAgencyActive { active },
+            solutio::accounts::SetAgencyActive {
+                registry_authority: signer.pubkey(),
+                registry: self.registry(),
+                agency: self.agency(agency_authority),
+            },
+        );
+        self.send(ix, &[signer])
+    }
+
+    pub fn close_request(&mut self, request: &Pubkey, rent_payer: &Pubkey) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::CloseRequest {},
+            solutio::accounts::CloseRequest {
+                request: *request,
+                rent_payer: *rent_payer,
+            },
+        );
+        self.send(ix, &[])
+    }
+
+    pub fn close_financing(&mut self, obligation: &Pubkey, financing: &Pubkey, rent_payer: &Pubkey) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::CloseFinancing {},
+            solutio::accounts::CloseFinancing {
+                obligation: *obligation,
+                financing: *financing,
+                rent_payer: *rent_payer,
+            },
+        );
+        self.send(ix, &[])
+    }
+
+    pub fn close_obligation(&mut self, obligation: &Pubkey, rent_payer: &Pubkey) -> Result<(), u32> {
+        let ix = self.ix(
+            solutio::instruction::CloseObligation {},
+            solutio::accounts::CloseObligation {
+                obligation: *obligation,
+                rent_payer: *rent_payer,
+            },
+        );
+        self.send(ix, &[])
     }
 
     pub fn set_time(&mut self, unix: i64) {
@@ -106,10 +198,9 @@ impl Env {
             Err(failed) => {
                 use solana_transaction_error::TransactionError;
                 match failed.err {
-                    TransactionError::InstructionError(
-                        _,
-                        solana_instruction_error::InstructionError::Custom(c),
-                    ) => Err(c),
+                    TransactionError::InstructionError(_, solana_instruction_error::InstructionError::Custom(c)) => {
+                        Err(c)
+                    }
                     _ => Err(u32::MAX),
                 }
             }
@@ -150,7 +241,12 @@ impl Env {
         self.pda(&[USAGE_SEED, item.as_ref(), agency.as_ref()])
     }
     pub fn request_pda(&self, item: &Pubkey, agency: &Pubkey, request_id: u64) -> Pubkey {
-        self.pda(&[REQUEST_SEED, item.as_ref(), agency.as_ref(), request_id.to_le_bytes().as_ref()])
+        self.pda(&[
+            REQUEST_SEED,
+            item.as_ref(),
+            agency.as_ref(),
+            request_id.to_le_bytes().as_ref(),
+        ])
     }
     pub fn obligation_pda(&self, debtor_agency: &Pubkey, id: &[u8; 32]) -> Pubkey {
         self.pda(&[OBLIGATION_SEED, debtor_agency.as_ref(), id.as_ref()])
@@ -170,14 +266,22 @@ impl Env {
     }
 
     pub fn new_agency_ex(&mut self, sphere: Sphere, name: &str, is_health_ministry: bool) -> Keypair {
-        let attributes = AgencyAttributes { is_health_ministry, is_state_capital: false, profile: RuleProfile::Baseline };
+        let attributes = AgencyAttributes {
+            is_health_ministry,
+            is_state_capital: false,
+            profile: RuleProfile::Baseline,
+        };
         self.new_agency_with(sphere, name, attributes)
     }
 
     pub fn new_agency_with(&mut self, sphere: Sphere, name: &str, attributes: AgencyAttributes) -> Keypair {
         let authority = Keypair::new();
         let ix = self.ix(
-            solutio::instruction::RegisterAgency { sphere, name: name.to_string(), attributes },
+            solutio::instruction::RegisterAgency {
+                sphere,
+                name: name.to_string(),
+                attributes,
+            },
             solutio::accounts::RegisterAgency {
                 payer: self.sponsor.pubkey(),
                 registry_authority: self.registry_authority.pubkey(),
@@ -217,14 +321,21 @@ impl Env {
         ata
     }
 
-    pub fn try_add_item(&mut self, manager: &Keypair, ata: &Pubkey, item_no: u16, qty: u64, max_adhesion: u64) -> Result<Pubkey, u32> {
+    pub fn try_add_item(
+        &mut self,
+        manager: &Keypair,
+        ata: &Pubkey,
+        item_no: u16,
+        qty: u64,
+        max_adhesion: u64,
+    ) -> Result<Pubkey, u32> {
         let item = self.item_pda(ata, item_no);
         let ix = self.ix(
             solutio::instruction::AddItem {
                 item_no,
                 registered_qty: qty,
                 max_adhesion_qty: max_adhesion,
-                unit_price: 1_250,
+                unit_price: UNIT_PRICE,
             },
             solutio::accounts::AddItem {
                 payer: self.sponsor.pubkey(),
@@ -244,7 +355,10 @@ impl Env {
 
     pub fn set_status(&mut self, manager: &Keypair, ata: &Pubkey, status: AtaStatus) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::SetAtaStatus { status, evidence_hash: hash("despacho-status") },
+            solutio::instruction::SetAtaStatus {
+                status,
+                evidence_hash: hash("despacho-status"),
+            },
             solutio::accounts::SetAtaStatus {
                 manager_authority: manager.pubkey(),
                 manager_agency: self.agency(&manager.pubkey()),
@@ -286,7 +400,14 @@ impl Env {
         self.send(ix, &[adherent]).map(|_| request)
     }
 
-    pub fn request(&mut self, adherent: &Keypair, ata: &Pubkey, item: &Pubkey, request_id: u64, qty: u64) -> Result<Pubkey, u32> {
+    pub fn request(
+        &mut self,
+        adherent: &Keypair,
+        ata: &Pubkey,
+        item: &Pubkey,
+        request_id: u64,
+        qty: u64,
+    ) -> Result<Pubkey, u32> {
         self.request_ex(adherent, ata, item, request_id, qty, AdhesionException::None)
     }
 
@@ -313,7 +434,14 @@ impl Env {
         self.send(ix, &[supplier])
     }
 
-    fn decision_accounts(&self, manager: &Keypair, ata: &Pubkey, item: &Pubkey, adherent: &Keypair, request: &Pubkey) -> solutio::accounts::ManagerDecision {
+    fn decision_accounts(
+        &self,
+        manager: &Keypair,
+        ata: &Pubkey,
+        item: &Pubkey,
+        adherent: &Keypair,
+        request: &Pubkey,
+    ) -> solutio::accounts::ManagerDecision {
         let agency = self.agency(&adherent.pubkey());
         solutio::accounts::ManagerDecision {
             manager_authority: manager.pubkey(),
@@ -336,28 +464,58 @@ impl Env {
         evidence: [u8; 32],
     ) -> Result<(), u32> {
         let accounts = self.decision_accounts(manager, ata, item, adherent, request);
-        let ix = self.ix(solutio::instruction::AuthorizeAdhesion { authorized_qty: qty, evidence_hash: evidence }, accounts);
+        let ix = self.ix(
+            solutio::instruction::AuthorizeAdhesion {
+                authorized_qty: qty,
+                evidence_hash: evidence,
+            },
+            accounts,
+        );
         self.send(ix, &[manager])
     }
 
-    pub fn deny(&mut self, manager: &Keypair, ata: &Pubkey, item: &Pubkey, adherent: &Keypair, request: &Pubkey) -> Result<(), u32> {
+    pub fn deny(
+        &mut self,
+        manager: &Keypair,
+        ata: &Pubkey,
+        item: &Pubkey,
+        adherent: &Keypair,
+        request: &Pubkey,
+    ) -> Result<(), u32> {
         let accounts = self.decision_accounts(manager, ata, item, adherent, request);
-        let ix = self.ix(solutio::instruction::DenyAdhesion { evidence_hash: hash("motivacao") }, accounts);
+        let ix = self.ix(
+            solutio::instruction::DenyAdhesion {
+                evidence_hash: hash("motivacao"),
+            },
+            accounts,
+        );
         self.send(ix, &[manager])
     }
 
-    pub fn extend(&mut self, manager: &Keypair, ata: &Pubkey, item: &Pubkey, adherent: &Keypair, request: &Pubkey, new_execute_by: i64) -> Result<(), u32> {
+    pub fn extend(
+        &mut self,
+        manager: &Keypair,
+        ata: &Pubkey,
+        item: &Pubkey,
+        adherent: &Keypair,
+        request: &Pubkey,
+        new_execute_by: i64,
+    ) -> Result<(), u32> {
         let accounts = self.decision_accounts(manager, ata, item, adherent, request);
         let ix = self.ix(solutio::instruction::ExtendExecution { new_execute_by }, accounts);
         self.send(ix, &[manager])
     }
 
     pub fn formalize(&mut self, adherent: &Keypair, request: &Pubkey) -> Result<(), u32> {
+        let r: AdhesionRequest = self.fetch(request);
         let ix = self.ix(
-            solutio::instruction::FormalizeAdhesion { evidence_hash: hash("nota-de-empenho") },
+            solutio::instruction::FormalizeAdhesion {
+                evidence_hash: hash("nota-de-empenho"),
+            },
             solutio::accounts::FormalizeAdhesion {
                 adherent_authority: adherent.pubkey(),
                 adherent_agency: self.agency(&adherent.pubkey()),
+                ata: r.ata,
                 request: *request,
             },
         );
@@ -431,7 +589,10 @@ impl Env {
     pub fn attach_doc(&mut self, debtor: &Keypair, obligation: &Pubkey, nfe_key: &str, amount: u64) -> Result<(), u32> {
         let h = hash(nfe_key);
         let ix = self.ix(
-            solutio::instruction::AttachFiscalDocument { doc_key_hash: h, amount },
+            solutio::instruction::AttachFiscalDocument {
+                doc_key_hash: h,
+                amount,
+            },
             solutio::accounts::AttachFiscalDocument {
                 payer: self.sponsor.pubkey(),
                 debtor_authority: debtor.pubkey(),
@@ -495,7 +656,10 @@ impl Env {
 
     pub fn reduce(&mut self, debtor: &Keypair, obligation: &Pubkey, amount: u64) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::RecordReduction { amount, evidence_hash: hash("glosa") },
+            solutio::instruction::RecordReduction {
+                amount,
+                evidence_hash: hash("glosa"),
+            },
             solutio::accounts::DebtorUpdate {
                 debtor_authority: debtor.pubkey(),
                 debtor_agency: self.agency(&debtor.pubkey()),
@@ -507,7 +671,10 @@ impl Env {
 
     pub fn pay(&mut self, debtor: &Keypair, obligation: &Pubkey, amount: u64) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::RecordPayment { amount, evidence_hash: hash("ordem-bancaria") },
+            solutio::instruction::RecordPayment {
+                amount,
+                evidence_hash: hash("ordem-bancaria"),
+            },
             solutio::accounts::DebtorUpdate {
                 debtor_authority: debtor.pubkey(),
                 debtor_agency: self.agency(&debtor.pubkey()),

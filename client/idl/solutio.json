@@ -298,6 +298,82 @@
       ]
     },
     {
+      "name": "close_financing",
+      "discriminator": [
+        201,
+        253,
+        16,
+        127,
+        166,
+        249,
+        73,
+        7
+      ],
+      "accounts": [
+        {
+          "name": "obligation",
+          "writable": true
+        },
+        {
+          "name": "financing",
+          "writable": true
+        },
+        {
+          "name": "rent_payer",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_obligation",
+      "discriminator": [
+        178,
+        182,
+        18,
+        237,
+        158,
+        158,
+        51,
+        124
+      ],
+      "accounts": [
+        {
+          "name": "obligation",
+          "writable": true
+        },
+        {
+          "name": "rent_payer",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_request",
+      "discriminator": [
+        170,
+        46,
+        165,
+        120,
+        223,
+        102,
+        115,
+        2
+      ],
+      "accounts": [
+        {
+          "name": "request",
+          "writable": true
+        },
+        {
+          "name": "rent_payer",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "create_ata",
       "discriminator": [
         26,
@@ -757,6 +833,9 @@
           }
         },
         {
+          "name": "ata"
+        },
+        {
           "name": "request",
           "writable": true
         }
@@ -793,7 +872,18 @@
         },
         {
           "name": "authority",
+          "docs": [
+            "Must be the program's upgrade authority, so nobody can front-run the",
+            "initialization of a fresh deployment."
+          ],
           "signer": true
+        },
+        {
+          "name": "program",
+          "address": "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E"
+        },
+        {
+          "name": "program_data"
         },
         {
           "name": "registry",
@@ -1181,8 +1271,10 @@
         {
           "name": "source_request",
           "docs": [
-            "Optional: the executed adhesion this obligation derives from."
+            "Optional: the executed adhesion this obligation derives from. Writable,",
+            "because it tracks how much has been obligated against it (audit M-2)."
           ],
+          "writable": true,
           "optional": true
         },
         {
@@ -1365,6 +1457,75 @@
       ]
     },
     {
+      "name": "set_agency_active",
+      "discriminator": [
+        134,
+        79,
+        209,
+        241,
+        194,
+        127,
+        64,
+        14
+      ],
+      "accounts": [
+        {
+          "name": "registry_authority",
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "agency",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  103,
+                  101,
+                  110,
+                  99,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "agency.authority",
+                "account": "Agency"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "active",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "set_ata_status",
       "discriminator": [
         220,
@@ -1427,6 +1588,101 @@
           }
         }
       ]
+    },
+    {
+      "name": "set_eligibility_verifier",
+      "discriminator": [
+        0,
+        59,
+        189,
+        254,
+        38,
+        60,
+        179,
+        84
+      ],
+      "accounts": [
+        {
+          "name": "registry_authority",
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "new_verifier",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "set_registry_authority",
+      "discriminator": [
+        140,
+        214,
+        166,
+        246,
+        135,
+        116,
+        20,
+        37
+      ],
+      "accounts": [
+        {
+          "name": "registry_authority",
+          "signer": true
+        },
+        {
+          "name": "new_authority",
+          "docs": [
+            "The new authority signs too, so the root of trust can never be handed to",
+            "a key nobody controls."
+          ],
+          "signer": true
+        },
+        {
+          "name": "registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
     },
     {
       "name": "supplier_respond",
@@ -1613,6 +1869,19 @@
   ],
   "events": [
     {
+      "name": "AccountClosed",
+      "discriminator": [
+        19,
+        250,
+        79,
+        236,
+        91,
+        80,
+        148,
+        48
+      ]
+    },
+    {
       "name": "AdhesionAuthorized",
       "discriminator": [
         159,
@@ -1688,6 +1957,19 @@
         118,
         185,
         67
+      ]
+    },
+    {
+      "name": "AgencyStatusChanged",
+      "discriminator": [
+        110,
+        50,
+        224,
+        149,
+        86,
+        220,
+        205,
+        190
       ]
     },
     {
@@ -1818,6 +2100,19 @@
         239,
         150,
         58
+      ]
+    },
+    {
+      "name": "RegistryKeyChanged",
+      "discriminator": [
+        41,
+        231,
+        137,
+        8,
+        250,
+        85,
+        208,
+        106
       ]
     },
     {
@@ -1984,9 +2279,61 @@
       "code": 6029,
       "name": "Overflow",
       "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6030,
+      "name": "NameTooLong",
+      "msg": "Agency name is longer than 64 bytes"
+    },
+    {
+      "code": 6031,
+      "name": "ExceedsAdhesionValue",
+      "msg": "Obligations citing this adhesion would exceed its authorized value"
+    },
+    {
+      "code": 6032,
+      "name": "NotClosable",
+      "msg": "Only terminal records can be closed"
+    },
+    {
+      "code": 6033,
+      "name": "OpenFinancings",
+      "msg": "Close every financing of this obligation first"
+    },
+    {
+      "code": 6034,
+      "name": "ResponseWindowOpen",
+      "msg": "The response window of this pending request has not passed yet"
     }
   ],
   "types": [
+    {
+      "name": "AccountClosed",
+      "docs": [
+        "kind: 0 = adhesion request, 1 = financing, 2 = obligation."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "account",
+            "type": "pubkey"
+          },
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "refunded_to",
+            "type": "pubkey"
+          },
+          {
+            "name": "lamports",
+            "type": "u64"
+          }
+        ]
+      }
+    },
     {
       "name": "AdhesionAuthorized",
       "type": {
@@ -2170,6 +2517,28 @@
             "type": "i64"
           },
           {
+            "name": "unit_price",
+            "docs": [
+              "Unit price copied from the item when the request is made."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "obligated_amount",
+            "docs": [
+              "Total verified amount of obligations that cite this adhesion as their source.",
+              "Never exceeds `authorized_qty * unit_price`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "rent_payer",
+            "docs": [
+              "Account that paid the rent; receives it back when the request is closed."
+            ],
+            "type": "pubkey"
+          },
+          {
             "name": "bump",
             "type": "u8"
           }
@@ -2339,6 +2708,22 @@
           {
             "name": "authority",
             "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgencyStatusChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "agency",
+            "type": "pubkey"
+          },
+          {
+            "name": "active",
+            "type": "bool"
           }
         ]
       }
@@ -2637,6 +3022,13 @@
             "type": "i64"
           },
           {
+            "name": "rent_payer",
+            "docs": [
+              "Account that paid the rent; receives it back when the financing is closed."
+            ],
+            "type": "pubkey"
+          },
+          {
             "name": "bump",
             "type": "u8"
           }
@@ -2808,6 +3200,20 @@
             "type": "pubkey"
           },
           {
+            "name": "open_financings",
+            "docs": [
+              "Financing accounts not yet closed; the obligation closes only at zero."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "rent_payer",
+            "docs": [
+              "Account that paid the rent; receives it back when the obligation is closed."
+            ],
+            "type": "pubkey"
+          },
+          {
             "name": "bump",
             "type": "u8"
           }
@@ -2957,6 +3363,29 @@
           {
             "name": "bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegistryKeyChanged",
+      "docs": [
+        "role: 0 = registry authority, 1 = eligibility verifier."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "role",
+            "type": "u8"
+          },
+          {
+            "name": "previous",
+            "type": "pubkey"
+          },
+          {
+            "name": "current",
+            "type": "pubkey"
           }
         ]
       }

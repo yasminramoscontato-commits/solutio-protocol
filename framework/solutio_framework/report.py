@@ -97,46 +97,60 @@ def render_economics() -> str:
     costs = economics.load_costs()
     lc = economics.lifecycle_costs(costs)
     fx = a["fx"]["brl_per_usd"]["value"]
+    modes = [m for m in ("no_close", "measured_close", "fees_only") if m != "measured_close" or "closing" in lc]
     lines = [GENERATED, "# Unit economics and scalability\n",
-             f"On-chain costs are **measured**, read back from the {len(costs['steps'])} devnet transactions in "
-             "[`docs/DEVNET.md`](../DEVNET.md) (`client/devnet-costs.json`). Devnet charges the same base fee per signature as "
-             "mainnet; priority fees are excluded. Market anchors come from the evidence base; every other input is an "
-             "**assumption** in `framework/solutio_framework/assumptions.json`. These are scenarios, not forecasts.\n",
+             "This page separates three kinds of numbers. **Measured**: fees, rent deposits and refunds read back from the "
+             f"{len(costs['steps'])} devnet transactions in [`docs/DEVNET.md`](../DEVNET.md) (`client/devnet-costs.json`). "
+             "**Conditional**: costs that depend on a design choice, stated as such. **Hypothesis**: prices, volumes and "
+             "adoption from `framework/solutio_framework/assumptions.json`, not validated with any buyer. Devnet charges the "
+             "same base fee per signature as mainnet; priority fees are excluded.\n",
              "## Measured cost per lifecycle\n",
-             "| Lifecycle | Transactions | Fees (lamports) | Rent deposit (lamports) | Compute units |", "| --- | --- | --- | --- | --- |"]
+             "| Lifecycle | Transactions | Fees (lamports) | Rent, net (lamports) | Compute units |", "| --- | --- | --- | --- | --- |"]
     for v in lc.values():
         lines.append(f"| {v.name} | {v.transactions} | {v.fee_lamports:,} | {v.rent_lamports:,} | {v.compute_units:,} |")
-    lines += ["\nRent is a refundable deposit held by the accounts, not a fee. The program does not close settled accounts yet, "
-              "so the base case counts it as cost.\n",
-              "## Cost per obligation (adhesion + obligation lifecycles), in BRL\n",
-              f"Assumed BRL/USD: {fx}.\n", "| SOL price (USD) | Rent counted as cost | Rent recovered (fees only) |", "| --- | --- | --- |"]
+    lines += ["\nRent is a refundable deposit, not a fee. A negative value is rent returned when an account is closed.\n",
+              "## Cost per obligation (one adhesion + one financed obligation), in BRL\n",
+              f"Assumed BRL/USD: {fx}. Modes: " + "; ".join(f"**{m}** = {economics.MODES[m]}" for m in modes) + ".\n",
+              "| SOL price (USD) | " + " | ".join(modes) + " |", "| --- |" + " --- |" * len(modes)]
     for usd in a["fx"]["usd_per_sol"]["sensitivity"]:
-        lines.append(f"| {usd} | R$ {economics.cost_per_obligation_brl(usd):.2f} | R$ {economics.cost_per_obligation_brl(usd, include_rent=False):.4f} |")
-    for closing, title in ((False, "Base case: rent counted as cost"), (True, "With a close instruction: rent recovered after settlement")):
-        lines += [f"\n## Scenarios · {title}\n",
-                  "| Scenario | Volume through Solutio | Obligations/yr | Avg tx/s | Financed volume | Revenue | On-chain cost | Cost / revenue |",
+        lines.append(f"| {usd} | " + " | ".join(f"R$ {economics.cost_per_obligation_brl(usd, m):.3f}" for m in modes) + " |")
+    for m in modes:
+        lines += [f"\n## Scenarios · {economics.MODES[m]}\n",
+                  "| Scenario | Volume through Solutio | Obligations/yr | Avg tx/s | Financed volume | Revenue (hypothesis) | On-chain cost | Cost / revenue |",
                   "| --- | --- | --- | --- | --- | --- | --- | --- |"]
-        for r in economics.scenarios(close_accounts=closing):
+        for r in economics.scenarios(mode=m):
             lines.append(f"| {r['scenario']} | {brl(r['volume_brl'])} | {r['obligations_per_year']:,.0f} | {r['tx_per_second_avg']:.3f} | "
                          f"{brl(r['financed_volume_brl'])} | {brl(r['revenue_brl'])} | {brl(r['chain_cost_brl'])} | "
                          f"{100 * r['chain_cost_share_of_revenue']:.1f}% |")
     p = a["pricing"]
-    rent = lc["adhesion"].rent_lamports + lc["obligation"].rent_lamports
-    rent_share = 100 * rent / (rent + lc["adhesion"].fee_lamports + lc["obligation"].fee_lamports)
-    lines += ["\n## Revenue model (assumptions)\n",
-              f"- Public bodies pay **nothing**. {p['government_fee_brl']['why']}",
-              f"- Financiers pay a verification fee of R$ {p['verification_fee_brl_per_check']['value']:.2f} per check, "
-              f"{p['checks_per_financed_obligation']['value']} checks per financed obligation.",
-              f"- A take rate of {10_000 * p['take_rate_on_financed_volume']['value']:.0f} bps on financed volume, shared with a licensed financing partner.",
-              "\n## What the numbers say\n",
-              "1. **Throughput is not the constraint.** Even the national scenario averages well under one transaction per second; "
-              "the binding constraint is per-item write serialization, which is the property that enforces the caps.",
-              f"2. **Rent dominates on-chain cost.** Rent deposits are {rent_share:.1f}% of the measured cost per obligation; fees are a "
-              "fraction of a real. Closing settled accounts turns on-chain cost from tens of percent of revenue into well under 1%.",
-              "3. **Revenue comes from financing, not from governments.** The compliance layer is free, which removes the procurement "
-              "barrier to adoption; financiers pay because a verified, single-financing receivable lowers their risk.",
-              ]
-    return "\n".join(lines)
+    gross = economics.per_obligation_lamports(lc, "no_close")
+    fees = economics.per_obligation_lamports(lc, "fees_only")
+    findings = [
+        "\n## Revenue model (hypothesis)\n",
+        f"- Public bodies pay **nothing**. {p['government_fee_brl']['why']}",
+        f"- Financiers pay a verification fee of R$ {p['verification_fee_brl_per_check']['value']:.2f} per check, "
+        f"{p['checks_per_financed_obligation']['value']} checks per financed obligation.",
+        f"- A take rate of {10_000 * p['take_rate_on_financed_volume']['value']:.0f} bps on financed volume, shared with a licensed financing partner. "
+        "Benchmark: the federal AntecipaGov charges lenders 0.17%-0.42% per operation (Portaria SEGES/MGI 6.521/2025).",
+        "\n## What the numbers say\n",
+        "1. **Throughput is not the constraint.** Even the national scenario averages well under one transaction per second. The binding "
+        "constraint is per-account write serialization, which is exactly what enforces the caps (see the concurrency run in DEVNET.md).",
+        f"2. **Rent dominates on-chain cost.** Rent deposits are {100 * (gross - fees) / gross:.1f}% of the gross cost per obligation.",
+    ]
+    if "closing" in lc:
+        closed = economics.per_obligation_lamports(lc, "measured_close")
+        findings.append(
+            f"3. **Closing recovers part of it, not all.** The implemented close instructions return {100 * (gross - closed) / gross:.0f}% of the "
+            "gross cost. The rest stays on purpose: fiscal-document markers stop an invoice from backing a second obligation, and executed "
+            "adhesions are the provenance that obligations cite. Going further needs a design change (smaller markers, or compression), not a parameter.")
+    findings.append(
+        f"{4 if 'closing' in lc else 3}. **The cheapest lever is when to record, not how.** The scenarios record every obligation on-chain but "
+        "earn revenue only on the financed share. Recording an obligation when its supplier asks for financing (and keeping the free "
+        "compliance layer for adhesions) spreads the same cost over revenue-bearing obligations only.")
+    findings.append(
+        f"{5 if 'closing' in lc else 4}. **Revenue is a hypothesis.** The compliance layer is free for government; whether financiers pay the "
+        "assumed fee and take rate is the open question in docs/THESIS.md (H5, H8).")
+    return "\n".join(lines + findings)
 
 
 RENDERERS = {"rules": ("RULEBOOK.md", render_rules), "evidence": ("EVIDENCE.md", render_evidence),

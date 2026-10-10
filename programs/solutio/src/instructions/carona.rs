@@ -18,16 +18,11 @@ use crate::{
     constants::*,
     error::ErrorCode,
     events::*,
-    rules::{adhesion_cap, check_reservation, execution_deadline, ReserveCheck},
+    rules::{check_reservation, execution_deadline, ReserveCheck},
     state::*,
 };
 
-fn release(
-    item: &mut AtaItem,
-    usage: &mut AgencyItemUsage,
-    exception: AdhesionException,
-    qty: u64,
-) -> Result<()> {
+fn release(item: &mut AtaItem, usage: &mut AgencyItemUsage, exception: AdhesionException, qty: u64) -> Result<()> {
     usage.committed = usage.committed.checked_sub(qty).ok_or(ErrorCode::Overflow)?;
     if exception == AdhesionException::None {
         item.committed_capped = item.committed_capped.checked_sub(qty).ok_or(ErrorCode::Overflow)?;
@@ -133,10 +128,16 @@ pub fn handle_add_item(
     unit_price: u64,
 ) -> Result<()> {
     require!(registered_qty > 0, ErrorCode::InvalidQuantity);
+    // Items are added only to an active record in force (audit L-3).
+    let ata = &ctx.accounts.ata;
+    require!(ata.status == AtaStatus::Active, ErrorCode::AtaNotActive);
+    require!(
+        Clock::get()?.unix_timestamp <= ata.valid_until,
+        ErrorCode::AtaNotInForce
+    );
     // The tender may allow fewer adhesions than the statute, never more.
     let statutory = registered_qty.checked_mul(2).ok_or(ErrorCode::Overflow)?;
     require!(max_adhesion_qty <= statutory, ErrorCode::InvalidMaxAdhesion);
-    debug_assert_eq!(adhesion_cap(registered_qty, max_adhesion_qty), Some(max_adhesion_qty));
     let item = &mut ctx.accounts.item;
     item.ata = ctx.accounts.ata.key();
     item.item_no = item_no;
@@ -271,8 +272,14 @@ pub fn handle_request_adhesion(
     .map_err(ErrorCode::from)?;
 
     usage.committed = r.agency_committed;
-    item.committed_capped = item.committed_capped.checked_add(r.capped_delta).ok_or(ErrorCode::Overflow)?;
-    item.committed_exempt = item.committed_exempt.checked_add(r.exempt_delta).ok_or(ErrorCode::Overflow)?;
+    item.committed_capped = item
+        .committed_capped
+        .checked_add(r.capped_delta)
+        .ok_or(ErrorCode::Overflow)?;
+    item.committed_exempt = item
+        .committed_exempt
+        .checked_add(r.exempt_delta)
+        .ok_or(ErrorCode::Overflow)?;
 
     let request = &mut ctx.accounts.request;
     request.ata = ata.key();
@@ -291,6 +298,9 @@ pub fn handle_request_adhesion(
     request.supplier_decided_at = 0;
     request.authorized_at = 0;
     request.execute_by = 0;
+    request.unit_price = item.unit_price;
+    request.obligated_amount = 0;
+    request.rent_payer = ctx.accounts.payer.key();
     request.bump = ctx.bumps.request;
     emit!(AdhesionRequested {
         request: request.key(),
@@ -327,15 +337,26 @@ pub struct SupplierRespond<'info> {
 /// uploaded document.
 pub fn handle_supplier_respond(ctx: Context<SupplierRespond>, accept: bool) -> Result<()> {
     let request = &mut ctx.accounts.request;
-    require!(request.status == RequestStatus::Requested, ErrorCode::InvalidRequestStatus);
+    require!(
+        request.status == RequestStatus::Requested,
+        ErrorCode::InvalidRequestStatus
+    );
     request.supplier_decided_at = Clock::get()?.unix_timestamp;
     if accept {
         request.status = RequestStatus::SupplierAccepted;
     } else {
-        release(&mut ctx.accounts.item, &mut ctx.accounts.usage, request.exception, request.requested_qty)?;
+        release(
+            &mut ctx.accounts.item,
+            &mut ctx.accounts.usage,
+            request.exception,
+            request.requested_qty,
+        )?;
         request.status = RequestStatus::Rejected;
     }
-    emit!(SupplierResponded { request: request.key(), accepted: accept });
+    emit!(SupplierResponded {
+        request: request.key(),
+        accepted: accept
+    });
     Ok(())
 }
 
@@ -375,20 +396,37 @@ pub fn handle_authorize_adhesion(
     let now = Clock::get()?.unix_timestamp;
     let ata = &ctx.accounts.ata;
     require!(ata.status == AtaStatus::Active, ErrorCode::AtaNotActive);
-    require!(now >= ata.valid_from && now <= ata.valid_until, ErrorCode::AtaNotInForce);
+    require!(
+        now >= ata.valid_from && now <= ata.valid_until,
+        ErrorCode::AtaNotInForce
+    );
     let request = &mut ctx.accounts.request;
-    require!(request.status == RequestStatus::SupplierAccepted, ErrorCode::InvalidRequestStatus);
+    require!(
+        request.status == RequestStatus::SupplierAccepted,
+        ErrorCode::InvalidRequestStatus
+    );
     require!(
         authorized_qty > 0 && authorized_qty <= request.requested_qty,
         ErrorCode::InvalidQuantity
     );
     if authorized_qty < request.requested_qty {
         require!(evidence_hash != [0u8; 32], ErrorCode::MissingEvidence);
-        let remainder = request.requested_qty - authorized_qty;
-        release(&mut ctx.accounts.item, &mut ctx.accounts.usage, request.exception, remainder)?;
+        let remainder = request
+            .requested_qty
+            .checked_sub(authorized_qty)
+            .ok_or(ErrorCode::Overflow)?;
+        release(
+            &mut ctx.accounts.item,
+            &mut ctx.accounts.usage,
+            request.exception,
+            remainder,
+        )?;
     }
     let item = &mut ctx.accounts.item;
-    item.authorized_total = item.authorized_total.checked_add(authorized_qty).ok_or(ErrorCode::Overflow)?;
+    item.authorized_total = item
+        .authorized_total
+        .checked_add(authorized_qty)
+        .ok_or(ErrorCode::Overflow)?;
     request.authorized_qty = authorized_qty;
     request.status = RequestStatus::Authorized;
     request.decision_evidence_hash = evidence_hash;
@@ -406,10 +444,18 @@ pub fn handle_deny_adhesion(ctx: Context<ManagerDecision>, evidence_hash: [u8; 3
     require!(evidence_hash != [0u8; 32], ErrorCode::MissingEvidence);
     let request = &mut ctx.accounts.request;
     require!(
-        matches!(request.status, RequestStatus::Requested | RequestStatus::SupplierAccepted),
+        matches!(
+            request.status,
+            RequestStatus::Requested | RequestStatus::SupplierAccepted
+        ),
         ErrorCode::InvalidRequestStatus
     );
-    release(&mut ctx.accounts.item, &mut ctx.accounts.usage, request.exception, request.requested_qty)?;
+    release(
+        &mut ctx.accounts.item,
+        &mut ctx.accounts.usage,
+        request.exception,
+        request.requested_qty,
+    )?;
     request.status = RequestStatus::Rejected;
     request.decision_evidence_hash = evidence_hash;
     emit!(AdhesionDenied { request: request.key() });
@@ -420,14 +466,22 @@ pub fn handle_deny_adhesion(ctx: Context<ManagerDecision>, evidence_hash: [u8; 3
 /// never beyond the record's validity.
 pub fn handle_extend_execution(ctx: Context<ManagerDecision>, new_execute_by: i64) -> Result<()> {
     let ata = &ctx.accounts.ata;
+    // No extension while the record is suspended or cancelled (audit L-3).
+    require!(ata.status == AtaStatus::Active, ErrorCode::AtaNotActive);
     let request = &mut ctx.accounts.request;
-    require!(request.status == RequestStatus::Authorized, ErrorCode::InvalidRequestStatus);
+    require!(
+        request.status == RequestStatus::Authorized,
+        ErrorCode::InvalidRequestStatus
+    );
     require!(
         new_execute_by > request.execute_by && new_execute_by <= ata.valid_until,
         ErrorCode::InvalidDeadline
     );
     request.execute_by = new_execute_by;
-    emit!(ExecutionExtended { request: request.key(), execute_by: new_execute_by });
+    emit!(ExecutionExtended {
+        request: request.key(),
+        execute_by: new_execute_by
+    });
     Ok(())
 }
 
@@ -439,20 +493,33 @@ pub struct FormalizeAdhesion<'info> {
     #[account(
         seeds = [AGENCY_SEED, adherent_authority.key().as_ref()],
         bump = adherent_agency.bump,
-        constraint = adherent_agency.key() == request.adherent_agency @ ErrorCode::Unauthorized
+        constraint = adherent_agency.key() == request.adherent_agency @ ErrorCode::Unauthorized,
+        constraint = adherent_agency.active @ ErrorCode::AgencyInactive
     )]
     pub adherent_agency: Account<'info, Agency>,
+    #[account(constraint = ata.key() == request.ata @ ErrorCode::AccountMismatch)]
+    pub ata: Account<'info, Ata>,
     #[account(mut)]
     pub request: Account<'info, AdhesionRequest>,
 }
 
 /// Records that the purchase was executed (contract or commitment note,
 /// Decree art. 34) within the deadline.
+///
+/// Decree 11.462/2023, art. 28, §1 (and Alagoas Decree 95.019/2023, art. 28,
+/// §1): while a record is suspended no new contract may derive from it.
+/// Executing an authorized adhesion is a new contract, so it is refused while
+/// the record is suspended or cancelled (audit M-3). The 90-day clock keeps
+/// running; the manager may extend it once the record is active again.
 pub fn handle_formalize_adhesion(ctx: Context<FormalizeAdhesion>, evidence_hash: [u8; 32]) -> Result<()> {
     require!(evidence_hash != [0u8; 32], ErrorCode::MissingEvidence);
+    require!(ctx.accounts.ata.status == AtaStatus::Active, ErrorCode::AtaNotActive);
     let now = Clock::get()?.unix_timestamp;
     let request = &mut ctx.accounts.request;
-    require!(request.status == RequestStatus::Authorized, ErrorCode::InvalidRequestStatus);
+    require!(
+        request.status == RequestStatus::Authorized,
+        ErrorCode::InvalidRequestStatus
+    );
     require!(now <= request.execute_by, ErrorCode::ExecutionDeadlinePassed);
     request.status = RequestStatus::Executed;
     request.execution_evidence_hash = evidence_hash;
@@ -476,18 +543,73 @@ pub struct ExpireAdhesion<'info> {
     pub request: Account<'info, AdhesionRequest>,
 }
 
-/// Anyone may lapse an authorized adhesion that was not executed in time,
-/// releasing its quantity back to the item. No authority is trusted for this.
+/// Anyone may lapse an adhesion that holds quantity it can no longer use, and
+/// the quantity returns to the item. No authority is trusted for this:
+/// - an authorized adhesion not executed within its deadline (Decree art. 31, §2);
+/// - a request still awaiting the supplier or the manager after the response
+///   window (design choice, audit L-2), so an unanswered request cannot hold the
+///   balance forever.
 pub fn handle_expire_adhesion(ctx: Context<ExpireAdhesion>) -> Result<()> {
     let now = Clock::get()?.unix_timestamp;
     let request = &mut ctx.accounts.request;
-    require!(request.status == RequestStatus::Authorized, ErrorCode::InvalidRequestStatus);
-    require!(now > request.execute_by, ErrorCode::ExecutionDeadlineNotReached);
-    let qty = request.authorized_qty;
-    release(&mut ctx.accounts.item, &mut ctx.accounts.usage, request.exception, qty)?;
-    let item = &mut ctx.accounts.item;
-    item.authorized_total = item.authorized_total.checked_sub(qty).ok_or(ErrorCode::Overflow)?;
+    let qty = match request.status {
+        RequestStatus::Authorized => {
+            require!(now > request.execute_by, ErrorCode::ExecutionDeadlineNotReached);
+            let qty = request.authorized_qty;
+            release(&mut ctx.accounts.item, &mut ctx.accounts.usage, request.exception, qty)?;
+            let item = &mut ctx.accounts.item;
+            item.authorized_total = item.authorized_total.checked_sub(qty).ok_or(ErrorCode::Overflow)?;
+            qty
+        }
+        RequestStatus::Requested | RequestStatus::SupplierAccepted => {
+            let deadline = request
+                .requested_at
+                .checked_add(RESPONSE_WINDOW_SECS)
+                .ok_or(ErrorCode::Overflow)?;
+            require!(now > deadline, ErrorCode::ResponseWindowOpen);
+            let qty = request.requested_qty;
+            release(&mut ctx.accounts.item, &mut ctx.accounts.usage, request.exception, qty)?;
+            qty
+        }
+        _ => return err!(ErrorCode::InvalidRequestStatus),
+    };
     request.status = RequestStatus::Lapsed;
-    emit!(AdhesionLapsed { request: request.key(), released_qty: qty });
+    emit!(AdhesionLapsed {
+        request: request.key(),
+        released_qty: qty
+    });
+    Ok(())
+}
+
+// ---------------------------------------------------------------- close (permissionless)
+
+#[derive(Accounts)]
+pub struct CloseRequest<'info> {
+    #[account(
+        mut,
+        close = rent_payer,
+        constraint = request.rent_payer == rent_payer.key() @ ErrorCode::AccountMismatch
+    )]
+    pub request: Account<'info, AdhesionRequest>,
+    /// CHECK: receives the rent; must be the account that paid it (checked above).
+    #[account(mut)]
+    pub rent_payer: UncheckedAccount<'info>,
+}
+
+/// Anyone may close a request that ended without effect (rejected or lapsed);
+/// its rent returns to whoever paid it. Executed requests stay open because
+/// obligations cite them as their source. History remains in the events.
+pub fn handle_close_request(ctx: Context<CloseRequest>) -> Result<()> {
+    let request = &ctx.accounts.request;
+    require!(
+        matches!(request.status, RequestStatus::Rejected | RequestStatus::Lapsed),
+        ErrorCode::NotClosable
+    );
+    emit!(AccountClosed {
+        account: request.key(),
+        kind: 0,
+        refunded_to: ctx.accounts.rent_payer.key(),
+        lamports: request.to_account_info().lamports(),
+    });
     Ok(())
 }

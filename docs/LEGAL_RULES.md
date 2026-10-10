@@ -25,6 +25,8 @@ Sources consulted: Law 14.133/2021; Decree 11.462/2023; Alagoas Decrees 95.019/2
 | C15 | Registered quantities cannot be increased | Decree art. 23 | no instruction modifies `registered_qty` | by construction |
 | C16 | The managing agency does not adhere to its own record | Law art. 6, XLIX; federal tool rule | `rules::check_reservation` | `the_manager_cannot_adhere_to_its_own_record` |
 | C18 | Alagoas state agencies may not adhere to records managed by municipal agencies, except those of state capitals | Alagoas Decree 95.019/2023, art. 33 | `rules::profile_allows`, `Agency.profile`, `Agency.is_state_capital` | `alagoas_art33_state_cannot_adhere_to_municipal_records_except_capitals`; `alagoas_profile_blocks_state_adhesion_to_non_capital_municipal_records` |
+| C19 | No execution (contract or commitment note) while the record is suspended or cancelled; the deadline keeps running | Decree 11.462/2023 art. 28 §1; Decree AL 95.019/2023 art. 28 §1 (reading: executing an authorized adhesion is a new contract) | `formalize_adhesion` | `m3_no_execution_while_the_record_is_suspended` |
+| C20 | A request left unanswered by the supplier or the manager for 90 days can be lapsed by anyone and its quantity returns | Design choice (no legal deadline exists); prevents an unanswered request from holding the balance | `expire_adhesion`, `RESPONSE_WINDOW_SECS` | `l2_unanswered_requests_lapse_after_the_response_window` |
 | C17 | An obligation derived from an adhesion requires the adhesion to have been executed | Decree art. 34 (contract or commitment note) | `register_obligation` | `an_obligation_can_only_derive_from_an_executed_adhesion` |
 
 ## Profile: Alagoas (Decree 95.019/2023)
@@ -56,6 +58,7 @@ Alagoas regulates arts. 82–86 for its direct, autarchic and foundational admin
 | O7 | Withholdings and disallowances are recorded, never refused; they cap eligibility and may impair financed claims | Debtor's administrative acts | `rules::apply_reduction`, status `Impaired` | `reductions_cap_eligibility_and_flag_impairment`; `a_disallowance_after_financing_marks_the_obligation_impaired` |
 | O8 | Payments cannot exceed the outstanding amount; full payment settles the obligation | Law 4.320/1964, payment stage | `rules::apply_payment` | `payments_close_financing_and_settle`; `full_lifecycle_finances_once_then_settles` |
 | O9 | An obligation linked to an adhesion requires that adhesion to be executed and to match debtor and creditor | Cross-module consistency; Decree art. 34 | `register_obligation` | `an_obligation_can_only_derive_from_an_executed_adhesion` |
+| O11 | Obligations citing one adhesion together never exceed its authorized value (quantity × registered unit price) | Cross-module consistency (audit M-2) | `register_obligation` | `m2_obligations_cannot_exceed_the_value_of_their_source_adhesion` |
 | O10 | Only the debtor records payments and reductions | Debtor's administrative acts | `DebtorUpdate` constraints | `only_the_debtor_can_record_payments_and_reductions` |
 
 ## Open interpretation questions (part of research question QP1)

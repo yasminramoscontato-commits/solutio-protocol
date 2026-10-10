@@ -32,7 +32,9 @@ pub struct RegisterObligation<'info> {
         bump
     )]
     pub obligation: Account<'info, Obligation>,
-    /// Optional: the executed adhesion this obligation derives from.
+    /// Optional: the executed adhesion this obligation derives from. Writable,
+    /// because it tracks how much has been obligated against it (audit M-2).
+    #[account(mut)]
     pub source_request: Option<Account<'info, AdhesionRequest>>,
     pub system_program: Program<'info, System>,
 }
@@ -48,13 +50,28 @@ pub fn handle_register_obligation(
     require!(evidence_hash != [0u8; 32], ErrorCode::MissingEvidence);
     let debtor_key = ctx.accounts.debtor_agency.key();
 
-    let source = match &ctx.accounts.source_request {
+    let source = match &mut ctx.accounts.source_request {
         Some(req) => {
-            require!(req.status == RequestStatus::Executed, ErrorCode::SourceAdhesionNotEffective);
+            require!(
+                req.status == RequestStatus::Executed,
+                ErrorCode::SourceAdhesionNotEffective
+            );
             require!(
                 req.adherent_agency == debtor_key && req.supplier == creditor,
                 ErrorCode::SourceAdhesionMismatch
             );
+            // All obligations citing one adhesion together stay within its
+            // authorized value (quantity x registered unit price).
+            let value = req
+                .authorized_qty
+                .checked_mul(req.unit_price)
+                .ok_or(ErrorCode::Overflow)?;
+            let obligated = req
+                .obligated_amount
+                .checked_add(verified_amount)
+                .ok_or(ErrorCode::Overflow)?;
+            require!(obligated <= value, ErrorCode::ExceedsAdhesionValue);
+            req.obligated_amount = obligated;
             req.key()
         }
         None => Pubkey::default(),
@@ -76,6 +93,8 @@ pub fn handle_register_obligation(
     o.evidence_hash = evidence_hash;
     o.eligibility_evidence_hash = [0u8; 32];
     o.source_request = source;
+    o.open_financings = 0;
+    o.rent_payer = ctx.accounts.payer.key();
     o.bump = ctx.bumps.obligation;
     emit!(ObligationRegistered {
         obligation: o.key(),
@@ -96,7 +115,8 @@ pub struct AttachFiscalDocument<'info> {
     pub debtor_authority: Signer<'info>,
     #[account(
         seeds = [AGENCY_SEED, debtor_authority.key().as_ref()],
-        bump = debtor_agency.bump
+        bump = debtor_agency.bump,
+        constraint = debtor_agency.active @ ErrorCode::AgencyInactive
     )]
     pub debtor_agency: Account<'info, Agency>,
     #[account(
@@ -122,7 +142,10 @@ pub fn handle_attach_fiscal_document(
     amount: u64,
 ) -> Result<()> {
     let o = &mut ctx.accounts.obligation;
-    require!(o.status != ObligationStatus::Settled, ErrorCode::ObligationNotFinanceable);
+    require!(
+        o.status != ObligationStatus::Settled,
+        ErrorCode::ObligationNotFinanceable
+    );
     let next = rules::attach_document(o.balances(), amount).map_err(ErrorCode::from)?;
     o.store(next);
     o.document_count = o.document_count.checked_add(1).ok_or(ErrorCode::Overflow)?;
@@ -155,11 +178,7 @@ pub struct MarkEligible<'info> {
     pub obligation: Account<'info, Obligation>,
 }
 
-pub fn handle_mark_eligible(
-    ctx: Context<MarkEligible>,
-    eligible_amount: u64,
-    evidence_hash: [u8; 32],
-) -> Result<()> {
+pub fn handle_mark_eligible(ctx: Context<MarkEligible>, eligible_amount: u64, evidence_hash: [u8; 32]) -> Result<()> {
     require!(evidence_hash != [0u8; 32], ErrorCode::MissingEvidence);
     let o = &mut ctx.accounts.obligation;
     require!(
@@ -230,6 +249,7 @@ pub fn handle_finance(
     let next = rules::finance(o.balances(), amount).map_err(ErrorCode::from)?;
     o.store(next);
     o.financing_count = o.financing_count.checked_add(1).ok_or(ErrorCode::Overflow)?;
+    o.open_financings = o.open_financings.checked_add(1).ok_or(ErrorCode::Overflow)?;
     o.status = ObligationStatus::Financed;
 
     let f = &mut ctx.accounts.financing;
@@ -239,6 +259,7 @@ pub fn handle_finance(
     f.amount = amount;
     f.notice_evidence_hash = notice_evidence_hash;
     f.created_at = Clock::get()?.unix_timestamp;
+    f.rent_payer = ctx.accounts.payer.key();
     f.bump = ctx.bumps.financing;
     emit!(ObligationFinanced {
         obligation: o.key(),
@@ -257,7 +278,8 @@ pub struct DebtorUpdate<'info> {
     pub debtor_authority: Signer<'info>,
     #[account(
         seeds = [AGENCY_SEED, debtor_authority.key().as_ref()],
-        bump = debtor_agency.bump
+        bump = debtor_agency.bump,
+        constraint = debtor_agency.active @ ErrorCode::AgencyInactive
     )]
     pub debtor_agency: Account<'info, Agency>,
     #[account(
@@ -269,11 +291,7 @@ pub struct DebtorUpdate<'info> {
 
 /// Withholdings and disallowances are acts of the debtor. The protocol records
 /// them even when they hurt a financier, and marks the obligation impaired.
-pub fn handle_record_reduction(
-    ctx: Context<DebtorUpdate>,
-    amount: u64,
-    evidence_hash: [u8; 32],
-) -> Result<()> {
+pub fn handle_record_reduction(ctx: Context<DebtorUpdate>, amount: u64, evidence_hash: [u8; 32]) -> Result<()> {
     require!(evidence_hash != [0u8; 32], ErrorCode::MissingEvidence);
     let o = &mut ctx.accounts.obligation;
     require!(o.status != ObligationStatus::Settled, ErrorCode::ExceedsOutstanding);
@@ -293,11 +311,7 @@ pub fn handle_record_reduction(
     Ok(())
 }
 
-pub fn handle_record_payment(
-    ctx: Context<DebtorUpdate>,
-    amount: u64,
-    evidence_hash: [u8; 32],
-) -> Result<()> {
+pub fn handle_record_payment(ctx: Context<DebtorUpdate>, amount: u64, evidence_hash: [u8; 32]) -> Result<()> {
     require!(evidence_hash != [0u8; 32], ErrorCode::MissingEvidence);
     let o = &mut ctx.accounts.obligation;
     require!(o.status != ObligationStatus::Settled, ErrorCode::ExceedsOutstanding);
@@ -311,6 +325,67 @@ pub fn handle_record_payment(
         obligation: o.key(),
         amount,
         settled,
+    });
+    Ok(())
+}
+
+// ---------------------------------------------------------------- close (permissionless)
+
+#[derive(Accounts)]
+pub struct CloseFinancing<'info> {
+    #[account(mut, constraint = obligation.key() == financing.obligation @ ErrorCode::AccountMismatch)]
+    pub obligation: Account<'info, Obligation>,
+    #[account(
+        mut,
+        close = rent_payer,
+        constraint = financing.rent_payer == rent_payer.key() @ ErrorCode::AccountMismatch
+    )]
+    pub financing: Account<'info, Financing>,
+    /// CHECK: receives the rent; must be the account that paid it (checked above).
+    #[account(mut)]
+    pub rent_payer: UncheckedAccount<'info>,
+}
+
+/// Once an obligation is settled, its financing records can be closed by
+/// anyone and their rent returned. History remains in the events.
+pub fn handle_close_financing(ctx: Context<CloseFinancing>) -> Result<()> {
+    let o = &mut ctx.accounts.obligation;
+    require!(o.status == ObligationStatus::Settled, ErrorCode::NotClosable);
+    o.open_financings = o.open_financings.checked_sub(1).ok_or(ErrorCode::Overflow)?;
+    emit!(AccountClosed {
+        account: ctx.accounts.financing.key(),
+        kind: 1,
+        refunded_to: ctx.accounts.rent_payer.key(),
+        lamports: ctx.accounts.financing.to_account_info().lamports(),
+    });
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct CloseObligation<'info> {
+    #[account(
+        mut,
+        close = rent_payer,
+        constraint = obligation.rent_payer == rent_payer.key() @ ErrorCode::AccountMismatch
+    )]
+    pub obligation: Account<'info, Obligation>,
+    /// CHECK: receives the rent; must be the account that paid it (checked above).
+    #[account(mut)]
+    pub rent_payer: UncheckedAccount<'info>,
+}
+
+/// A settled obligation with no open financing can be closed by anyone. Its
+/// fiscal documents stay open on purpose: they are what stops the same invoice
+/// from backing a new obligation later.
+pub fn handle_close_obligation(ctx: Context<CloseObligation>) -> Result<()> {
+    let o = &ctx.accounts.obligation;
+    require!(o.status == ObligationStatus::Settled, ErrorCode::NotClosable);
+    require!(o.open_financings == 0, ErrorCode::OpenFinancings);
+    emit!(AccountClosed {
+        account: o.key(),
+        kind: 2,
+        refunded_to: ctx.accounts.rent_payer.key(),
+        lamports: o.to_account_info().lamports(),
     });
     Ok(())
 }

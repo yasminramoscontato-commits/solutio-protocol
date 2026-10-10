@@ -190,6 +190,13 @@ pub struct AdhesionRequest {
     pub supplier_decided_at: i64,
     pub authorized_at: i64,
     pub execute_by: i64,
+    /// Unit price copied from the item when the request is made.
+    pub unit_price: u64,
+    /// Total verified amount of obligations that cite this adhesion as their source.
+    /// Never exceeds `authorized_qty * unit_price`.
+    pub obligated_amount: u64,
+    /// Account that paid the rent; receives it back when the request is closed.
+    pub rent_payer: Pubkey,
     pub bump: u8,
 }
 
@@ -231,6 +238,10 @@ pub struct Obligation {
     pub eligibility_evidence_hash: [u8; 32],
     /// Adhesion this obligation derives from, or the default key if none.
     pub source_request: Pubkey,
+    /// Financing accounts not yet closed; the obligation closes only at zero.
+    pub open_financings: u32,
+    /// Account that paid the rent; receives it back when the obligation is closed.
+    pub rent_payer: Pubkey,
     pub bump: u8,
 }
 
@@ -278,5 +289,7 @@ pub struct Financing {
     /// Hash of the evidence that the debtor was notified of the assignment.
     pub notice_evidence_hash: [u8; 32],
     pub created_at: i64,
+    /// Account that paid the rent; receives it back when the financing is closed.
+    pub rent_payer: Pubkey,
     pub bump: u8,
 }

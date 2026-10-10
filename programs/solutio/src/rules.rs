@@ -85,9 +85,9 @@ pub fn profile_allows(
 ) -> bool {
     match adherent_profile {
         RuleProfile::Baseline => true,
-        RuleProfile::Alagoas => !(adherent_sphere == Sphere::State
-            && manager_sphere == Sphere::Municipal
-            && !manager_is_state_capital),
+        RuleProfile::Alagoas => {
+            !(adherent_sphere == Sphere::State && manager_sphere == Sphere::Municipal && !manager_is_state_capital)
+        }
     }
 }
 
@@ -144,13 +144,23 @@ pub fn check_reservation(c: &ReserveCheck) -> Result<Reservation, RuleViolation>
     if c.adherent_sphere == Sphere::Federal && c.manager_sphere != Sphere::Federal {
         return Err(RuleViolation::FederalAdhesionForbidden);
     }
-    if !profile_allows(c.adherent_profile, c.adherent_sphere, c.manager_sphere, c.manager_is_state_capital) {
+    if !profile_allows(
+        c.adherent_profile,
+        c.adherent_sphere,
+        c.manager_sphere,
+        c.manager_is_state_capital,
+    ) {
         return Err(RuleViolation::MunicipalAdhesionForbidden);
     }
     if c.max_adhesion_qty == 0 {
         return Err(RuleViolation::AdhesionsNotAllowed);
     }
-    if !exception_applies(c.exception, c.adherent_sphere, c.manager_sphere, c.manager_is_health_ministry) {
+    if !exception_applies(
+        c.exception,
+        c.adherent_sphere,
+        c.manager_sphere,
+        c.manager_is_health_ministry,
+    ) {
         return Err(RuleViolation::ExceptionNotApplicable);
     }
     // §4 applies to every adhesion, exceptions included.
@@ -228,9 +238,7 @@ pub struct Balances {
 impl Balances {
     /// Amount the debtor still owes: verified - reductions - paid.
     pub fn outstanding(&self) -> Option<u64> {
-        self.verified
-            .checked_sub(self.reductions)?
-            .checked_sub(self.paid)
+        self.verified.checked_sub(self.reductions)?.checked_sub(self.paid)
     }
 
     /// Remaining amount that may still be financed.
@@ -270,10 +278,7 @@ pub fn attach_document(b: Balances, amount: u64) -> Result<Balances, LedgerViola
     if amount == 0 {
         return Err(LedgerViolation::InvalidAmount);
     }
-    let documented = b
-        .documented
-        .checked_add(amount)
-        .ok_or(LedgerViolation::Overflow)?;
+    let documented = b.documented.checked_add(amount).ok_or(LedgerViolation::Overflow)?;
     if documented > b.verified {
         return Err(LedgerViolation::ExceedsVerified);
     }
@@ -307,10 +312,7 @@ pub fn finance(b: Balances, amount: u64) -> Result<Balances, LedgerViolation> {
     if amount > b.financeable() {
         return Err(LedgerViolation::ExceedsFinanceable);
     }
-    let financed = b
-        .financed
-        .checked_add(amount)
-        .ok_or(LedgerViolation::Overflow)?;
+    let financed = b.financed.checked_add(amount).ok_or(LedgerViolation::Overflow)?;
     Ok(Balances { financed, ..b })
 }
 
@@ -321,13 +323,8 @@ pub fn apply_reduction(b: Balances, amount: u64) -> Result<Balances, LedgerViola
     if amount == 0 {
         return Err(LedgerViolation::InvalidAmount);
     }
-    let reductions = b
-        .reductions
-        .checked_add(amount)
-        .ok_or(LedgerViolation::Overflow)?;
-    let consumed = reductions
-        .checked_add(b.paid)
-        .ok_or(LedgerViolation::Overflow)?;
+    let reductions = b.reductions.checked_add(amount).ok_or(LedgerViolation::Overflow)?;
+    let consumed = reductions.checked_add(b.paid).ok_or(LedgerViolation::Overflow)?;
     if consumed > b.verified {
         return Err(LedgerViolation::ExceedsOutstanding);
     }
@@ -381,7 +378,11 @@ mod tests {
     }
 
     fn reserved(qty: u64, agency: u64) -> Result<Reservation, RuleViolation> {
-        Ok(Reservation { agency_committed: agency, capped_delta: qty, exempt_delta: 0 })
+        Ok(Reservation {
+            agency_committed: agency,
+            capped_delta: qty,
+            exempt_delta: 0,
+        })
     }
 
     #[test]
@@ -389,14 +390,27 @@ mod tests {
         assert_eq!(individual_cap(100), 50);
         assert_eq!(individual_cap(75), 37);
         assert_eq!(individual_cap(1), 0);
-        assert_eq!(check_reservation(&ReserveCheck { requested_qty: 50, ..base() }), reserved(50, 50));
         assert_eq!(
-            check_reservation(&ReserveCheck { requested_qty: 51, ..base() }),
+            check_reservation(&ReserveCheck {
+                requested_qty: 50,
+                ..base()
+            }),
+            reserved(50, 50)
+        );
+        assert_eq!(
+            check_reservation(&ReserveCheck {
+                requested_qty: 51,
+                ..base()
+            }),
             Err(RuleViolation::ExceedsIndividualCap)
         );
         // Pending and authorized quantities of the same agency count together.
         assert_eq!(
-            check_reservation(&ReserveCheck { agency_committed: 45, requested_qty: 6, ..base() }),
+            check_reservation(&ReserveCheck {
+                agency_committed: 45,
+                requested_qty: 6,
+                ..base()
+            }),
             Err(RuleViolation::ExceedsIndividualCap)
         );
     }
@@ -404,15 +418,35 @@ mod tests {
     #[test]
     fn art86_par5_cap_is_twice_registered_or_the_tender_maximum() {
         assert_eq!(adhesion_cap(100, 200), Some(200));
-        assert_eq!(adhesion_cap(100, 500), Some(200), "the tender cannot raise the statutory cap");
+        assert_eq!(
+            adhesion_cap(100, 500),
+            Some(200),
+            "the tender cannot raise the statutory cap"
+        );
         assert_eq!(adhesion_cap(100, 80), Some(80));
-        let at_cap = ReserveCheck { committed_capped: 150, requested_qty: 50, ..base() };
+        let at_cap = ReserveCheck {
+            committed_capped: 150,
+            requested_qty: 50,
+            ..base()
+        };
         assert_eq!(check_reservation(&at_cap), reserved(50, 50));
-        let over = ReserveCheck { committed_capped: 151, requested_qty: 50, ..base() };
+        let over = ReserveCheck {
+            committed_capped: 151,
+            requested_qty: 50,
+            ..base()
+        };
         assert_eq!(check_reservation(&over), Err(RuleViolation::ExceedsGlobalCap));
-        let tender_limit = ReserveCheck { max_adhesion_qty: 80, committed_capped: 40, requested_qty: 41, ..base() };
+        let tender_limit = ReserveCheck {
+            max_adhesion_qty: 80,
+            committed_capped: 40,
+            requested_qty: 41,
+            ..base()
+        };
         assert_eq!(check_reservation(&tender_limit), Err(RuleViolation::ExceedsGlobalCap));
-        let closed = ReserveCheck { max_adhesion_qty: 0, ..base() };
+        let closed = ReserveCheck {
+            max_adhesion_qty: 0,
+            ..base()
+        };
         assert_eq!(check_reservation(&closed), Err(RuleViolation::AdhesionsNotAllowed));
     }
 
@@ -426,14 +460,24 @@ mod tests {
             ..base()
         };
         assert_eq!(check_reservation(&health), Err(RuleViolation::ExceptionNotApplicable));
-        let health_ms = ReserveCheck { manager_is_health_ministry: true, ..health };
+        let health_ms = ReserveCheck {
+            manager_is_health_ministry: true,
+            ..health
+        };
         assert_eq!(
             check_reservation(&health_ms),
-            Ok(Reservation { agency_committed: 50, capped_delta: 0, exempt_delta: 50 })
+            Ok(Reservation {
+                agency_committed: 50,
+                capped_delta: 0,
+                exempt_delta: 50
+            })
         );
         // §4 still applies under an exception.
         assert_eq!(
-            check_reservation(&ReserveCheck { requested_qty: 51, ..health_ms }),
+            check_reservation(&ReserveCheck {
+                requested_qty: 51,
+                ..health_ms
+            }),
             Err(RuleViolation::ExceedsIndividualCap)
         );
         // Federal-programme transfers (art. 86 §6): only under a record managed
@@ -446,25 +490,45 @@ mod tests {
         };
         assert!(check_reservation(&transfer).is_ok());
         // A state programme (e.g. Alagoas Decree 95.019 art. 32 §2) does not lift §5.
-        let state_programme = ReserveCheck { manager_sphere: Sphere::State, ..transfer };
-        assert_eq!(check_reservation(&state_programme), Err(RuleViolation::ExceptionNotApplicable));
+        let state_programme = ReserveCheck {
+            manager_sphere: Sphere::State,
+            ..transfer
+        };
+        assert_eq!(
+            check_reservation(&state_programme),
+            Err(RuleViolation::ExceptionNotApplicable)
+        );
         let federal_transfer = ReserveCheck {
             adherent_sphere: Sphere::Federal,
             manager_sphere: Sphere::Federal,
             ..transfer
         };
-        assert_eq!(check_reservation(&federal_transfer), Err(RuleViolation::ExceptionNotApplicable));
+        assert_eq!(
+            check_reservation(&federal_transfer),
+            Err(RuleViolation::ExceptionNotApplicable)
+        );
     }
 
     #[test]
     fn art86_par8_federal_cannot_adhere_to_non_federal() {
         for manager in [Sphere::State, Sphere::District, Sphere::Municipal] {
-            let c = ReserveCheck { manager_sphere: manager, adherent_sphere: Sphere::Federal, ..base() };
+            let c = ReserveCheck {
+                manager_sphere: manager,
+                adherent_sphere: Sphere::Federal,
+                ..base()
+            };
             assert_eq!(check_reservation(&c), Err(RuleViolation::FederalAdhesionForbidden));
         }
-        let fed_to_fed = ReserveCheck { manager_sphere: Sphere::Federal, adherent_sphere: Sphere::Federal, ..base() };
+        let fed_to_fed = ReserveCheck {
+            manager_sphere: Sphere::Federal,
+            adherent_sphere: Sphere::Federal,
+            ..base()
+        };
         assert!(check_reservation(&fed_to_fed).is_ok());
-        let muni_to_fed = ReserveCheck { manager_sphere: Sphere::Federal, ..base() };
+        let muni_to_fed = ReserveCheck {
+            manager_sphere: Sphere::Federal,
+            ..base()
+        };
         assert!(check_reservation(&muni_to_fed).is_ok());
     }
 
@@ -476,31 +540,70 @@ mod tests {
             manager_sphere: Sphere::Municipal,
             ..base()
         };
-        assert_eq!(check_reservation(&al_state), Err(RuleViolation::MunicipalAdhesionForbidden));
-        let capital = ReserveCheck { manager_is_state_capital: true, ..al_state };
+        assert_eq!(
+            check_reservation(&al_state),
+            Err(RuleViolation::MunicipalAdhesionForbidden)
+        );
+        let capital = ReserveCheck {
+            manager_is_state_capital: true,
+            ..al_state
+        };
         assert!(check_reservation(&capital).is_ok());
         // The restriction is Alagoas's own: the federal baseline has no such rule.
-        let baseline = ReserveCheck { adherent_profile: RuleProfile::Baseline, ..al_state };
+        let baseline = ReserveCheck {
+            adherent_profile: RuleProfile::Baseline,
+            ..al_state
+        };
         assert!(check_reservation(&baseline).is_ok());
         // It restricts state agencies only, and only toward municipal records.
-        let al_to_state = ReserveCheck { manager_sphere: Sphere::State, ..al_state };
+        let al_to_state = ReserveCheck {
+            manager_sphere: Sphere::State,
+            ..al_state
+        };
         assert!(check_reservation(&al_to_state).is_ok());
-        let muni_under_al = ReserveCheck { adherent_sphere: Sphere::Municipal, ..al_state };
+        let muni_under_al = ReserveCheck {
+            adherent_sphere: Sphere::Municipal,
+            ..al_state
+        };
         assert!(check_reservation(&muni_under_al).is_ok());
     }
 
     #[test]
     fn status_validity_and_basic_guards() {
-        assert_eq!(check_reservation(&ReserveCheck { ata_active: false, ..base() }), Err(RuleViolation::AtaNotActive));
-        assert_eq!(check_reservation(&ReserveCheck { now: 2_001, ..base() }), Err(RuleViolation::AtaNotInForce));
-        assert_eq!(check_reservation(&ReserveCheck { now: -1, ..base() }), Err(RuleViolation::AtaNotInForce));
-        assert_eq!(check_reservation(&ReserveCheck { requested_qty: 0, ..base() }), Err(RuleViolation::InvalidQuantity));
         assert_eq!(
-            check_reservation(&ReserveCheck { adherent_is_manager: true, ..base() }),
+            check_reservation(&ReserveCheck {
+                ata_active: false,
+                ..base()
+            }),
+            Err(RuleViolation::AtaNotActive)
+        );
+        assert_eq!(
+            check_reservation(&ReserveCheck { now: 2_001, ..base() }),
+            Err(RuleViolation::AtaNotInForce)
+        );
+        assert_eq!(
+            check_reservation(&ReserveCheck { now: -1, ..base() }),
+            Err(RuleViolation::AtaNotInForce)
+        );
+        assert_eq!(
+            check_reservation(&ReserveCheck {
+                requested_qty: 0,
+                ..base()
+            }),
+            Err(RuleViolation::InvalidQuantity)
+        );
+        assert_eq!(
+            check_reservation(&ReserveCheck {
+                adherent_is_manager: true,
+                ..base()
+            }),
             Err(RuleViolation::ManagerCannotAdhere)
         );
         assert_eq!(
-            check_reservation(&ReserveCheck { agency_committed: u64::MAX, ..base() }),
+            check_reservation(&ReserveCheck {
+                agency_committed: u64::MAX,
+                ..base()
+            }),
             Err(RuleViolation::Overflow)
         );
     }
@@ -515,7 +618,10 @@ mod tests {
     struct Lcg(u64);
     impl Lcg {
         fn next(&mut self) -> u64 {
-            self.0 = self.0.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            self.0 = self
+                .0
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             self.0 >> 33
         }
         fn below(&mut self, n: u64) -> u64 {
@@ -563,7 +669,10 @@ mod tests {
     }
 
     fn verified(amount: u64) -> Balances {
-        Balances { verified: amount, ..Default::default() }
+        Balances {
+            verified: amount,
+            ..Default::default()
+        }
     }
 
     #[test]

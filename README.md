@@ -16,6 +16,7 @@ Built for the Colosseum **Crypto World's Fair** hackathon (Solana track).
 | --- | --- |
 | Anchor program (`programs/solutio`) | Implemented, builds for SBF |
 | Legal rules as pure functions (`rules.rs`) | Implemented, 13 unit tests incl. 2 randomized suites (2,000 sequences each) |
+| Security audit (Solana AI Kit checklist) | [`docs/security-audit-2026-10-09.md`](docs/security-audit-2026-10-09.md): 0 critical; high and medium findings fixed, 13 regression tests |
 | Module 1 — Carona (art. 86 + Decree 11.462/2023 + Alagoas profile) | Implemented, 17 integration tests |
 | Module 2 — Obligations (single financing) | Implemented, 8 integration tests |
 | Integration test environment | LiteSVM (in-process Solana VM running the compiled program) |
@@ -25,7 +26,7 @@ Built for the Colosseum **Crypto World's Fair** hackathon (Solana track).
 | Public verifier page | **Not yet** |
 | Financing pool (test stablecoin) | **Not started** — experimental, optional |
 
-Last full test run: 38 passed, 0 failed (2026-10-09). Devnet uses test SOL and DEMO identities with fictional names. No real funds, no real government data, no pilot or partnership is claimed.
+Last full test run: 51 passed, 0 failed (2026-10-09). The devnet deployment still runs the pre-audit binary until it is upgraded. Devnet uses test SOL and DEMO identities with fictional names. No real funds, no real government data, no pilot or partnership is claimed.
 
 ---
 
@@ -144,7 +145,6 @@ cd client && npm install && node devnet-demo.mjs
 - Exceptions: the registry attests which agency is the Ministry of Health; the legal judgment that a purchase is an emergency or executes a federal programme stays human (evidence hash recorded).
 - Participating agencies (other than the manager) and quantity reallocation (*remanejamento*, Decree art. 30) are not modeled yet.
 - Decree 11.462/2023 is the federal regulation; Alagoas is the first state profile. Other state and municipal regulations become profiles once validated.
-- On devnet the registry was initialized by the demo issuer right after deployment; before any real use, `init_registry` must be restricted to the upgrade authority.
 - After the debtor's first payment, new financing is closed (simplifying policy for the MVP).
 - Open legal interpretation questions are listed in `docs/LEGAL_RULES.md`.
 

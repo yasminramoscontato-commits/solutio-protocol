@@ -49,13 +49,21 @@ class LifecycleCost:
         return (self.fee_lamports + (self.rent_lamports if include_rent else 0)) / LAMPORTS_PER_SOL
 
 
+MODES = {
+    "no_close": "Rent deposits kept forever",
+    "measured_close": "Settled obligations and their financings closed (implemented, refunds measured)",
+    "fees_only": "Theoretical floor: every deposit recovered (not achievable: fiscal documents and executed adhesions stay open)",
+}
+
+
 def lifecycle_costs(costs: dict) -> dict[str, LifecycleCost]:
     steps = costs["steps"]
     adhesion = ("Prefeitura A requests 50", "Supplier accepts", "Managing agency authorizes", "Prefeitura A executes")
     obligation = ("Prefeitura A records a verified", "Attach fiscal document", "Designated verifier", "Financier A advances",
                   "Prefeitura A records payment")
+    closing = ("Anyone closes financing #0", "Anyone closes the settled obligation")
     refused = [s for s in steps if s["outcome"] != "ok"]
-    return {
+    out = {
         "adhesion": LifecycleCost("Adhesion: request → supplier accepts → authorize → execute", len(adhesion),
                                   _sum(steps, adhesion, "fee_lamports"), _sum(steps, adhesion, "rent_lamports"),
                                   _sum(steps, adhesion, "compute_units")),
@@ -66,19 +74,38 @@ def lifecycle_costs(costs: dict) -> dict[str, LifecycleCost]:
                                  round(sum(s["fee_lamports"] for s in refused) / len(refused)), 0,
                                  round(sum(s["compute_units"] for s in refused) / len(refused))),
     }
+    if any(s["label"].startswith(closing[1]) for s in steps):
+        out["closing"] = LifecycleCost("Closing after settlement: one financing + the obligation (rent refunded)", len(closing),
+                                       _sum(steps, closing, "fee_lamports"), _sum(steps, closing, "rent_lamports"),
+                                       _sum(steps, closing, "compute_units"))
+    return out
+
+
+def per_obligation_lamports(lc: dict[str, LifecycleCost], mode: str) -> int:
+    """Net on-chain cost of one adhesion plus one financed obligation, in lamports."""
+    fees = lc["adhesion"].fee_lamports + lc["obligation"].fee_lamports
+    rent = lc["adhesion"].rent_lamports + lc["obligation"].rent_lamports
+    if mode == "no_close":
+        return fees + rent
+    if mode == "fees_only":
+        return fees
+    if mode == "measured_close":
+        if "closing" not in lc:
+            raise ValueError("the recorded run has no closing steps; rerun client/devnet-demo.mjs")
+        return fees + rent + lc["closing"].fee_lamports + lc["closing"].rent_lamports
+    raise ValueError(mode)
 
 
 def scenarios(assumptions: dict | None = None, costs: dict | None = None, usd_per_sol: float | None = None,
-              close_accounts: bool | None = None) -> list[dict]:
+              mode: str = "no_close") -> list[dict]:
     a = assumptions or load_assumptions()
     lc = lifecycle_costs(costs or load_costs())
     brl_usd = a["fx"]["brl_per_usd"]["value"]
     sol_usd = usd_per_sol if usd_per_sol is not None else a["fx"]["usd_per_sol"]["value"]
     sol_brl = sol_usd * brl_usd
     p, o = a["pricing"], a["operations"]
-    closing = o["close_accounts_after_settlement"]["value"] if close_accounts is None else close_accounts
-    rent_counts = not closing
-    per_obligation_sol = lc["adhesion"].sol(rent_counts) * o["average_adhesion_obligations"]["value"] + lc["obligation"].sol(rent_counts)
+    per_obligation_sol = per_obligation_lamports(lc, mode) / LAMPORTS_PER_SOL
+    txs = lc["adhesion"].transactions + lc["obligation"].transactions + (lc["closing"].transactions if mode == "measured_close" else 0)
     out = []
     for sc in a["scenarios"]:
         if sc["market"] == "BR":
@@ -97,7 +124,7 @@ def scenarios(assumptions: dict | None = None, costs: dict | None = None, usd_pe
             "scenario": sc["name"],
             "volume_brl": volume,
             "obligations_per_year": obligations,
-            "tx_per_second_avg": obligations * (lc["adhesion"].transactions + lc["obligation"].transactions) / (365 * 86_400),
+            "tx_per_second_avg": obligations * txs / (365 * 86_400),
             "financed_volume_brl": financed_volume,
             "revenue_brl": revenue,
             "revenue_take_brl": revenue_take,
@@ -105,15 +132,13 @@ def scenarios(assumptions: dict | None = None, costs: dict | None = None, usd_pe
             "chain_cost_brl": chain_cost,
             "chain_cost_share_of_revenue": chain_cost / revenue if revenue else float("inf"),
             "usd_per_sol": sol_usd,
-            "rent_counted_as_cost": rent_counts,
+            "mode": mode,
         })
     return out
 
 
-def cost_per_obligation_brl(usd_per_sol: float, assumptions: dict | None = None, costs: dict | None = None,
-                            include_rent: bool = True) -> float:
+def cost_per_obligation_brl(usd_per_sol: float, mode: str = "no_close", assumptions: dict | None = None,
+                            costs: dict | None = None) -> float:
     a = assumptions or load_assumptions()
     lc = lifecycle_costs(costs or load_costs())
-    rent_counts = include_rent
-    sol = lc["adhesion"].sol(rent_counts) + lc["obligation"].sol(rent_counts)
-    return sol * usd_per_sol * a["fx"]["brl_per_usd"]["value"]
+    return per_obligation_lamports(lc, mode) / LAMPORTS_PER_SOL * usd_per_sol * a["fx"]["brl_per_usd"]["value"]
