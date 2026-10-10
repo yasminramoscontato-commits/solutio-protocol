@@ -1,52 +1,93 @@
-# Devnet run
+# Devnet runs
 
-The Solutio program is deployed on **Solana devnet** and was exercised end to end by [`client/devnet-demo.mjs`](../client/devnet-demo.mjs). Every row below is a real devnet transaction you can open in the explorer.
+The Solutio program is deployed on **Solana devnet**. Every row below is a real devnet transaction you can open in the explorer.
 
 - Program: [`5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E`](https://explorer.solana.com/address/5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E?cluster=devnet)
-- Deployed binary SHA-256: `4a9ee4815508b38d5e9bdd157edaad017e814abf230db644c2873e64e133581d` (same bytes as `target/deploy/solutio.so`; checked with `solana program dump`)
-- Run: 2026-10-09T18:48:49.075Z → 2026-10-09T18:49:33.145Z, 32 transactions, all outcomes matched expectations.
-- Registry: `2gsNHY73voZ1A2mHsrJ7VSRdfZo2uiuXKFrukEB6DMno` · Price record: `A1X8YBDXzXzjqmBCJU8PN59hYs4Xra6tfvkTPJ6ceywV` · Item: `2hSoBAXTypXeJGY7EKrVCGbCFXeahHfxixbkk3ZAHihd` · Obligation: `9cPTvUnoas4MjJFZMjEPc2bhGBhhwkkwBbmEkwTYG7f5`
+- Current binary: SHA-256 `99ce61559156d59b42b3fae711aaf589f5769766afab9857a12b6386e5837ebd` (the audited version, commit `38d8baa`; checked against `solana program dump`). Upgrade transaction: [`fyQ8KkWM1n9UcgWz…`](https://explorer.solana.com/tx/fyQ8KkWM1n9UcgWzCE4XSZkdienD4xNTyuz3L5hEXTSZ9c4BhMFU3uVLWCvzAAEee97njXE5wBn4Kv7BriywPcz?cluster=devnet).
+- An earlier run of 32 transactions against the pre-audit binary is preserved in the git history (commit `722f683`, this file).
 
-**What is real:** the program, the transactions, the on-chain rejections and the balances.
+**What is real:** the program, the transactions, the on-chain refusals, the balances and the rent refunds.
 **What is not:** every agency, supplier and financier is a DEMO identity with a fictional name, registered by a demo issuer. Amounts are illustrative. No real government data, pilot or partnership is involved.
 
-Refused steps were sent with preflight disabled on purpose, so the program's rejection is itself recorded on-chain (open the transaction to see the error).
+Refused steps are sent with preflight disabled on purpose, so the program's refusal is itself recorded on-chain.
 
-| # | Step | Legal / design basis | Outcome | Explorer |
+## 1. Scripted scenario (28 transactions, 2026-10-10T02:47 UTC)
+
+Agencies and the registry were registered in the earlier run and are reused here.
+
+| # | Step | Basis | Outcome | Explorer |
 | --- | --- | --- | --- | --- |
-| 1 | Initialize registry | Demo issuer; designates the eligibility verifier | ✅ accepted | [tx](https://explorer.solana.com/tx/53yatCzPTywiw9KtcwNkZLgWR1xLVRB1y3kfXudTpoAUKWoPMwvZdkvEiNHT7vZEhsaxz7N5uptNnE2cCv9pHzSd?cluster=devnet) |
-| 2 | Register agency: DEMO Central de Compras mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/3Lspcsapsopnqsbw8Aau3vkfN7ahn3FKgcFBq9W9YTeUdQTRoGhPmeE9ishhwAx2BUbQbDWv2xm3RQEYELzmYJUK?cluster=devnet) |
-| 3 | Register agency: DEMO Prefeitura A mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/gCWJupEC5bxHnUCLgyLLZdCR1F3n7tUZVSCcJ3RvaQrM5BVmqi8wf3nzLLfgDq1rsPeTwcges55PcJaHuQED7Tx?cluster=devnet) |
-| 4 | Register agency: DEMO Prefeitura B mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/4hmqGSL7aZXTLsWhszbVdVTZ3UyPz7L9dWSULRVhAnn8H1odik3xyYcUpHtNKTygcLWoHwzDmB4Gy9bGcJXb3LiV?cluster=devnet) |
-| 5 | Register agency: DEMO Prefeitura C mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/FeHZij1gAsKjfPMwUPd8mfpsyqRAYNdh2xztzXfGcuhhJdVSSBizrCpcBz44ZK3T6aV9em2ykXGuLBdVgy1uGmS?cluster=devnet) |
-| 6 | Register agency: DEMO Prefeitura D mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/4mQe18sGZFipbQU26wkFEEHZggTUmDr3aTUijQ2wmvh3SL1B4Egro9a7ptnmg7LCB3S93WtYsSp22YXmmsPcUjVV?cluster=devnet) |
-| 7 | Register agency: DEMO Prefeitura E mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/5c1WYy8qwwd3B6Q4nJGXKJMzt2D4QaZ8eerVZ4CiVb1wCdqW8YEV81tjAjoWWLKwM9FoDE1Pyf7XNdMbUtJSvzBG?cluster=devnet) |
-| 8 | Register agency: DEMO Ministerio Federal mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/gy1soro8izJcBrZHToF7wWtzoogt3qGxVWtEQm97KM5hZJFwY7UdcGtjbqB1njRbYCK6ikxGQQNHZzq59DMSHK8?cluster=devnet) |
-| 9 | Register agency: DEMO Prefeitura do Interior mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/2wJf9NbgZJF7VFZUYzNUGTDrjpHNNZ3wxx7Vj2mH5dHgFenW3uHD3ptTLCWFSW4xLcBNzB62TdBRrKXGi2eNZ6vh?cluster=devnet) |
-| 10 | Register agency: DEMO Secretaria Estadual AL mv1bjudp | Demo issuer (registry authority) | ✅ accepted | [tx](https://explorer.solana.com/tx/2KDfUon8vwAus4jjhtS2emi2BRz5rDYxGHGUNfnbsvnmKwX7kR6EfVvhfj7yZXCEEQTcRcXBNpiEDmfjSovpkDGn?cluster=devnet) |
-| 11 | Create price record DEMO-ARP-mv1bjudp | Law 14.133 art. 82; Decree 11.462 art. 22 (validity) | ✅ accepted | [tx](https://explorer.solana.com/tx/48MMTpdcBQCyTvDbvXUHMvk4aQnYnKx1B5kyG3nySHmwjZY1TDs7m1TpBwMrf7qfyZVPYhxJ2JHyW3Fbw26aUKSv?cluster=devnet) |
-| 12 | Add item 1: 100 registered, adhesion maximum 200 | Decree 11.462 art. 15 XI; art. 86 §5 | ✅ accepted | [tx](https://explorer.solana.com/tx/BHhmLgxFhVDKwVwBg2jb9xGuWjy3QeUXu26kb3PrGm7KoHGdHV6ZMw2TFZDFc2nNFNkBdTxubhDstFmrxxy8ku3?cluster=devnet) |
-| 13 | Prefeitura A requests 50 units | Art. 86 §4: up to 50% per agency | ✅ accepted | [tx](https://explorer.solana.com/tx/63AusWmrcqVpeQm1PXpiqiNr9zmTMhii7WU2utiB1ShhTjjZK9aifvDmML3igCWDEJZiT16ddrgiivVcbWvaEazA?cluster=devnet) |
-| 14 | Prefeitura A requests 1 units | Art. 86 §4: 51% would exceed the individual cap | ⛔ refused: `ExceedsIndividualCap` | [tx](https://explorer.solana.com/tx/3R3dziRTMvwdSnU5NcV9AUcVGG5X9NvoPPzQKAQe3PFJsz5fpJi3M5GN41phbRLX4tPyphrRPmtgYZRDAvnZ5PeH?cluster=devnet) |
-| 15 | Prefeitura B requests 50 units | Art. 86 §5: running total 100 of 200 | ✅ accepted | [tx](https://explorer.solana.com/tx/3xX6oaTxyYQFkhnwCmnmjrbY6ke4YYKFpRpq6o4TFRax9Wx7MwmAjVMP9PvoCmvwBwcU1Xwizwcs9RnX9ArGRb44?cluster=devnet) |
-| 16 | Prefeitura C requests 50 units | Art. 86 §5: running total 150 of 200 | ✅ accepted | [tx](https://explorer.solana.com/tx/U2nEjj9hST8DpDg4TRLrEoJjzqhdutk3BqBysZa8smwEm44X66DXRUKQEnXeHsHR5WbmTvBmmeVAqq1PiACEvqU?cluster=devnet) |
-| 17 | Prefeitura D requests 50 units | Art. 86 §5: running total 200 of 200 | ✅ accepted | [tx](https://explorer.solana.com/tx/4tKuXBrrA7ZsjeihbmKinehES8JYiXSWnXUPcsYvkxXAHczgP9ycQSaLmGsyy5s17cVNgJ58Zbdjg45BQvAKtnYw?cluster=devnet) |
-| 18 | Prefeitura E requests 1 units | Art. 86 §5: the item's adhesion pool is exhausted | ⛔ refused: `ExceedsGlobalCap` | [tx](https://explorer.solana.com/tx/iYRWRCAHm1s8hNRkSvQc2J7YTqthAWk55SmhyL3inkZRCjJXB5uiPGrneiAryLSJCEmSJc42zDBdEJ2aoYRn3bd?cluster=devnet) |
-| 19 | Ministerio Federal requests 10 units | Art. 86 §8: federal agency to a state record | ⛔ refused: `FederalAdhesionForbidden` | [tx](https://explorer.solana.com/tx/2goH6bpJxFjQTzoSJxMUs4f2wugAspLQLNh9nyfEhCYUXC6nMYX6XqayZ4JUh448DbYP9DSryEAddmeDjjEcsncZ?cluster=devnet) |
-| 20 | Create price record DEMO-ARP-MUN-mv1bjudp | Law 14.133 art. 82; Decree 11.462 art. 22 (validity) | ✅ accepted | [tx](https://explorer.solana.com/tx/5335hhJwKZ9D2gD7EuEVmPEX7qJiFZoFfqnKULtgNn1hbT2s2xGib13JMPFyqot2FQKmPL76YDgtryjZoUgVCW6w?cluster=devnet) |
-| 21 | Add item 1: 100 registered, adhesion maximum 200 | Decree 11.462 art. 15 XI; art. 86 §5 | ✅ accepted | [tx](https://explorer.solana.com/tx/5JgnbGbsuMN2V71sb3qdaT9tHiDHidnanuSybQgYvMY1ULSfLWUzDxPXth1ZwnkWRuPfrnK47Mgtyj5qJsKtTDHs?cluster=devnet) |
-| 22 | Secretaria Estadual (AL) requests 10 units | Alagoas Decree 95.019/2023 art. 33: state agency to a non-capital municipal record | ⛔ refused: `MunicipalAdhesionForbidden` | [tx](https://explorer.solana.com/tx/374qWD2DnjqSeZLiEoE1B3m2p3mVegcXA6DfFaRR8bnwcGS7HZ1eaXJb5hSaoddEwvWjt5eYoXde6V4vEeBGfoy1?cluster=devnet) |
-| 23 | Supplier accepts Prefeitura A's adhesion by signature | Decree 11.462 art. 31 §1 (acceptance before authorization) | ✅ accepted | [tx](https://explorer.solana.com/tx/4T9vgucdtQe3bjXe9rvnfDQqvCP3HiSA3aAiJFuYAQr8WEDfUchM5H8SL2EU6G8EN7e2n6BhjExZxZV2YPic21PL?cluster=devnet) |
-| 24 | Managing agency authorizes 50 units | Decree 11.462 art. 31 §1-2 (90-day execution window starts) | ✅ accepted | [tx](https://explorer.solana.com/tx/5qcJKT3BBGz8BmtBa1s8Bwy7DGe3rXtmYquEnEhDW5gDgTEXF823wjcM6HFVNUXn4nb1LEutXExWTbfZj5xTodfr?cluster=devnet) |
-| 25 | Prefeitura A executes the purchase (nota de empenho) | Decree 11.462 art. 34 | ✅ accepted | [tx](https://explorer.solana.com/tx/55sspY9shTNnuUcG85y2G3RgdrC8o1NoXwrdAexBXPJUzzsnGHGuhNhRrig4Ayn5StXWBEnbWuUJspEApFSzTSUb?cluster=devnet) |
-| 26 | Prefeitura A records a verified obligation of R$ 10.000,00 | Lei 4.320 art. 63 (liquidação); source = executed adhesion | ✅ accepted | [tx](https://explorer.solana.com/tx/x9KigLNK2C1uhSYzq7zuVNjKSGmKGMyRoGDsxYJ99mgKHr8nPCaruVkEgbxp5PyV6FkmJgyttSMu9xnLzxk559u?cluster=devnet) |
-| 27 | Attach fiscal document (hash of the NF-e key) | One document backs one obligation (PDA by document hash) | ✅ accepted | [tx](https://explorer.solana.com/tx/5nZG5zC37UJdbAXGNyT5DHE15WhK4afhXYMd8kdxdmWjpYwfVaBL9D5unwHgZ7Kk6eZML9Ydv7D3AeHKpLLB3BGi?cluster=devnet) |
-| 28 | Designated verifier confirms eligibility | Verified ≠ eligible: separate signed step | ✅ accepted | [tx](https://explorer.solana.com/tx/4DBejkBZXyitjDpCw4ZFM3HohquwzXuznWwGvRBGoXVUeAzpC8QbdyWYkMWF8Nv7WpCfq7Tcpi6JXHGuwY95gRRd?cluster=devnet) |
-| 29 | Financier A advances R$ 6.000,00 (creditor co-signs) | CC art. 290 (notice of assignment); cumulative financing ≤ eligible | ✅ accepted | [tx](https://explorer.solana.com/tx/3gVKDcQ5wVTt9URN3S6xJe7NTHjbijgFL2e6csbNpF9om6K1Lc3jkyPGC73qG5kUzg4TgboMSKsvDzrrXkk6Vbga?cluster=devnet) |
-| 30 | Financier B advances R$ 4.000,00 | CC art. 290 (notice of assignment); cumulative financing ≤ eligible | ✅ accepted | [tx](https://explorer.solana.com/tx/3oGwnzn1Udu4duxeHjGVPyo9uW5FTM3t9UE4d49gqxEUFCXNMn6QiQKUqhvn9csP53ruM5kMrqf5pB6JBz4fJ6mq?cluster=devnet) |
-| 31 | Financier A tries to finance R$ 0,01 more | CC art. 290 (notice of assignment); cumulative financing ≤ eligible | ⛔ refused: `ExceedsFinanceableBalance` | [tx](https://explorer.solana.com/tx/2KoQGRQWVqLhTaVS16k4QHxxXkLrZ2UDGcKaPCPsQqrVHvg1DbmKV1HnycQ6RJu6FjU3b6v53Qc2YbmqKwmt4bxY?cluster=devnet) |
-| 32 | Prefeitura A records payment of R$ 10.000,00 | Lei 4.320 arts. 64-65 (ordem bancária) | ✅ accepted | [tx](https://explorer.solana.com/tx/WsdmBccz5QVzMY2zgsH4hGSDq5aKeaaBnG1oocXseDJncv4189D4BoYkSx7799o99241YLLuGzgGDyx5PAvb1rm?cluster=devnet) |
+| 1 | Create price record DEMO-ARP-mv1snte3 | Law 14.133 art. 82; Decree 11.462 art. 22 (validity) | ✅ accepted | [tx](https://explorer.solana.com/tx/3FAmf5PmgbywyYY5xH3gc3LQeoZtDT6PcJ5gN4DbZZHrVeZH6BnQZMrHWdXQHSXWdA2XtqNn38j4ZJMx9b7oQTf8?cluster=devnet) |
+| 2 | Add item 1: 100 registered, adhesion maximum 200 | Decree 11.462 art. 15 XI; art. 86 §5 | ✅ accepted | [tx](https://explorer.solana.com/tx/4FcbNTSsTmBnHYjUcwY7ttsjZ15fQeRjg7fUvfu7ikdW7XjrX5saWnGAma8oaS7kaPa1pLntubhp27WsoSe7MRSZ?cluster=devnet) |
+| 3 | Prefeitura A requests 50 units | Art. 86 §4: up to 50% per agency | ✅ accepted | [tx](https://explorer.solana.com/tx/35rcNxdLc8dAwLBN2ttNn9Z46t6yHXTnpfL7tLoPvy1Eu4sXvi7EwKtiuh5fZpNFKhoiK7du3a2LpuMEr2iTQSbu?cluster=devnet) |
+| 4 | Prefeitura A requests 1 units | Art. 86 §4: 51% would exceed the individual cap | ⛔ refused: `ExceedsIndividualCap` | [tx](https://explorer.solana.com/tx/3LchMMKbMqMyyN5AvJ6yzP6QwvuVpwqU9WFaSnvFeBjER6eoZWfTcbeAgjbUBPRoX1wsESU7SxGTW1GhP6zctZCA?cluster=devnet) |
+| 5 | Prefeitura B requests 50 units | Art. 86 §5: running total 100 of 200 | ✅ accepted | [tx](https://explorer.solana.com/tx/5FFhaZ7UJ94QNpscTuze4W15P4aqQuedvgHVdh6xDu39uUZNjh49vcoL3cK5HBToRZDsNHXsySiuGvLEnUp42ntp?cluster=devnet) |
+| 6 | Prefeitura C requests 50 units | Art. 86 §5: running total 150 of 200 | ✅ accepted | [tx](https://explorer.solana.com/tx/2dQvUbScrdsvjtZcUPyJ5Kgz5BUXr7Qh8YgeriBPH6FaeMVqpGZeZfm64gbZbnijwAzoxrMd2AzbjvqRGxB3QBBe?cluster=devnet) |
+| 7 | Prefeitura D requests 50 units | Art. 86 §5: running total 200 of 200 | ✅ accepted | [tx](https://explorer.solana.com/tx/2CPjxB6CD1CBcTfxErtdNhUWTCpM9gwgz7UYyS6tGqb59HDJ91LMBT6DYhbczVgqB3wcWKvbXRiKaqMTeP8tot1a?cluster=devnet) |
+| 8 | Prefeitura E requests 1 units | Art. 86 §5: the item's adhesion pool is exhausted | ⛔ refused: `ExceedsGlobalCap` | [tx](https://explorer.solana.com/tx/4kTADgHvxQ8MUQ3AL5pVusYvwTvuLzti3QRhEUkQP4X4rDb5YUPvthtehNiEfve1YV3MUKgNtd6J9xeU7bgDQVSt?cluster=devnet) |
+| 9 | Ministerio Federal requests 10 units | Art. 86 §8: federal agency to a state record | ⛔ refused: `FederalAdhesionForbidden` | [tx](https://explorer.solana.com/tx/2ctcfHGy8YxsN7UwQ3J8hg14MWwt3xsuAKUSedabTd7JRTurnqfJtbVEqarpC9D91KbJWKum54bq5riFAMPZaZKC?cluster=devnet) |
+| 10 | Create price record DEMO-ARP-MUN-mv1snte3 | Law 14.133 art. 82; Decree 11.462 art. 22 (validity) | ✅ accepted | [tx](https://explorer.solana.com/tx/5KP8K5nQE1KEGZbW8EKy5wr6sbJsF8z1M5BRvPJatCGnzQurVzT4FQzWdpFGpEMBARFuFBxRFS29tSG6gRx96hQ4?cluster=devnet) |
+| 11 | Add item 1: 100 registered, adhesion maximum 200 | Decree 11.462 art. 15 XI; art. 86 §5 | ✅ accepted | [tx](https://explorer.solana.com/tx/sAzsksqbNgGgbQD6J4y6bTdLcwaZhYeAa537xvZ61fymAvj84vdJA2QmBcdrNTSkcnnrBHifNipeYE6f9LuUTTe?cluster=devnet) |
+| 12 | Secretaria Estadual (AL) requests 10 units | Alagoas Decree 95.019/2023 art. 33: state agency to a non-capital municipal record | ⛔ refused: `MunicipalAdhesionForbidden` | [tx](https://explorer.solana.com/tx/3XhS3CyXqbbW8CmFimm5oyrZq3XNugWhAKD6MdxSjchYzfULowJQPbmxxJAWHUd6s2JxXN9VuRJpEp8JMq4kWgoF?cluster=devnet) |
+| 13 | Supplier declines Prefeitura D's adhesion: its 50 units return to the pool | Decree 11.462 art. 31 III (supplier acceptance) | ✅ accepted | [tx](https://explorer.solana.com/tx/3iUD4vH74huoQrSZ44auWzKxxG663iVZhKDsjXEr6NFuXWmSYAcsow9numdrJZa5ot8kgxZj3WYWAPf1LMXX1V5C?cluster=devnet) |
+| 14 | Anyone closes the rejected request; rent returns to the sponsor | Rent recovery (no state of value is lost) | ✅ accepted | [tx](https://explorer.solana.com/tx/2YwoANJsSSw6dto51dxzJ7TJTTdDJFqJCgCky6rLCFRU7xa2A8pc2ayPCd7kdgRiar2tccQ8NonERQycarAPNX4Y?cluster=devnet) |
+| 15 | Supplier accepts Prefeitura A's adhesion by signature | Decree 11.462 art. 31 §1 (acceptance before authorization) | ✅ accepted | [tx](https://explorer.solana.com/tx/2p8vW333WNAZfA9Zu8tzmiqNUpCXLNRRygLkAKyTyEwchGRrtLcZrbpDKWX7xbx7yS8jGLrrDzmMKa4btT1vGif2?cluster=devnet) |
+| 16 | Managing agency authorizes 50 units | Decree 11.462 art. 31 §1-2 (90-day execution window starts) | ✅ accepted | [tx](https://explorer.solana.com/tx/5G2FmmtVLYcRxpeygP8jpposv8tSEDmZKdmyXakbYYkLiRmi1DahkYK883EqhWJXNprfGpE2djBu1dNphi2mRstG?cluster=devnet) |
+| 17 | Prefeitura A executes the purchase (nota de empenho) | Decree 11.462 art. 34 | ✅ accepted | [tx](https://explorer.solana.com/tx/4oxa9EeLaxJHYKocfX4P8SrdFN8jKktUM9posJ1vEzHyjunnGmW9PbEsTGuXgCfbiVf9gzFs4hSk2LqkgCNquXiC?cluster=devnet) |
+| 18 | Prefeitura A records a verified obligation of R$ 10.000,00 | Lei 4.320 art. 63 (liquidação); source = executed adhesion | ✅ accepted | [tx](https://explorer.solana.com/tx/2HfKjGDYvGL98KDv3GMYvvMDrvLQNZUBuSfMawYcGDLYME563pnm4huFXVRLhinUEbUkNYhWLEB85o3hs1hU3a2d?cluster=devnet) |
+| 19 | A second obligation citing the same adhesion, R$ 0,01 beyond its value | Obligations ≤ authorized quantity × unit price (50 × R$ 200,00) | ⛔ refused: `ExceedsAdhesionValue` | [tx](https://explorer.solana.com/tx/4oEz9vhSoobTVF5N8KCywvtH1Qke7HWr5jV1pCHKmJEAbxzCiHtcv1LtGJKrdvLEqNkaVp5typAhnDppotsaon2u?cluster=devnet) |
+| 20 | Attach fiscal document (hash of the NF-e key) | One document backs one obligation (PDA by document hash) | ✅ accepted | [tx](https://explorer.solana.com/tx/5MuyqX1cYyPQFQUPgUq3e8vY4vKfN7GZhn582NYnTiMC7pZ9jxbdy12LV59KVGfGHZaNBLehEWfUarJ17jpXzixZ?cluster=devnet) |
+| 21 | Designated verifier confirms eligibility | Verified ≠ eligible: separate signed step | ✅ accepted | [tx](https://explorer.solana.com/tx/5mpZV8mXpyZkw2vbXFFrv7aGaWEDEsfoMM1cvMw6F3NjQ32brtXf73X8ipcsCWUzQtdUUZ32BeMBG5nMh2LxD2sR?cluster=devnet) |
+| 22 | Financier A advances R$ 6.000,00 (creditor co-signs) | CC art. 290 (notice of assignment); cumulative financing ≤ eligible | ✅ accepted | [tx](https://explorer.solana.com/tx/4M9x298atUGwD5cQKuHdfUBqPr2sUrekGjK8ju9dffajgdn7vTtm5ZqBW43LBLBK18yAkWT6jMvMs5wF5dW3E4ds?cluster=devnet) |
+| 23 | Financier B advances R$ 4.000,00 | CC art. 290 (notice of assignment); cumulative financing ≤ eligible | ✅ accepted | [tx](https://explorer.solana.com/tx/45Goom6TZM89c5BtAGWeLmvcmoHd19435nbSaYTJaL4fB6pBhJ7PiQkjmVu9oTAVY7EdypWx5BrTbLonkvPcVTUj?cluster=devnet) |
+| 24 | Financier A tries to finance R$ 0,01 more | CC art. 290 (notice of assignment); cumulative financing ≤ eligible | ⛔ refused: `ExceedsFinanceableBalance` | [tx](https://explorer.solana.com/tx/PAp46RjYV7gWPzD8VjxkMVyFQ8qZXfVuk2UN6CLBDkPYoKFME5EbJCCwgzzcYTheCXnNEUgVD3HYbzxdiBnaSPQ?cluster=devnet) |
+| 25 | Prefeitura A records payment of R$ 10.000,00 | Lei 4.320 arts. 64-65 (ordem bancária) | ✅ accepted | [tx](https://explorer.solana.com/tx/7eWVipEioqjmcpM8wnKREH3rUHVtzGfHsqo8WBEQztdCpVNXQ24wed94j3MQhfkNiktA8NieYsN59hDpPzP2UTo?cluster=devnet) |
+| 26 | Anyone closes financing #0 of the settled obligation; rent returns to the sponsor | Rent recovery after settlement | ✅ accepted | [tx](https://explorer.solana.com/tx/4Yztmx112dRU5qP1SM1vzhqKodmnh3PaYxfCXSohAYNi4by3aEQrwJ4FT275eqmU12syMBdSYC3suYeaqeBxaQ4A?cluster=devnet) |
+| 27 | Anyone closes financing #1 of the settled obligation; rent returns to the sponsor | Rent recovery after settlement | ✅ accepted | [tx](https://explorer.solana.com/tx/4zZNj2rESmsvQCKSWPcUEDGkyCj1cE4TYLCJ2MfV7tHNRmgARTexGe82ignEws1ZJrZNLNQHLvgav9r8GRpdNuFk?cluster=devnet) |
+| 28 | Anyone closes the settled obligation; its fiscal document stays as the anti-reuse marker | Rent recovery after settlement | ✅ accepted | [tx](https://explorer.solana.com/tx/55cG1J5e2bRempPXsTByn2P7YvHvbQxwC8YJLuYUGeu5KLFok9SQDbMAADTcgWBiwqou6dNm8jA8YacZ5s6nF6fL?cluster=devnet) |
 
-The eight signer wallets (managing agency, five municipalities, supplier, financier) ended the run holding **0 SOL**: a sponsor paid every fee and rent deposit.
+The 8 signer wallets (managing agency, municipalities, supplier, financier) hold **0 SOL**: a sponsor paid every fee and rent deposit, and received the rent back when accounts were closed.
 
-Reproduce: `cd client && npm install && node devnet-demo.mjs` (requires a funded devnet keypair at `~/.config/solana/devnet-deployer.json`; it becomes the demo issuer).
+## 2. Concurrency test (transactions submitted in parallel)
+
+Each race signs all transactions with the same blockhash and submits them at once, without waiting. The validator serializes transactions that write the same account; each one re-checks the rules against the state the previous one left.
+
+### Six agencies request 50 units each at once (pool of 200)
+
+4 of 6 succeeded (expected 4), landing in slot(s) 509395094, 509395095.
+
+| Outcome | Slot | Explorer |
+| --- | --- | --- |
+| ✅ accepted | 509395094 | [tx](https://explorer.solana.com/tx/2h5VQNWitaTTKnPQ9XW72aLijQ91gDShpPH9E2fyGNX6yjpvMAK2fSojALPh5g1LHojFQfadSc1thrsst53tEhBo?cluster=devnet) |
+| ✅ accepted | 509395094 | [tx](https://explorer.solana.com/tx/J4sCQpqp9CopUJf1uvTJEQ4EfBSHcb8D6rU3ZrUNLvSApAovHHAXzJggcREjTBxCpy5pqB8DyTgMMwn51DCvn1y?cluster=devnet) |
+| ⛔ refused: `ExceedsGlobalCap` | 509395095 | [tx](https://explorer.solana.com/tx/4zqR31xLt2NBCa3jwRGKQr1YZAAZh8dTjcg4JyRD1Hj4NwtSdrfhR4pz9MNT7Sd5NFGMM8MpjyZmuLzy49L9oq21?cluster=devnet) |
+| ✅ accepted | 509395095 | [tx](https://explorer.solana.com/tx/2fMeTa2K8zbSmf3kpnsnHVaeSuenfNhNvzHru3thy2oDuopodWgbgjqv2d5XTPfJ23yXpcTwUN65V9tHNZgCVh36?cluster=devnet) |
+| ✅ accepted | 509395094 | [tx](https://explorer.solana.com/tx/2L3RiGy4FAPcvjVhmttX9MCmE3J9p9VoNWM6GDTNBN519bMgdsVZqe3CfuPKyG36QHuTBJQM9TnVbTEx4PbkVb5E?cluster=devnet) |
+| ⛔ refused: `ExceedsGlobalCap` | 509395095 | [tx](https://explorer.solana.com/tx/5m6hKiGbLcK54YMftm62kR38gbtE2JS9h6rArSybvqjYiKMcwo39JggP41VwXbAxfLi4D8FKAApRyi3oTTtiKhMe?cluster=devnet) |
+
+### Two financiers race for the last R$ 1.000,00 at once
+
+1 of 2 succeeded (expected 1), landing in slot(s) 509395186.
+
+| Outcome | Slot | Explorer |
+| --- | --- | --- |
+| ✅ accepted | 509395186 | [tx](https://explorer.solana.com/tx/gFqtQ5kLzF7rnoZocZ19Vhj5trRowK4P58jipQWPcj6pkHt4rKekBvT5EKWHWbPwcywmWMwuKd9s9muUycQpXxz?cluster=devnet) |
+| ⛔ refused: `AccountAlreadyInUse` | 509395186 | [tx](https://explorer.solana.com/tx/2n7RYM8eLPq4zfFScsMfU3Anin4SXEzfPMbgxtsQP66iJgBup33MgCeKMZBtw2unjTMPhw5og2c3BnrK5TDfBxZc?cluster=devnet) |
+
+State read back after the races: item committed **200 of 200**; obligation financed **1000000 of 1,000,000** cents.
+
+In the financing race the losing transaction fails with `AccountAlreadyInUse`: the winner already created the financing record with that sequence number, so the second financing of the same balance cannot exist.
+
+**Scope of this evidence:** one devnet run. It shows serialization of conflicting writes within and across consecutive slots; it does not measure behaviour under mainnet congestion.
+
+## Reproduce
+
+```bash
+cd client && npm install
+node devnet-demo.mjs      # scripted scenario
+node concurrency.mjs      # parallel races
+node measure-costs.mjs    # fees, rent and refunds -> devnet-costs.json
+python3 render_devnet.py  # this page
+```
+
+Requires a funded devnet keypair at `~/.config/solana/devnet-deployer.json` (the program's upgrade authority, which is also the registry authority). Set `SOLUTIO_RPC=http://127.0.0.1:8899` to run against a local validator; local runs write `*.localnet.json` and never overwrite the devnet records.

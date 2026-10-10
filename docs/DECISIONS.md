@@ -47,10 +47,10 @@
 - [ ] Validate the Alagoas profile and the questions in LEGAL_RULES.md with GARC/SEI staff
 - [ ] Program: participant quotas, supply authorization and rectification (specified as PROC-11/12 in the framework)
 - [x] Program: close settled accounts to recover rent (implemented; recovers part of the deposit, see ECONOMICS.md)
-- [ ] Upgrade the devnet program to the audited version and rerun the demo and the concurrency test there
+- [x] Upgrade the devnet program to the audited version and rerun the demo and the concurrency test there (2026-10-09)
 - [ ] Verifiable build, CI, fuzzing, emergency pause (audit, still open)
 - [ ] Interviews: two receivables funds (FIDCs) and one factoring company on willingness to pay (H5, H8)
-- [x] Concurrency test on a validator (local validator: 6 requests in one slot, 4 accepted; 2 financings, 1 accepted). Devnet rerun pending
+- [x] Concurrency test: local validator (6 requests in one slot) and devnet (6 requests across two consecutive slots); 4 accepted, item at 200; financing race 1 of 2
 - [ ] Public verifier page that reads state directly from the chain
 - [ ] Validation interviews with procurement officers and financiers
 - [ ] Optional: financing pool with a test stablecoin

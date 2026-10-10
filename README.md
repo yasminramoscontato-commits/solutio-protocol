@@ -20,13 +20,13 @@ Built for the Colosseum **Crypto World's Fair** hackathon (Solana track).
 | Module 1 — Carona (art. 86 + Decree 11.462/2023 + Alagoas profile) | Implemented, 17 integration tests |
 | Module 2 — Obligations (single financing) | Implemented, 8 integration tests |
 | Integration test environment | LiteSVM (in-process Solana VM running the compiled program) |
-| Devnet deployment | **Live** — [`5cmBDMRd…jz9E`](https://explorer.solana.com/address/5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E?cluster=devnet); 32-transaction scripted run in [`docs/DEVNET.md`](docs/DEVNET.md) |
+| Devnet deployment | **Live**, audited binary — [`5cmBDMRd…jz9E`](https://explorer.solana.com/address/5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E?cluster=devnet); scripted scenario and parallel-submission concurrency test in [`docs/DEVNET.md`](docs/DEVNET.md) |
 | TypeScript client + IDL (`client/`) | Demo script used for the devnet run; cost measurement script |
 | Framework (`framework/`) | Evidence base, rulebook (24 rules across Brazil, Alagoas and the EU), reference engine, 12 scenario replays, unit economics from measured devnet costs; 22 tests |
 | Public verifier page | **Not yet** |
 | Financing pool (test stablecoin) | **Not started** — experimental, optional |
 
-Last full test run: 51 passed, 0 failed (2026-10-09). The devnet deployment still runs the pre-audit binary until it is upgraded. Devnet uses test SOL and DEMO identities with fictional names. No real funds, no real government data, no pilot or partnership is claimed.
+Last full test run: 51 passed, 0 failed (2026-10-09). Devnet uses test SOL and DEMO identities with fictional names. No real funds, no real government data, no pilot or partnership is claimed.
 
 ---
 
@@ -114,7 +114,7 @@ See [`docs/LEGAL_RULES.md`](docs/LEGAL_RULES.md) for the rule → code → test 
 Solana is the shared state between parties with no common operator: agencies at different levels of government, suppliers, financiers and auditors.
 
 - **The program, not a UI, enforces the rules.** A transaction that would breach a cap fails on-chain.
-- **Account-level write locking serializes conflicting writes.** Requests for the same item, or financings of the same obligation, are processed one after another, and each re-checks current state. See `race_for_the_last_units_only_one_can_win`.
+- **Account-level write locking serializes conflicting writes.** Requests for the same item, or financings of the same obligation, are processed one after another, and each re-checks current state. Tested on devnet by submitting six requests at once for a pool that fits four: four landed, two were refused, the item ended at exactly 200 (`docs/DEVNET.md`).
 - **Program-derived addresses** let anyone locate a record from public identifiers (price record, item, agency, obligation, document key).
 - **Fee-payer separation** lets officials sign without holding SOL (`agency_wallets_sign_without_holding_any_sol`).
 

@@ -3,36 +3,46 @@
 
 # Unit economics and scalability
 
-This page separates three kinds of numbers. **Measured**: fees, rent deposits and refunds read back from the 32 devnet transactions in [`docs/DEVNET.md`](../DEVNET.md) (`client/devnet-costs.json`). **Conditional**: costs that depend on a design choice, stated as such. **Hypothesis**: prices, volumes and adoption from `framework/solutio_framework/assumptions.json`, not validated with any buyer. Devnet charges the same base fee per signature as mainnet; priority fees are excluded.
+This page separates three kinds of numbers. **Measured**: fees, rent deposits and refunds read back from the 28 devnet transactions in [`docs/DEVNET.md`](../DEVNET.md) (`client/devnet-costs.json`). **Conditional**: costs that depend on a design choice, stated as such. **Hypothesis**: prices, volumes and adoption from `framework/solutio_framework/assumptions.json`, not validated with any buyer. Devnet charges the same base fee per signature as mainnet; priority fees are excluded.
 
 ## Measured cost per lifecycle
 
 | Lifecycle | Transactions | Fees (lamports) | Rent, net (lamports) | Compute units |
 | --- | --- | --- | --- | --- |
-| Adhesion: request → supplier accepts → authorize → execute | 4 | 40,000 | 3,190,240 | 44,233 |
-| Obligation: verify → document → eligible → finance → pay | 5 | 55,000 | 4,307,840 | 44,931 |
-| Refused transaction (recorded on-chain) | 1 | 11,000 | 0 | 19,178 |
+| Adhesion: request → supplier accepts → authorize → execute | 4 | 40,000 | 3,434,080 | 62,801 |
+| Obligation: verify → document → eligible → finance → pay | 5 | 55,000 | 4,653,280 | 67,662 |
+| Refused transaction (recorded on-chain) | 1 | 10,833 | 0 | 22,637 |
+| Closing after settlement: one financing + the obligation (rent refunded) | 2 | 10,000 | -3,591,560 | 10,743 |
 
 Rent is a refundable deposit, not a fee. A negative value is rent returned when an account is closed.
 
 ## Cost per obligation (one adhesion + one financed obligation), in BRL
 
-Assumed BRL/USD: 5.4. Modes: **no_close** = Rent deposits kept forever; **fees_only** = Theoretical floor: every deposit recovered (not achievable: fiscal documents and executed adhesions stay open).
+Assumed BRL/USD: 5.4. Modes: **no_close** = Rent deposits kept forever; **measured_close** = Settled obligations and their financings closed (implemented, refunds measured); **fees_only** = Theoretical floor: every deposit recovered (not achievable: fiscal documents and executed adhesions stay open).
 
-| SOL price (USD) | no_close | fees_only |
-| --- | --- | --- |
-| 50 | R$ 2.050 | R$ 0.026 |
-| 150 | R$ 6.150 | R$ 0.077 |
-| 300 | R$ 12.301 | R$ 0.154 |
+| SOL price (USD) | no_close | measured_close | fees_only |
+| --- | --- | --- | --- |
+| 50 | R$ 2.209 | R$ 1.242 | R$ 0.026 |
+| 150 | R$ 6.628 | R$ 3.727 | R$ 0.077 |
+| 300 | R$ 13.255 | R$ 7.453 | R$ 0.154 |
 
 ## Scenarios · Rent deposits kept forever
 
 | Scenario | Volume through Solutio | Obligations/yr | Avg tx/s | Financed volume | Revenue (hypothesis) | On-chain cost | Cost / revenue |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Pilot: one state central purchasing body | R$ 470.00 M | 11,750 | 0.003 | R$ 47.00 M | R$ 178,600 | R$ 72,267 | 40.5% |
-| Brazil: state central purchasing bodies | R$ 23.50 bn | 587,500 | 0.168 | R$ 2.35 bn | R$ 8.93 M | R$ 3.61 M | 40.5% |
-| Brazil: national (all spheres) | R$ 94.00 bn | 2,350,000 | 0.671 | R$ 14.10 bn | R$ 53.58 M | R$ 14.45 M | 27.0% |
-| Global: 0.1% of public procurement | R$ 59.40 bn | 1,485,000 | 0.424 | R$ 5.94 bn | R$ 22.57 M | R$ 9.13 M | 40.5% |
+| Pilot: one state central purchasing body | R$ 470.00 M | 11,750 | 0.003 | R$ 47.00 M | R$ 178,600 | R$ 77,876 | 43.6% |
+| Brazil: state central purchasing bodies | R$ 23.50 bn | 587,500 | 0.168 | R$ 2.35 bn | R$ 8.93 M | R$ 3.89 M | 43.6% |
+| Brazil: national (all spheres) | R$ 94.00 bn | 2,350,000 | 0.671 | R$ 14.10 bn | R$ 53.58 M | R$ 15.58 M | 29.1% |
+| Global: 0.1% of public procurement | R$ 59.40 bn | 1,485,000 | 0.424 | R$ 5.94 bn | R$ 22.57 M | R$ 9.84 M | 43.6% |
+
+## Scenarios · Settled obligations and their financings closed (implemented, refunds measured)
+
+| Scenario | Volume through Solutio | Obligations/yr | Avg tx/s | Financed volume | Revenue (hypothesis) | On-chain cost | Cost / revenue |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Pilot: one state central purchasing body | R$ 470.00 M | 11,750 | 0.004 | R$ 47.00 M | R$ 178,600 | R$ 43,788 | 24.5% |
+| Brazil: state central purchasing bodies | R$ 23.50 bn | 587,500 | 0.205 | R$ 2.35 bn | R$ 8.93 M | R$ 2.19 M | 24.5% |
+| Brazil: national (all spheres) | R$ 94.00 bn | 2,350,000 | 0.820 | R$ 14.10 bn | R$ 53.58 M | R$ 8.76 M | 16.3% |
+| Global: 0.1% of public procurement | R$ 59.40 bn | 1,485,000 | 0.518 | R$ 5.94 bn | R$ 22.57 M | R$ 5.53 M | 24.5% |
 
 ## Scenarios · Theoretical floor: every deposit recovered (not achievable: fiscal documents and executed adhesions stay open)
 
@@ -52,6 +62,7 @@ Assumed BRL/USD: 5.4. Modes: **no_close** = Rent deposits kept forever; **fees_o
 ## What the numbers say
 
 1. **Throughput is not the constraint.** Even the national scenario averages well under one transaction per second. The binding constraint is per-account write serialization, which is exactly what enforces the caps (see the concurrency run in DEVNET.md).
-2. **Rent dominates on-chain cost.** Rent deposits are 98.7% of the gross cost per obligation.
-3. **The cheapest lever is when to record, not how.** The scenarios record every obligation on-chain but earn revenue only on the financed share. Recording an obligation when its supplier asks for financing (and keeping the free compliance layer for adhesions) spreads the same cost over revenue-bearing obligations only.
-4. **Revenue is a hypothesis.** The compliance layer is free for government; whether financiers pay the assumed fee and take rate is the open question in docs/THESIS.md (H5, H8).
+2. **Rent dominates on-chain cost.** Rent deposits are 98.8% of the gross cost per obligation.
+3. **Closing recovers part of it, not all.** The implemented close instructions return 44% of the gross cost. The rest stays on purpose: fiscal-document markers stop an invoice from backing a second obligation, and executed adhesions are the provenance that obligations cite. Going further needs a design change (smaller markers, or compression), not a parameter.
+4. **The cheapest lever is when to record, not how.** The scenarios record every obligation on-chain but earn revenue only on the financed share. Recording an obligation when its supplier asks for financing (and keeping the free compliance layer for adhesions) spreads the same cost over revenue-bearing obligations only.
+5. **Revenue is a hypothesis.** The compliance layer is free for government; whether financiers pay the assumed fee and take rate is the open question in docs/THESIS.md (H5, H8).

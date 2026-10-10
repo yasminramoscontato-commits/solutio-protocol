@@ -1,106 +1,17 @@
 {
   "rpc": "https://api.devnet.solana.com",
   "program": "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E",
-  "started_at": "2026-10-09T18:48:49.075Z",
+  "started_at": "2026-10-10T02:47:48.882Z",
   "steps": [
     {
-      "label": "Initialize registry",
-      "basis": "Demo issuer; designates the eligibility verifier",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "53yatCzPTywiw9KtcwNkZLgWR1xLVRB1y3kfXudTpoAUKWoPMwvZdkvEiNHT7vZEhsaxz7N5uptNnE2cCv9pHzSd",
-      "explorer": "https://explorer.solana.com/tx/53yatCzPTywiw9KtcwNkZLgWR1xLVRB1y3kfXudTpoAUKWoPMwvZdkvEiNHT7vZEhsaxz7N5uptNnE2cCv9pHzSd?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Central de Compras mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "3Lspcsapsopnqsbw8Aau3vkfN7ahn3FKgcFBq9W9YTeUdQTRoGhPmeE9ishhwAx2BUbQbDWv2xm3RQEYELzmYJUK",
-      "explorer": "https://explorer.solana.com/tx/3Lspcsapsopnqsbw8Aau3vkfN7ahn3FKgcFBq9W9YTeUdQTRoGhPmeE9ishhwAx2BUbQbDWv2xm3RQEYELzmYJUK?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Prefeitura A mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "gCWJupEC5bxHnUCLgyLLZdCR1F3n7tUZVSCcJ3RvaQrM5BVmqi8wf3nzLLfgDq1rsPeTwcges55PcJaHuQED7Tx",
-      "explorer": "https://explorer.solana.com/tx/gCWJupEC5bxHnUCLgyLLZdCR1F3n7tUZVSCcJ3RvaQrM5BVmqi8wf3nzLLfgDq1rsPeTwcges55PcJaHuQED7Tx?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Prefeitura B mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "4hmqGSL7aZXTLsWhszbVdVTZ3UyPz7L9dWSULRVhAnn8H1odik3xyYcUpHtNKTygcLWoHwzDmB4Gy9bGcJXb3LiV",
-      "explorer": "https://explorer.solana.com/tx/4hmqGSL7aZXTLsWhszbVdVTZ3UyPz7L9dWSULRVhAnn8H1odik3xyYcUpHtNKTygcLWoHwzDmB4Gy9bGcJXb3LiV?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Prefeitura C mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "FeHZij1gAsKjfPMwUPd8mfpsyqRAYNdh2xztzXfGcuhhJdVSSBizrCpcBz44ZK3T6aV9em2ykXGuLBdVgy1uGmS",
-      "explorer": "https://explorer.solana.com/tx/FeHZij1gAsKjfPMwUPd8mfpsyqRAYNdh2xztzXfGcuhhJdVSSBizrCpcBz44ZK3T6aV9em2ykXGuLBdVgy1uGmS?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Prefeitura D mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "4mQe18sGZFipbQU26wkFEEHZggTUmDr3aTUijQ2wmvh3SL1B4Egro9a7ptnmg7LCB3S93WtYsSp22YXmmsPcUjVV",
-      "explorer": "https://explorer.solana.com/tx/4mQe18sGZFipbQU26wkFEEHZggTUmDr3aTUijQ2wmvh3SL1B4Egro9a7ptnmg7LCB3S93WtYsSp22YXmmsPcUjVV?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Prefeitura E mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "5c1WYy8qwwd3B6Q4nJGXKJMzt2D4QaZ8eerVZ4CiVb1wCdqW8YEV81tjAjoWWLKwM9FoDE1Pyf7XNdMbUtJSvzBG",
-      "explorer": "https://explorer.solana.com/tx/5c1WYy8qwwd3B6Q4nJGXKJMzt2D4QaZ8eerVZ4CiVb1wCdqW8YEV81tjAjoWWLKwM9FoDE1Pyf7XNdMbUtJSvzBG?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Ministerio Federal mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "gy1soro8izJcBrZHToF7wWtzoogt3qGxVWtEQm97KM5hZJFwY7UdcGtjbqB1njRbYCK6ikxGQQNHZzq59DMSHK8",
-      "explorer": "https://explorer.solana.com/tx/gy1soro8izJcBrZHToF7wWtzoogt3qGxVWtEQm97KM5hZJFwY7UdcGtjbqB1njRbYCK6ikxGQQNHZzq59DMSHK8?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Prefeitura do Interior mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "2wJf9NbgZJF7VFZUYzNUGTDrjpHNNZ3wxx7Vj2mH5dHgFenW3uHD3ptTLCWFSW4xLcBNzB62TdBRrKXGi2eNZ6vh",
-      "explorer": "https://explorer.solana.com/tx/2wJf9NbgZJF7VFZUYzNUGTDrjpHNNZ3wxx7Vj2mH5dHgFenW3uHD3ptTLCWFSW4xLcBNzB62TdBRrKXGi2eNZ6vh?cluster=devnet"
-    },
-    {
-      "label": "Register agency: DEMO Secretaria Estadual AL mv1bjudp",
-      "basis": "Demo issuer (registry authority)",
-      "expected": "ok",
-      "outcome": "ok",
-      "pass": true,
-      "signature": "2KDfUon8vwAus4jjhtS2emi2BRz5rDYxGHGUNfnbsvnmKwX7kR6EfVvhfj7yZXCEEQTcRcXBNpiEDmfjSovpkDGn",
-      "explorer": "https://explorer.solana.com/tx/2KDfUon8vwAus4jjhtS2emi2BRz5rDYxGHGUNfnbsvnmKwX7kR6EfVvhfj7yZXCEEQTcRcXBNpiEDmfjSovpkDGn?cluster=devnet"
-    },
-    {
-      "label": "Create price record DEMO-ARP-mv1bjudp",
+      "label": "Create price record DEMO-ARP-mv1snte3",
       "basis": "Law 14.133 art. 82; Decree 11.462 art. 22 (validity)",
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "48MMTpdcBQCyTvDbvXUHMvk4aQnYnKx1B5kyG3nySHmwjZY1TDs7m1TpBwMrf7qfyZVPYhxJ2JHyW3Fbw26aUKSv",
-      "explorer": "https://explorer.solana.com/tx/48MMTpdcBQCyTvDbvXUHMvk4aQnYnKx1B5kyG3nySHmwjZY1TDs7m1TpBwMrf7qfyZVPYhxJ2JHyW3Fbw26aUKSv?cluster=devnet"
+      "signature": "3FAmf5PmgbywyYY5xH3gc3LQeoZtDT6PcJ5gN4DbZZHrVeZH6BnQZMrHWdXQHSXWdA2XtqNn38j4ZJMx9b7oQTf8",
+      "slot": 509394839,
+      "explorer": "https://explorer.solana.com/tx/3FAmf5PmgbywyYY5xH3gc3LQeoZtDT6PcJ5gN4DbZZHrVeZH6BnQZMrHWdXQHSXWdA2XtqNn38j4ZJMx9b7oQTf8?cluster=devnet"
     },
     {
       "label": "Add item 1: 100 registered, adhesion maximum 200",
@@ -108,8 +19,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "BHhmLgxFhVDKwVwBg2jb9xGuWjy3QeUXu26kb3PrGm7KoHGdHV6ZMw2TFZDFc2nNFNkBdTxubhDstFmrxxy8ku3",
-      "explorer": "https://explorer.solana.com/tx/BHhmLgxFhVDKwVwBg2jb9xGuWjy3QeUXu26kb3PrGm7KoHGdHV6ZMw2TFZDFc2nNFNkBdTxubhDstFmrxxy8ku3?cluster=devnet"
+      "signature": "4FcbNTSsTmBnHYjUcwY7ttsjZ15fQeRjg7fUvfu7ikdW7XjrX5saWnGAma8oaS7kaPa1pLntubhp27WsoSe7MRSZ",
+      "slot": 509394842,
+      "explorer": "https://explorer.solana.com/tx/4FcbNTSsTmBnHYjUcwY7ttsjZ15fQeRjg7fUvfu7ikdW7XjrX5saWnGAma8oaS7kaPa1pLntubhp27WsoSe7MRSZ?cluster=devnet"
     },
     {
       "label": "Prefeitura A requests 50 units",
@@ -117,8 +29,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "63AusWmrcqVpeQm1PXpiqiNr9zmTMhii7WU2utiB1ShhTjjZK9aifvDmML3igCWDEJZiT16ddrgiivVcbWvaEazA",
-      "explorer": "https://explorer.solana.com/tx/63AusWmrcqVpeQm1PXpiqiNr9zmTMhii7WU2utiB1ShhTjjZK9aifvDmML3igCWDEJZiT16ddrgiivVcbWvaEazA?cluster=devnet"
+      "signature": "35rcNxdLc8dAwLBN2ttNn9Z46t6yHXTnpfL7tLoPvy1Eu4sXvi7EwKtiuh5fZpNFKhoiK7du3a2LpuMEr2iTQSbu",
+      "slot": 509394846,
+      "explorer": "https://explorer.solana.com/tx/35rcNxdLc8dAwLBN2ttNn9Z46t6yHXTnpfL7tLoPvy1Eu4sXvi7EwKtiuh5fZpNFKhoiK7du3a2LpuMEr2iTQSbu?cluster=devnet"
     },
     {
       "label": "Prefeitura A requests 1 units",
@@ -126,8 +39,9 @@
       "expected": "ExceedsIndividualCap",
       "outcome": "ExceedsIndividualCap",
       "pass": true,
-      "signature": "3R3dziRTMvwdSnU5NcV9AUcVGG5X9NvoPPzQKAQe3PFJsz5fpJi3M5GN41phbRLX4tPyphrRPmtgYZRDAvnZ5PeH",
-      "explorer": "https://explorer.solana.com/tx/3R3dziRTMvwdSnU5NcV9AUcVGG5X9NvoPPzQKAQe3PFJsz5fpJi3M5GN41phbRLX4tPyphrRPmtgYZRDAvnZ5PeH?cluster=devnet"
+      "signature": "3LchMMKbMqMyyN5AvJ6yzP6QwvuVpwqU9WFaSnvFeBjER6eoZWfTcbeAgjbUBPRoX1wsESU7SxGTW1GhP6zctZCA",
+      "slot": 509394850,
+      "explorer": "https://explorer.solana.com/tx/3LchMMKbMqMyyN5AvJ6yzP6QwvuVpwqU9WFaSnvFeBjER6eoZWfTcbeAgjbUBPRoX1wsESU7SxGTW1GhP6zctZCA?cluster=devnet"
     },
     {
       "label": "Prefeitura B requests 50 units",
@@ -135,8 +49,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "3xX6oaTxyYQFkhnwCmnmjrbY6ke4YYKFpRpq6o4TFRax9Wx7MwmAjVMP9PvoCmvwBwcU1Xwizwcs9RnX9ArGRb44",
-      "explorer": "https://explorer.solana.com/tx/3xX6oaTxyYQFkhnwCmnmjrbY6ke4YYKFpRpq6o4TFRax9Wx7MwmAjVMP9PvoCmvwBwcU1Xwizwcs9RnX9ArGRb44?cluster=devnet"
+      "signature": "5FFhaZ7UJ94QNpscTuze4W15P4aqQuedvgHVdh6xDu39uUZNjh49vcoL3cK5HBToRZDsNHXsySiuGvLEnUp42ntp",
+      "slot": 509394854,
+      "explorer": "https://explorer.solana.com/tx/5FFhaZ7UJ94QNpscTuze4W15P4aqQuedvgHVdh6xDu39uUZNjh49vcoL3cK5HBToRZDsNHXsySiuGvLEnUp42ntp?cluster=devnet"
     },
     {
       "label": "Prefeitura C requests 50 units",
@@ -144,8 +59,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "U2nEjj9hST8DpDg4TRLrEoJjzqhdutk3BqBysZa8smwEm44X66DXRUKQEnXeHsHR5WbmTvBmmeVAqq1PiACEvqU",
-      "explorer": "https://explorer.solana.com/tx/U2nEjj9hST8DpDg4TRLrEoJjzqhdutk3BqBysZa8smwEm44X66DXRUKQEnXeHsHR5WbmTvBmmeVAqq1PiACEvqU?cluster=devnet"
+      "signature": "2dQvUbScrdsvjtZcUPyJ5Kgz5BUXr7Qh8YgeriBPH6FaeMVqpGZeZfm64gbZbnijwAzoxrMd2AzbjvqRGxB3QBBe",
+      "slot": 509394890,
+      "explorer": "https://explorer.solana.com/tx/2dQvUbScrdsvjtZcUPyJ5Kgz5BUXr7Qh8YgeriBPH6FaeMVqpGZeZfm64gbZbnijwAzoxrMd2AzbjvqRGxB3QBBe?cluster=devnet"
     },
     {
       "label": "Prefeitura D requests 50 units",
@@ -153,8 +69,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "4tKuXBrrA7ZsjeihbmKinehES8JYiXSWnXUPcsYvkxXAHczgP9ycQSaLmGsyy5s17cVNgJ58Zbdjg45BQvAKtnYw",
-      "explorer": "https://explorer.solana.com/tx/4tKuXBrrA7ZsjeihbmKinehES8JYiXSWnXUPcsYvkxXAHczgP9ycQSaLmGsyy5s17cVNgJ58Zbdjg45BQvAKtnYw?cluster=devnet"
+      "signature": "2CPjxB6CD1CBcTfxErtdNhUWTCpM9gwgz7UYyS6tGqb59HDJ91LMBT6DYhbczVgqB3wcWKvbXRiKaqMTeP8tot1a",
+      "slot": 509394894,
+      "explorer": "https://explorer.solana.com/tx/2CPjxB6CD1CBcTfxErtdNhUWTCpM9gwgz7UYyS6tGqb59HDJ91LMBT6DYhbczVgqB3wcWKvbXRiKaqMTeP8tot1a?cluster=devnet"
     },
     {
       "label": "Prefeitura E requests 1 units",
@@ -162,8 +79,9 @@
       "expected": "ExceedsGlobalCap",
       "outcome": "ExceedsGlobalCap",
       "pass": true,
-      "signature": "iYRWRCAHm1s8hNRkSvQc2J7YTqthAWk55SmhyL3inkZRCjJXB5uiPGrneiAryLSJCEmSJc42zDBdEJ2aoYRn3bd",
-      "explorer": "https://explorer.solana.com/tx/iYRWRCAHm1s8hNRkSvQc2J7YTqthAWk55SmhyL3inkZRCjJXB5uiPGrneiAryLSJCEmSJc42zDBdEJ2aoYRn3bd?cluster=devnet"
+      "signature": "4kTADgHvxQ8MUQ3AL5pVusYvwTvuLzti3QRhEUkQP4X4rDb5YUPvthtehNiEfve1YV3MUKgNtd6J9xeU7bgDQVSt",
+      "slot": 509394898,
+      "explorer": "https://explorer.solana.com/tx/4kTADgHvxQ8MUQ3AL5pVusYvwTvuLzti3QRhEUkQP4X4rDb5YUPvthtehNiEfve1YV3MUKgNtd6J9xeU7bgDQVSt?cluster=devnet"
     },
     {
       "label": "Ministerio Federal requests 10 units",
@@ -171,17 +89,19 @@
       "expected": "FederalAdhesionForbidden",
       "outcome": "FederalAdhesionForbidden",
       "pass": true,
-      "signature": "2goH6bpJxFjQTzoSJxMUs4f2wugAspLQLNh9nyfEhCYUXC6nMYX6XqayZ4JUh448DbYP9DSryEAddmeDjjEcsncZ",
-      "explorer": "https://explorer.solana.com/tx/2goH6bpJxFjQTzoSJxMUs4f2wugAspLQLNh9nyfEhCYUXC6nMYX6XqayZ4JUh448DbYP9DSryEAddmeDjjEcsncZ?cluster=devnet"
+      "signature": "2ctcfHGy8YxsN7UwQ3J8hg14MWwt3xsuAKUSedabTd7JRTurnqfJtbVEqarpC9D91KbJWKum54bq5riFAMPZaZKC",
+      "slot": 509394902,
+      "explorer": "https://explorer.solana.com/tx/2ctcfHGy8YxsN7UwQ3J8hg14MWwt3xsuAKUSedabTd7JRTurnqfJtbVEqarpC9D91KbJWKum54bq5riFAMPZaZKC?cluster=devnet"
     },
     {
-      "label": "Create price record DEMO-ARP-MUN-mv1bjudp",
+      "label": "Create price record DEMO-ARP-MUN-mv1snte3",
       "basis": "Law 14.133 art. 82; Decree 11.462 art. 22 (validity)",
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "5335hhJwKZ9D2gD7EuEVmPEX7qJiFZoFfqnKULtgNn1hbT2s2xGib13JMPFyqot2FQKmPL76YDgtryjZoUgVCW6w",
-      "explorer": "https://explorer.solana.com/tx/5335hhJwKZ9D2gD7EuEVmPEX7qJiFZoFfqnKULtgNn1hbT2s2xGib13JMPFyqot2FQKmPL76YDgtryjZoUgVCW6w?cluster=devnet"
+      "signature": "5KP8K5nQE1KEGZbW8EKy5wr6sbJsF8z1M5BRvPJatCGnzQurVzT4FQzWdpFGpEMBARFuFBxRFS29tSG6gRx96hQ4",
+      "slot": 509394906,
+      "explorer": "https://explorer.solana.com/tx/5KP8K5nQE1KEGZbW8EKy5wr6sbJsF8z1M5BRvPJatCGnzQurVzT4FQzWdpFGpEMBARFuFBxRFS29tSG6gRx96hQ4?cluster=devnet"
     },
     {
       "label": "Add item 1: 100 registered, adhesion maximum 200",
@@ -189,8 +109,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "5JgnbGbsuMN2V71sb3qdaT9tHiDHidnanuSybQgYvMY1ULSfLWUzDxPXth1ZwnkWRuPfrnK47Mgtyj5qJsKtTDHs",
-      "explorer": "https://explorer.solana.com/tx/5JgnbGbsuMN2V71sb3qdaT9tHiDHidnanuSybQgYvMY1ULSfLWUzDxPXth1ZwnkWRuPfrnK47Mgtyj5qJsKtTDHs?cluster=devnet"
+      "signature": "sAzsksqbNgGgbQD6J4y6bTdLcwaZhYeAa537xvZ61fymAvj84vdJA2QmBcdrNTSkcnnrBHifNipeYE6f9LuUTTe",
+      "slot": 509394910,
+      "explorer": "https://explorer.solana.com/tx/sAzsksqbNgGgbQD6J4y6bTdLcwaZhYeAa537xvZ61fymAvj84vdJA2QmBcdrNTSkcnnrBHifNipeYE6f9LuUTTe?cluster=devnet"
     },
     {
       "label": "Secretaria Estadual (AL) requests 10 units",
@@ -198,8 +119,29 @@
       "expected": "MunicipalAdhesionForbidden",
       "outcome": "MunicipalAdhesionForbidden",
       "pass": true,
-      "signature": "374qWD2DnjqSeZLiEoE1B3m2p3mVegcXA6DfFaRR8bnwcGS7HZ1eaXJb5hSaoddEwvWjt5eYoXde6V4vEeBGfoy1",
-      "explorer": "https://explorer.solana.com/tx/374qWD2DnjqSeZLiEoE1B3m2p3mVegcXA6DfFaRR8bnwcGS7HZ1eaXJb5hSaoddEwvWjt5eYoXde6V4vEeBGfoy1?cluster=devnet"
+      "signature": "3XhS3CyXqbbW8CmFimm5oyrZq3XNugWhAKD6MdxSjchYzfULowJQPbmxxJAWHUd6s2JxXN9VuRJpEp8JMq4kWgoF",
+      "slot": 509394914,
+      "explorer": "https://explorer.solana.com/tx/3XhS3CyXqbbW8CmFimm5oyrZq3XNugWhAKD6MdxSjchYzfULowJQPbmxxJAWHUd6s2JxXN9VuRJpEp8JMq4kWgoF?cluster=devnet"
+    },
+    {
+      "label": "Supplier declines Prefeitura D's adhesion: its 50 units return to the pool",
+      "basis": "Decree 11.462 art. 31 III (supplier acceptance)",
+      "expected": "ok",
+      "outcome": "ok",
+      "pass": true,
+      "signature": "3iUD4vH74huoQrSZ44auWzKxxG663iVZhKDsjXEr6NFuXWmSYAcsow9numdrJZa5ot8kgxZj3WYWAPf1LMXX1V5C",
+      "slot": 509394918,
+      "explorer": "https://explorer.solana.com/tx/3iUD4vH74huoQrSZ44auWzKxxG663iVZhKDsjXEr6NFuXWmSYAcsow9numdrJZa5ot8kgxZj3WYWAPf1LMXX1V5C?cluster=devnet"
+    },
+    {
+      "label": "Anyone closes the rejected request; rent returns to the sponsor",
+      "basis": "Rent recovery (no state of value is lost)",
+      "expected": "ok",
+      "outcome": "ok",
+      "pass": true,
+      "signature": "2YwoANJsSSw6dto51dxzJ7TJTTdDJFqJCgCky6rLCFRU7xa2A8pc2ayPCd7kdgRiar2tccQ8NonERQycarAPNX4Y",
+      "slot": 509394922,
+      "explorer": "https://explorer.solana.com/tx/2YwoANJsSSw6dto51dxzJ7TJTTdDJFqJCgCky6rLCFRU7xa2A8pc2ayPCd7kdgRiar2tccQ8NonERQycarAPNX4Y?cluster=devnet"
     },
     {
       "label": "Supplier accepts Prefeitura A's adhesion by signature",
@@ -207,8 +149,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "4T9vgucdtQe3bjXe9rvnfDQqvCP3HiSA3aAiJFuYAQr8WEDfUchM5H8SL2EU6G8EN7e2n6BhjExZxZV2YPic21PL",
-      "explorer": "https://explorer.solana.com/tx/4T9vgucdtQe3bjXe9rvnfDQqvCP3HiSA3aAiJFuYAQr8WEDfUchM5H8SL2EU6G8EN7e2n6BhjExZxZV2YPic21PL?cluster=devnet"
+      "signature": "2p8vW333WNAZfA9Zu8tzmiqNUpCXLNRRygLkAKyTyEwchGRrtLcZrbpDKWX7xbx7yS8jGLrrDzmMKa4btT1vGif2",
+      "slot": 509394926,
+      "explorer": "https://explorer.solana.com/tx/2p8vW333WNAZfA9Zu8tzmiqNUpCXLNRRygLkAKyTyEwchGRrtLcZrbpDKWX7xbx7yS8jGLrrDzmMKa4btT1vGif2?cluster=devnet"
     },
     {
       "label": "Managing agency authorizes 50 units",
@@ -216,8 +159,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "5qcJKT3BBGz8BmtBa1s8Bwy7DGe3rXtmYquEnEhDW5gDgTEXF823wjcM6HFVNUXn4nb1LEutXExWTbfZj5xTodfr",
-      "explorer": "https://explorer.solana.com/tx/5qcJKT3BBGz8BmtBa1s8Bwy7DGe3rXtmYquEnEhDW5gDgTEXF823wjcM6HFVNUXn4nb1LEutXExWTbfZj5xTodfr?cluster=devnet"
+      "signature": "5G2FmmtVLYcRxpeygP8jpposv8tSEDmZKdmyXakbYYkLiRmi1DahkYK883EqhWJXNprfGpE2djBu1dNphi2mRstG",
+      "slot": 509394930,
+      "explorer": "https://explorer.solana.com/tx/5G2FmmtVLYcRxpeygP8jpposv8tSEDmZKdmyXakbYYkLiRmi1DahkYK883EqhWJXNprfGpE2djBu1dNphi2mRstG?cluster=devnet"
     },
     {
       "label": "Prefeitura A executes the purchase (nota de empenho)",
@@ -225,8 +169,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "55sspY9shTNnuUcG85y2G3RgdrC8o1NoXwrdAexBXPJUzzsnGHGuhNhRrig4Ayn5StXWBEnbWuUJspEApFSzTSUb",
-      "explorer": "https://explorer.solana.com/tx/55sspY9shTNnuUcG85y2G3RgdrC8o1NoXwrdAexBXPJUzzsnGHGuhNhRrig4Ayn5StXWBEnbWuUJspEApFSzTSUb?cluster=devnet"
+      "signature": "4oxa9EeLaxJHYKocfX4P8SrdFN8jKktUM9posJ1vEzHyjunnGmW9PbEsTGuXgCfbiVf9gzFs4hSk2LqkgCNquXiC",
+      "slot": 509394934,
+      "explorer": "https://explorer.solana.com/tx/4oxa9EeLaxJHYKocfX4P8SrdFN8jKktUM9posJ1vEzHyjunnGmW9PbEsTGuXgCfbiVf9gzFs4hSk2LqkgCNquXiC?cluster=devnet"
     },
     {
       "label": "Prefeitura A records a verified obligation of R$ 10.000,00",
@@ -234,8 +179,19 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "x9KigLNK2C1uhSYzq7zuVNjKSGmKGMyRoGDsxYJ99mgKHr8nPCaruVkEgbxp5PyV6FkmJgyttSMu9xnLzxk559u",
-      "explorer": "https://explorer.solana.com/tx/x9KigLNK2C1uhSYzq7zuVNjKSGmKGMyRoGDsxYJ99mgKHr8nPCaruVkEgbxp5PyV6FkmJgyttSMu9xnLzxk559u?cluster=devnet"
+      "signature": "2HfKjGDYvGL98KDv3GMYvvMDrvLQNZUBuSfMawYcGDLYME563pnm4huFXVRLhinUEbUkNYhWLEB85o3hs1hU3a2d",
+      "slot": 509394938,
+      "explorer": "https://explorer.solana.com/tx/2HfKjGDYvGL98KDv3GMYvvMDrvLQNZUBuSfMawYcGDLYME563pnm4huFXVRLhinUEbUkNYhWLEB85o3hs1hU3a2d?cluster=devnet"
+    },
+    {
+      "label": "A second obligation citing the same adhesion, R$ 0,01 beyond its value",
+      "basis": "Obligations ≤ authorized quantity × unit price (50 × R$ 200,00)",
+      "expected": "ExceedsAdhesionValue",
+      "outcome": "ExceedsAdhesionValue",
+      "pass": true,
+      "signature": "4oEz9vhSoobTVF5N8KCywvtH1Qke7HWr5jV1pCHKmJEAbxzCiHtcv1LtGJKrdvLEqNkaVp5typAhnDppotsaon2u",
+      "slot": 509394942,
+      "explorer": "https://explorer.solana.com/tx/4oEz9vhSoobTVF5N8KCywvtH1Qke7HWr5jV1pCHKmJEAbxzCiHtcv1LtGJKrdvLEqNkaVp5typAhnDppotsaon2u?cluster=devnet"
     },
     {
       "label": "Attach fiscal document (hash of the NF-e key)",
@@ -243,8 +199,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "5nZG5zC37UJdbAXGNyT5DHE15WhK4afhXYMd8kdxdmWjpYwfVaBL9D5unwHgZ7Kk6eZML9Ydv7D3AeHKpLLB3BGi",
-      "explorer": "https://explorer.solana.com/tx/5nZG5zC37UJdbAXGNyT5DHE15WhK4afhXYMd8kdxdmWjpYwfVaBL9D5unwHgZ7Kk6eZML9Ydv7D3AeHKpLLB3BGi?cluster=devnet"
+      "signature": "5MuyqX1cYyPQFQUPgUq3e8vY4vKfN7GZhn582NYnTiMC7pZ9jxbdy12LV59KVGfGHZaNBLehEWfUarJ17jpXzixZ",
+      "slot": 509394955,
+      "explorer": "https://explorer.solana.com/tx/5MuyqX1cYyPQFQUPgUq3e8vY4vKfN7GZhn582NYnTiMC7pZ9jxbdy12LV59KVGfGHZaNBLehEWfUarJ17jpXzixZ?cluster=devnet"
     },
     {
       "label": "Designated verifier confirms eligibility",
@@ -252,8 +209,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "4DBejkBZXyitjDpCw4ZFM3HohquwzXuznWwGvRBGoXVUeAzpC8QbdyWYkMWF8Nv7WpCfq7Tcpi6JXHGuwY95gRRd",
-      "explorer": "https://explorer.solana.com/tx/4DBejkBZXyitjDpCw4ZFM3HohquwzXuznWwGvRBGoXVUeAzpC8QbdyWYkMWF8Nv7WpCfq7Tcpi6JXHGuwY95gRRd?cluster=devnet"
+      "signature": "5mpZV8mXpyZkw2vbXFFrv7aGaWEDEsfoMM1cvMw6F3NjQ32brtXf73X8ipcsCWUzQtdUUZ32BeMBG5nMh2LxD2sR",
+      "slot": 509394964,
+      "explorer": "https://explorer.solana.com/tx/5mpZV8mXpyZkw2vbXFFrv7aGaWEDEsfoMM1cvMw6F3NjQ32brtXf73X8ipcsCWUzQtdUUZ32BeMBG5nMh2LxD2sR?cluster=devnet"
     },
     {
       "label": "Financier A advances R$ 6.000,00 (creditor co-signs)",
@@ -261,8 +219,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "3gVKDcQ5wVTt9URN3S6xJe7NTHjbijgFL2e6csbNpF9om6K1Lc3jkyPGC73qG5kUzg4TgboMSKsvDzrrXkk6Vbga",
-      "explorer": "https://explorer.solana.com/tx/3gVKDcQ5wVTt9URN3S6xJe7NTHjbijgFL2e6csbNpF9om6K1Lc3jkyPGC73qG5kUzg4TgboMSKsvDzrrXkk6Vbga?cluster=devnet"
+      "signature": "4M9x298atUGwD5cQKuHdfUBqPr2sUrekGjK8ju9dffajgdn7vTtm5ZqBW43LBLBK18yAkWT6jMvMs5wF5dW3E4ds",
+      "slot": 509394968,
+      "explorer": "https://explorer.solana.com/tx/4M9x298atUGwD5cQKuHdfUBqPr2sUrekGjK8ju9dffajgdn7vTtm5ZqBW43LBLBK18yAkWT6jMvMs5wF5dW3E4ds?cluster=devnet"
     },
     {
       "label": "Financier B advances R$ 4.000,00",
@@ -270,8 +229,9 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "3oGwnzn1Udu4duxeHjGVPyo9uW5FTM3t9UE4d49gqxEUFCXNMn6QiQKUqhvn9csP53ruM5kMrqf5pB6JBz4fJ6mq",
-      "explorer": "https://explorer.solana.com/tx/3oGwnzn1Udu4duxeHjGVPyo9uW5FTM3t9UE4d49gqxEUFCXNMn6QiQKUqhvn9csP53ruM5kMrqf5pB6JBz4fJ6mq?cluster=devnet"
+      "signature": "45Goom6TZM89c5BtAGWeLmvcmoHd19435nbSaYTJaL4fB6pBhJ7PiQkjmVu9oTAVY7EdypWx5BrTbLonkvPcVTUj",
+      "slot": 509394974,
+      "explorer": "https://explorer.solana.com/tx/45Goom6TZM89c5BtAGWeLmvcmoHd19435nbSaYTJaL4fB6pBhJ7PiQkjmVu9oTAVY7EdypWx5BrTbLonkvPcVTUj?cluster=devnet"
     },
     {
       "label": "Financier A tries to finance R$ 0,01 more",
@@ -279,8 +239,9 @@
       "expected": "ExceedsFinanceableBalance",
       "outcome": "ExceedsFinanceableBalance",
       "pass": true,
-      "signature": "2KoQGRQWVqLhTaVS16k4QHxxXkLrZ2UDGcKaPCPsQqrVHvg1DbmKV1HnycQ6RJu6FjU3b6v53Qc2YbmqKwmt4bxY",
-      "explorer": "https://explorer.solana.com/tx/2KoQGRQWVqLhTaVS16k4QHxxXkLrZ2UDGcKaPCPsQqrVHvg1DbmKV1HnycQ6RJu6FjU3b6v53Qc2YbmqKwmt4bxY?cluster=devnet"
+      "signature": "PAp46RjYV7gWPzD8VjxkMVyFQ8qZXfVuk2UN6CLBDkPYoKFME5EbJCCwgzzcYTheCXnNEUgVD3HYbzxdiBnaSPQ",
+      "slot": 509394986,
+      "explorer": "https://explorer.solana.com/tx/PAp46RjYV7gWPzD8VjxkMVyFQ8qZXfVuk2UN6CLBDkPYoKFME5EbJCCwgzzcYTheCXnNEUgVD3HYbzxdiBnaSPQ?cluster=devnet"
     },
     {
       "label": "Prefeitura A records payment of R$ 10.000,00",
@@ -288,8 +249,39 @@
       "expected": "ok",
       "outcome": "ok",
       "pass": true,
-      "signature": "WsdmBccz5QVzMY2zgsH4hGSDq5aKeaaBnG1oocXseDJncv4189D4BoYkSx7799o99241YLLuGzgGDyx5PAvb1rm",
-      "explorer": "https://explorer.solana.com/tx/WsdmBccz5QVzMY2zgsH4hGSDq5aKeaaBnG1oocXseDJncv4189D4BoYkSx7799o99241YLLuGzgGDyx5PAvb1rm?cluster=devnet"
+      "signature": "7eWVipEioqjmcpM8wnKREH3rUHVtzGfHsqo8WBEQztdCpVNXQ24wed94j3MQhfkNiktA8NieYsN59hDpPzP2UTo",
+      "slot": 509394992,
+      "explorer": "https://explorer.solana.com/tx/7eWVipEioqjmcpM8wnKREH3rUHVtzGfHsqo8WBEQztdCpVNXQ24wed94j3MQhfkNiktA8NieYsN59hDpPzP2UTo?cluster=devnet"
+    },
+    {
+      "label": "Anyone closes financing #0 of the settled obligation; rent returns to the sponsor",
+      "basis": "Rent recovery after settlement",
+      "expected": "ok",
+      "outcome": "ok",
+      "pass": true,
+      "signature": "4Yztmx112dRU5qP1SM1vzhqKodmnh3PaYxfCXSohAYNi4by3aEQrwJ4FT275eqmU12syMBdSYC3suYeaqeBxaQ4A",
+      "slot": 509395005,
+      "explorer": "https://explorer.solana.com/tx/4Yztmx112dRU5qP1SM1vzhqKodmnh3PaYxfCXSohAYNi4by3aEQrwJ4FT275eqmU12syMBdSYC3suYeaqeBxaQ4A?cluster=devnet"
+    },
+    {
+      "label": "Anyone closes financing #1 of the settled obligation; rent returns to the sponsor",
+      "basis": "Rent recovery after settlement",
+      "expected": "ok",
+      "outcome": "ok",
+      "pass": true,
+      "signature": "4zZNj2rESmsvQCKSWPcUEDGkyCj1cE4TYLCJ2MfV7tHNRmgARTexGe82ignEws1ZJrZNLNQHLvgav9r8GRpdNuFk",
+      "slot": 509395024,
+      "explorer": "https://explorer.solana.com/tx/4zZNj2rESmsvQCKSWPcUEDGkyCj1cE4TYLCJ2MfV7tHNRmgARTexGe82ignEws1ZJrZNLNQHLvgav9r8GRpdNuFk?cluster=devnet"
+    },
+    {
+      "label": "Anyone closes the settled obligation; its fiscal document stays as the anti-reuse marker",
+      "basis": "Rent recovery after settlement",
+      "expected": "ok",
+      "outcome": "ok",
+      "pass": true,
+      "signature": "55cG1J5e2bRempPXsTByn2P7YvHvbQxwC8YJLuYUGeu5KLFok9SQDbMAADTcgWBiwqou6dNm8jA8YacZ5s6nF6fL",
+      "slot": 509395028,
+      "explorer": "https://explorer.solana.com/tx/55cG1J5e2bRempPXsTByn2P7YvHvbQxwC8YJLuYUGeu5KLFok9SQDbMAADTcgWBiwqou6dNm8jA8YacZ5s6nF6fL?cluster=devnet"
     }
   ],
   "agency_wallet_lamports": [
@@ -304,9 +296,9 @@
   ],
   "accounts": {
     "registry": "2gsNHY73voZ1A2mHsrJ7VSRdfZo2uiuXKFrukEB6DMno",
-    "ata": "A1X8YBDXzXzjqmBCJU8PN59hYs4Xra6tfvkTPJ6ceywV",
-    "item": "2hSoBAXTypXeJGY7EKrVCGbCFXeahHfxixbkk3ZAHihd",
-    "obligation": "9cPTvUnoas4MjJFZMjEPc2bhGBhhwkkwBbmEkwTYG7f5"
+    "ata": "GivgxifUeF9PjJWTPjhXkbcfpFKu77XuvfCphJgJ4mjv",
+    "item": "fYRz1fKzhfZTJm2U99qCcDNxhehQL6cnDgerJoXqKDU",
+    "obligation": "B7hFAdCDNonmT8naCXUXGx1mWvyuiy8JEtfqjooVPAUn"
   },
-  "finished_at": "2026-10-09T18:49:33.145Z"
+  "finished_at": "2026-10-10T02:48:36.080Z"
 }
