@@ -18,13 +18,13 @@ Built for the Colosseum **Crypto World's Fair** hackathon (Solana track).
 | Module 1 — Carona (art. 86 + Decree 11.462/2023 + Alagoas profile) | Implemented, 17 integration tests |
 | Module 2 — Obligations (single financing) | Implemented, 8 integration tests |
 | Integration test environment | LiteSVM (in-process Solana VM running the compiled program) |
-| Devnet deployment | **Live**, audited binary — [`5cmBDMRd…jz9E`](https://explorer.solana.com/address/5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E?cluster=devnet); scripted scenario and parallel-submission concurrency test in [`docs/DEVNET.md`](docs/DEVNET.md) |
+| Devnet deployment | **Live**, audited binary — [`5cmBDMRd…jz9E`](https://explorer.solana.com/address/5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E?cluster=devnet); scripted scenario and parallel-submission concurrency test in [`docs/DEVNET.md`](docs/DEVNET.md); binary built before the rename, under the former name Solutio (same program ID and behavior) |
 | TypeScript client + IDL (`client/`) | Demo script used for the devnet run; cost measurement script |
 | Framework (`framework/`) | Evidence base, rulebook (24 rules across Brazil, Alagoas and the EU), reference engine, 12 scenario replays, unit economics from measured devnet costs; 22 tests |
 | Public verifier page | **Not yet** |
 | Financing pool (test stablecoin) | **Not started** — experimental, optional |
 
-Last full test run: 51 passed, 0 failed (2026-10-09). Devnet uses test SOL and DEMO identities with fictional names. No real funds, no real government data, no pilot or partnership is claimed.
+Last full test run: 51 passed, 0 failed (2026-10-09). After the rename to Marjan (2026-10-11) the LiteSVM suites have **not** been rerun yet: the code compiles and the 13 rules tests and 22 framework tests pass. Devnet uses test SOL and DEMO identities with fictional names. No real funds, no real government data, no pilot or partnership is claimed.
 
 ---
 
