@@ -1,5 +1,5 @@
 //! Every state transition emits an event, so the full history can be rebuilt
-//! from the ledger by anyone, without trusting a Solutio interface.
+//! from the ledger by anyone, without trusting a Marjan interface.
 use anchor_lang::prelude::*;
 
 use crate::state::{AdhesionException, AtaStatus};

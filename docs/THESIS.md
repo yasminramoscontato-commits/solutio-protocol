@@ -13,7 +13,7 @@ Evidence ids refer to [`framework/EVIDENCE.md`](framework/EVIDENCE.md). Scenario
 
 | # | Hypothesis | Status | Evidence | Gap / next step |
 | --- | --- | --- | --- | --- |
-| H1 | Statutory adhesion caps break in practice | **Validated** | `BR-TCU-547-2026` (negative balances, rounding up, authorization after expiry); `BR-TCU-1487-2007`; scenarios S02–S04 reproduce the outcomes and show Solutio refusing them | How often it happens across all records is unknown: the TCU itself could not extract reliable balances |
+| H1 | Statutory adhesion caps break in practice | **Validated** | `BR-TCU-547-2026` (negative balances, rounding up, authorization after expiry); `BR-TCU-1487-2007`; scenarios S02–S04 reproduce the outcomes and show Marjan refusing them | How often it happens across all records is unknown: the TCU itself could not extract reliable balances |
 | H2 | No shared state exists across systems and spheres | **Validated** | 179 systems run price registration (`BR-TCU-547-2026`); the national procurement portal (PNCP) does not count adherents' contracts; field observation of 3–4 parallel records per adhesion (`FIELD-STATE-CPB`) | Interviews to measure reconciliation effort (hours per adhesion) |
 | H3 | The same structural rule exists outside Brazil | **Validated (legal)** / **Partial (market)** | `EU-CJEU-C216-17`, `EU-CJEU-C23-20`, `US-GAO-05-201`; scenario S08 runs the EU rule on the same engine | No evidence yet of foreign buyers' demand; next step is a conversation with one EU central purchasing body |
 | H4 | Financing the same asset twice is a real loss mode, and government receivables lack the registry that private receivables have | **Validated** | `GL-QINGDAO-2014` (conviction); `GL-FIRSTBRANDS-2025` and `GL-TRICOLOR-2025` (allegations); `BR-BCB-RECEIVABLES` vs `BR-ANTECIPAGOV`; scenario S09 | Whether electronic duplicatas could legally carry government receivables is unverified |
@@ -24,7 +24,7 @@ Evidence ids refer to [`framework/EVIDENCE.md`](framework/EVIDENCE.md). Scenario
 
 ## Why a public chain and not a better central system
 
-The TCU's recommendations for the federal adhesion module (items 9.1.1.6 to 9.1.1.12 and 9.1.3.2) describe what Solutio does by construction:
+The TCU's recommendations for the federal adhesion module (items 9.1.1.6 to 9.1.1.12 and 9.1.3.2) describe what Marjan does by construction:
 - round down;
 - block adhesions when no quantity is available;
 - block authorization after expiry;
@@ -40,6 +40,6 @@ The honest counter-argument stays in the README: if one operator were trusted by
 
 ## What the evidence does not show
 
-- That Solutio would have prevented any specific case cited. The cases show the failure modes; the scenarios show the rules refusing them.
+- That Marjan would have prevented any specific case cited. The cases show the failure modes; the scenarios show the rules refusing them.
 - Any pilot, partnership, user or transaction with real public money. Everything on devnet uses DEMO identities.
 - That the framework's economics are a forecast. They are scenarios built on stated assumptions and on costs measured on devnet.

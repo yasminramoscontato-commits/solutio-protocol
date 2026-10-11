@@ -3,14 +3,14 @@ skip_local_validator = true
 [toolchain]
 
 [features]
-resolution = true
+remarjann = true
 skip-lint = false
 
 [programs.localnet]
-solutio = "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E"
+marjan = "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E"
 
 [programs.devnet]
-solutio = "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E"
+marjan = "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E"
 
 [provider]
 cluster = "localnet"

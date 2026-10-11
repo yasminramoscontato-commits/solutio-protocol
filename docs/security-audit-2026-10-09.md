@@ -1,5 +1,7 @@
 # Security and conformance audit — 2026-10-09
 
+> Written when the project was named Solutio. Paths such as `programs/solutio` are now `programs/marjan`, and `Program<Solutio>` is `Program<Marjan>`; the findings and line numbers refer to the code as audited.
+
 Audit of `programs/solutio` (commit `8407f77`) and the surrounding repository against the **Solana AI Kit 2.3.0** (Superteam / `solanabr/ai-kit`): the house rules in `CLAUDE-solana.md`, the `/audit-solana` checklist, `/build-program`, `/test-rust`, `/profile-cu`, the `solana-qa-engineer` coverage bar and the `deployment.md` runbook.
 
 The kit's external skill packs (`auditor-skill`, `solana-dev`) are git submodules and were not in the archive, so the checklist applied is the one written inline in `/audit-solana`, not auditor-skill's itemized checklists.

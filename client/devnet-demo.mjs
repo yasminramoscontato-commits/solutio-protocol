@@ -1,4 +1,4 @@
-// Solutio — scripted demo against the program deployed on Solana devnet.
+// Marjan — scripted demo against the program deployed on Solana devnet.
 //
 // Every step is a real devnet transaction. Steps that the law forbids are
 // submitted on purpose with preflight disabled, so the rejection itself is

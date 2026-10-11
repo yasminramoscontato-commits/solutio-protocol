@@ -7,7 +7,7 @@
 
 use anchor_lang::prelude::*;
 
-use crate::{constants::*, error::ErrorCode, events::*, program::Solutio, state::*};
+use crate::{constants::*, error::ErrorCode, events::*, program::Marjan, state::*};
 
 #[derive(Accounts)]
 pub struct InitRegistry<'info> {
@@ -17,7 +17,7 @@ pub struct InitRegistry<'info> {
     /// initialization of a fresh deployment.
     pub authority: Signer<'info>,
     #[account(constraint = program.programdata_address()? == Some(program_data.key()) @ ErrorCode::AccountMismatch)]
-    pub program: Program<'info, Solutio>,
+    pub program: Program<'info, Marjan>,
     #[account(constraint = program_data.upgrade_authority_address == Some(authority.key()) @ ErrorCode::Unauthorized)]
     pub program_data: Account<'info, ProgramData>,
     #[account(

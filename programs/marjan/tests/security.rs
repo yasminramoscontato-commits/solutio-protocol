@@ -3,9 +3,9 @@
 mod common;
 
 use common::*;
+use marjan::{constants::RESPONSE_WINDOW_SECS, error::ErrorCode, state::*};
 use solana_keypair::Keypair;
 use solana_signer::Signer;
-use solutio::{constants::RESPONSE_WINDOW_SECS, error::ErrorCode, state::*};
 
 const BRL_10K: u64 = 1_000_000;
 
@@ -201,7 +201,7 @@ fn l5_long_agency_names_get_their_own_error() {
     let mut env = Env::new();
     let authority = Keypair::new();
     let ix = env.ix(
-        solutio::instruction::RegisterAgency {
+        marjan::instruction::RegisterAgency {
             sphere: Sphere::Municipal,
             name: "x".repeat(65),
             attributes: AgencyAttributes {
@@ -210,7 +210,7 @@ fn l5_long_agency_names_get_their_own_error() {
                 profile: RuleProfile::Baseline,
             },
         },
-        solutio::accounts::RegisterAgency {
+        marjan::accounts::RegisterAgency {
             payer: env.sponsor.pubkey(),
             registry_authority: env.registry_authority.pubkey(),
             registry: env.registry(),
@@ -323,14 +323,14 @@ fn invalid_validity_and_zero_amounts_are_refused() {
     let ata_id = hash("ARP-BAD");
     let now = env.now();
     let ix = env.ix(
-        solutio::instruction::CreateAta {
+        marjan::instruction::CreateAta {
             ata_id,
             supplier: Keypair::new().pubkey(),
             doc_hash: hash("doc"),
             valid_from: now,
             valid_until: now,
         },
-        solutio::accounts::CreateAta {
+        marjan::accounts::CreateAta {
             payer: env.sponsor.pubkey(),
             manager_authority: manager.pubkey(),
             manager_agency,

@@ -3,9 +3,9 @@
 mod common;
 
 use common::*;
+use marjan::{error::ErrorCode, state::*};
 use solana_keypair::Keypair;
 use solana_signer::Signer;
-use solutio::{error::ErrorCode, state::*};
 
 const BRL_10K: u64 = 1_000_000; // R$ 10.000,00 in cents
 

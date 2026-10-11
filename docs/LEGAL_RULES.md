@@ -1,6 +1,6 @@
 # Legal rules implemented — traceability matrix
 
-Each row links a legal source to the code that enforces it and to the tests that prove the behavior. Profiles: **Baseline — Law 14.133/2021, art. 86, as regulated in the federal sphere by Decree 11.462/2023, arts. 31–33**, and **Alagoas — State Decree 95.019/2023** (see the profile section below). Balance accounting mirrors the federal *Gestão de Atas* tool (Compras.gov.br and SIASGnet). Unit tests live in `programs/solutio/src/rules.rs`; integration tests in `programs/solutio/tests/`.
+Each row links a legal source to the code that enforces it and to the tests that prove the behavior. Profiles: **Baseline — Law 14.133/2021, art. 86, as regulated in the federal sphere by Decree 11.462/2023, arts. 31–33**, and **Alagoas — State Decree 95.019/2023** (see the profile section below). Balance accounting mirrors the federal *Gestão de Atas* tool (Compras.gov.br and SIASGnet). Unit tests live in `programs/marjan/src/rules.rs`; integration tests in `programs/marjan/tests/`.
 
 Sources consulted: Law 14.133/2021; Decree 11.462/2023; Alagoas Decrees 95.019/2023 and 90.391/2023; *Manual de Gestão de Atas de Registro de Preços* (Compras.gov.br); *Guia Prático – Gestão de Ata SRP/SIASGnet* (legacy guide written under the revoked Decree 7.892/2013, used here only for its balance formulas).
 
@@ -31,16 +31,16 @@ Sources consulted: Law 14.133/2021; Decree 11.462/2023; Alagoas Decrees 95.019/2
 
 ## Profile: Alagoas (Decree 95.019/2023)
 
-Alagoas regulates arts. 82–86 for its direct, autarchic and foundational administration with a text that closely follows the federal decree. Article-by-article comparison of what matters for Solutio:
+Alagoas regulates arts. 82–86 for its direct, autarchic and foundational administration with a text that closely follows the federal decree. Article-by-article comparison of what matters for Marjan:
 
-| Topic | Alagoas 95.019/2023 | Federal 11.462/2023 | In Solutio |
+| Topic | Alagoas 95.019/2023 | Federal 11.462/2023 | In Marjan |
 | --- | --- | --- | --- |
 | Order: supplier accepts, then manager authorizes; 90 days to execute; extension within validity | art. 31 §§1–3 | art. 31 §§1–3 | Same code path (C5, C11, C12) |
 | 50% per agency; 2x in total | art. 32, I–II | art. 32, I–II | Same (C1, C2) |
 | Emergency medicines under a Ministry of Health record exempt from 2x | art. 32 §1 (state agencies) | art. 32 §1 | Same (C7) |
 | Adhesion that may be required for voluntary transfers | art. 32 §2: **municipal** adhesion, for state transfers | art. 32 §2: subnational adhesion, federal programmes | The 2x exemption comes from Law art. 86 §6, which covers only federal records: a state programme does not lift the cap (C8) |
 | Restriction on adhering to other spheres | art. 33: **state agencies may not adhere to municipal records, except state capitals** | art. 33: federal agencies may not adhere to non-federal records | New rule C18, active under the `Alagoas` profile |
-| Tool for balances and adhesion requests | art. 24: the federal *Gestão de Atas* (Compras.gov.br), via Termo de Acesso (arts. 5–6) | art. 24 equivalent | Solutio complements, not replaces, the official tool |
+| Tool for balances and adhesion requests | art. 24: the federal *Gestão de Atas* (Compras.gov.br), via Termo de Acesso (arts. 5–6) | art. 24 equivalent | Marjan complements, not replaces, the official tool |
 | Adhering to a record managed outside Alagoas | art. 7, XI: the state managing body deliberates on it | — | Not modeled: human gate, recordable as evidence |
 
 **Approval gates from Alagoas Decree 90.391/2023 (not modeled, recorded as evidence when relevant):** AMGESP's Director-President homologates price-record tenders (art. 2, III); processes above R$ 350,000.00 go to SEGOV after the State Attorney's Office (art. 3); secretaries ratify contracts arising from adhesions once SEGOV has checked the demand against government priorities (art. 4).

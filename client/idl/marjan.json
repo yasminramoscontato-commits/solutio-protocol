@@ -1,10 +1,10 @@
 {
   "address": "5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E",
   "metadata": {
-    "name": "solutio",
+    "name": "marjan",
     "version": "0.1.0",
     "spec": "0.1.0",
-    "description": "Solutio: verifiable legal limits and single-financing control for public procurement obligations"
+    "description": "Marjan: verifiable legal limits and single-financing control for public procurement obligations"
   },
   "instructions": [
     {

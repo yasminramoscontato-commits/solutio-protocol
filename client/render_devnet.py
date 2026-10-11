@@ -23,10 +23,10 @@ def main() -> None:
     lines = [
         "# Devnet runs",
         "",
-        "The Solutio program is deployed on **Solana devnet**. Every row below is a real devnet transaction you can open in the explorer.",
+        "The Marjan program is deployed on **Solana devnet**. Every row below is a real devnet transaction you can open in the explorer.",
         "",
         f"- Program: [`{prog}`](https://explorer.solana.com/address/{prog}?cluster=devnet)",
-        f"- Current binary: SHA-256 `{PROGRAM_SHA256}` (the audited version, commit `38d8baa`; checked against `solana program dump`). "
+        f"- Current binary: SHA-256 `{PROGRAM_SHA256}` (the audited version, commit `38d8baa`; checked against `solana program dump`). It was built under the project's former name, Solutio; the rename changes no instruction, account or seed, so a binary rebuilt under the new name behaves the same but has a different hash. "
         f"Upgrade transaction: [`{UPGRADE_SIG[:16]}…`](https://explorer.solana.com/tx/{UPGRADE_SIG}?cluster=devnet).",
         "- An earlier run of 32 transactions against the pre-audit binary is preserved in the git history (commit `722f683`, this file).",
         "",
@@ -89,7 +89,7 @@ def main() -> None:
         "```",
         "",
         "Requires a funded devnet keypair at `~/.config/solana/devnet-deployer.json` (the program's upgrade authority, which is also "
-        "the registry authority). Set `SOLUTIO_RPC=http://127.0.0.1:8899` to run against a local validator; local runs write "
+        "the registry authority). Set `MARJAN_RPC=http://127.0.0.1:8899` to run against a local validator; local runs write "
         "`*.localnet.json` and never overwrite the devnet records.",
         "",
     ]

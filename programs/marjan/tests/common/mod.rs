@@ -1,5 +1,5 @@
 //! Shared helpers for LiteSVM integration tests. Every test runs the compiled
-//! program (`target/deploy/solutio.so`) inside an in-process Solana VM, with
+//! program (`target/deploy/marjan.so`) inside an in-process Solana VM, with
 //! real signatures, fees and account constraints.
 #![allow(dead_code)]
 
@@ -9,11 +9,11 @@ use anchor_lang::{
     AccountDeserialize, InstructionData, ToAccountMetas,
 };
 use litesvm::LiteSVM;
+use marjan::{constants::*, error::ErrorCode, state::*};
 use solana_keypair::Keypair;
 use solana_message::{Message, VersionedMessage};
 use solana_signer::Signer;
 use solana_transaction::versioned::VersionedTransaction;
-use solutio::{constants::*, error::ErrorCode, state::*};
 
 pub const DAY: i64 = 86_400;
 /// R$ 1.250,00 per unit, in cents.
@@ -53,9 +53,9 @@ impl Env {
 
     /// Program loaded with `registry_authority` as its upgrade authority, registry not initialized.
     pub fn new_uninitialized() -> Self {
-        let program_id = solutio::id();
+        let program_id = marjan::id();
         let mut svm = LiteSVM::new();
-        let bytes = include_bytes!(concat!(env!("CARGO_TARGET_TMPDIR"), "/../deploy/solutio.so"));
+        let bytes = include_bytes!(concat!(env!("CARGO_TARGET_TMPDIR"), "/../deploy/marjan.so"));
         svm.add_program(program_id, bytes).unwrap();
         let sponsor = Keypair::new();
         svm.airdrop(&sponsor.pubkey(), 100_000_000_000).unwrap();
@@ -83,10 +83,10 @@ impl Env {
 
     pub fn init_registry(&mut self, authority: &Keypair, verifier: Pubkey) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::InitRegistry {
+            marjan::instruction::InitRegistry {
                 eligibility_verifier: verifier,
             },
-            solutio::accounts::InitRegistry {
+            marjan::accounts::InitRegistry {
                 payer: self.sponsor.pubkey(),
                 authority: authority.pubkey(),
                 program: self.program_id,
@@ -100,8 +100,8 @@ impl Env {
 
     pub fn set_verifier(&mut self, signer: &Keypair, new_verifier: Pubkey) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::SetEligibilityVerifier { new_verifier },
-            solutio::accounts::RegistryAdmin {
+            marjan::instruction::SetEligibilityVerifier { new_verifier },
+            marjan::accounts::RegistryAdmin {
                 registry_authority: signer.pubkey(),
                 registry: self.registry(),
             },
@@ -111,8 +111,8 @@ impl Env {
 
     pub fn set_registry_authority(&mut self, current: &Keypair, new: &Keypair) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::SetRegistryAuthority {},
-            solutio::accounts::SetRegistryAuthority {
+            marjan::instruction::SetRegistryAuthority {},
+            marjan::accounts::SetRegistryAuthority {
                 registry_authority: current.pubkey(),
                 new_authority: new.pubkey(),
                 registry: self.registry(),
@@ -123,8 +123,8 @@ impl Env {
 
     pub fn set_agency_active(&mut self, signer: &Keypair, agency_authority: &Pubkey, active: bool) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::SetAgencyActive { active },
-            solutio::accounts::SetAgencyActive {
+            marjan::instruction::SetAgencyActive { active },
+            marjan::accounts::SetAgencyActive {
                 registry_authority: signer.pubkey(),
                 registry: self.registry(),
                 agency: self.agency(agency_authority),
@@ -135,8 +135,8 @@ impl Env {
 
     pub fn close_request(&mut self, request: &Pubkey, rent_payer: &Pubkey) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::CloseRequest {},
-            solutio::accounts::CloseRequest {
+            marjan::instruction::CloseRequest {},
+            marjan::accounts::CloseRequest {
                 request: *request,
                 rent_payer: *rent_payer,
             },
@@ -146,8 +146,8 @@ impl Env {
 
     pub fn close_financing(&mut self, obligation: &Pubkey, financing: &Pubkey, rent_payer: &Pubkey) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::CloseFinancing {},
-            solutio::accounts::CloseFinancing {
+            marjan::instruction::CloseFinancing {},
+            marjan::accounts::CloseFinancing {
                 obligation: *obligation,
                 financing: *financing,
                 rent_payer: *rent_payer,
@@ -158,8 +158,8 @@ impl Env {
 
     pub fn close_obligation(&mut self, obligation: &Pubkey, rent_payer: &Pubkey) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::CloseObligation {},
-            solutio::accounts::CloseObligation {
+            marjan::instruction::CloseObligation {},
+            marjan::accounts::CloseObligation {
                 obligation: *obligation,
                 rent_payer: *rent_payer,
             },
@@ -277,12 +277,12 @@ impl Env {
     pub fn new_agency_with(&mut self, sphere: Sphere, name: &str, attributes: AgencyAttributes) -> Keypair {
         let authority = Keypair::new();
         let ix = self.ix(
-            solutio::instruction::RegisterAgency {
+            marjan::instruction::RegisterAgency {
                 sphere,
                 name: name.to_string(),
                 attributes,
             },
-            solutio::accounts::RegisterAgency {
+            marjan::accounts::RegisterAgency {
                 payer: self.sponsor.pubkey(),
                 registry_authority: self.registry_authority.pubkey(),
                 registry: self.registry(),
@@ -302,14 +302,14 @@ impl Env {
         let ata = self.ata_pda(&manager_agency, &ata_id);
         let now = self.now();
         let ix = self.ix(
-            solutio::instruction::CreateAta {
+            marjan::instruction::CreateAta {
                 ata_id,
                 supplier: *supplier,
                 doc_hash: hash(&format!("{label}-doc")),
                 valid_from: now - DAY,
                 valid_until: now + days_valid * DAY,
             },
-            solutio::accounts::CreateAta {
+            marjan::accounts::CreateAta {
                 payer: self.sponsor.pubkey(),
                 manager_authority: manager.pubkey(),
                 manager_agency,
@@ -331,13 +331,13 @@ impl Env {
     ) -> Result<Pubkey, u32> {
         let item = self.item_pda(ata, item_no);
         let ix = self.ix(
-            solutio::instruction::AddItem {
+            marjan::instruction::AddItem {
                 item_no,
                 registered_qty: qty,
                 max_adhesion_qty: max_adhesion,
                 unit_price: UNIT_PRICE,
             },
-            solutio::accounts::AddItem {
+            marjan::accounts::AddItem {
                 payer: self.sponsor.pubkey(),
                 manager_authority: manager.pubkey(),
                 manager_agency: self.agency(&manager.pubkey()),
@@ -355,11 +355,11 @@ impl Env {
 
     pub fn set_status(&mut self, manager: &Keypair, ata: &Pubkey, status: AtaStatus) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::SetAtaStatus {
+            marjan::instruction::SetAtaStatus {
                 status,
                 evidence_hash: hash("despacho-status"),
             },
-            solutio::accounts::SetAtaStatus {
+            marjan::accounts::SetAtaStatus {
                 manager_authority: manager.pubkey(),
                 manager_agency: self.agency(&manager.pubkey()),
                 ata: *ata,
@@ -380,13 +380,13 @@ impl Env {
         let agency = self.agency(&adherent.pubkey());
         let request = self.request_pda(item, &agency, request_id);
         let ix = self.ix(
-            solutio::instruction::RequestAdhesion {
+            marjan::instruction::RequestAdhesion {
                 request_id,
                 qty,
                 exception,
                 evidence_hash: hash("oficio-justificativa"),
             },
-            solutio::accounts::RequestAdhesion {
+            marjan::accounts::RequestAdhesion {
                 payer: self.sponsor.pubkey(),
                 adherent_authority: adherent.pubkey(),
                 adherent_agency: agency,
@@ -422,8 +422,8 @@ impl Env {
     ) -> Result<(), u32> {
         let agency = self.agency(&adherent.pubkey());
         let ix = self.ix(
-            solutio::instruction::SupplierRespond { accept },
-            solutio::accounts::SupplierRespond {
+            marjan::instruction::SupplierRespond { accept },
+            marjan::accounts::SupplierRespond {
                 supplier: supplier.pubkey(),
                 ata: *ata,
                 item: *item,
@@ -441,9 +441,9 @@ impl Env {
         item: &Pubkey,
         adherent: &Keypair,
         request: &Pubkey,
-    ) -> solutio::accounts::ManagerDecision {
+    ) -> marjan::accounts::ManagerDecision {
         let agency = self.agency(&adherent.pubkey());
-        solutio::accounts::ManagerDecision {
+        marjan::accounts::ManagerDecision {
             manager_authority: manager.pubkey(),
             manager_agency: self.agency(&manager.pubkey()),
             ata: *ata,
@@ -465,7 +465,7 @@ impl Env {
     ) -> Result<(), u32> {
         let accounts = self.decision_accounts(manager, ata, item, adherent, request);
         let ix = self.ix(
-            solutio::instruction::AuthorizeAdhesion {
+            marjan::instruction::AuthorizeAdhesion {
                 authorized_qty: qty,
                 evidence_hash: evidence,
             },
@@ -484,7 +484,7 @@ impl Env {
     ) -> Result<(), u32> {
         let accounts = self.decision_accounts(manager, ata, item, adherent, request);
         let ix = self.ix(
-            solutio::instruction::DenyAdhesion {
+            marjan::instruction::DenyAdhesion {
                 evidence_hash: hash("motivacao"),
             },
             accounts,
@@ -502,17 +502,17 @@ impl Env {
         new_execute_by: i64,
     ) -> Result<(), u32> {
         let accounts = self.decision_accounts(manager, ata, item, adherent, request);
-        let ix = self.ix(solutio::instruction::ExtendExecution { new_execute_by }, accounts);
+        let ix = self.ix(marjan::instruction::ExtendExecution { new_execute_by }, accounts);
         self.send(ix, &[manager])
     }
 
     pub fn formalize(&mut self, adherent: &Keypair, request: &Pubkey) -> Result<(), u32> {
         let r: AdhesionRequest = self.fetch(request);
         let ix = self.ix(
-            solutio::instruction::FormalizeAdhesion {
+            marjan::instruction::FormalizeAdhesion {
                 evidence_hash: hash("nota-de-empenho"),
             },
-            solutio::accounts::FormalizeAdhesion {
+            marjan::accounts::FormalizeAdhesion {
                 adherent_authority: adherent.pubkey(),
                 adherent_agency: self.agency(&adherent.pubkey()),
                 ata: r.ata,
@@ -526,8 +526,8 @@ impl Env {
     pub fn expire(&mut self, item: &Pubkey, adherent: &Keypair, request: &Pubkey) -> Result<(), u32> {
         let agency = self.agency(&adherent.pubkey());
         let ix = self.ix(
-            solutio::instruction::ExpireAdhesion {},
-            solutio::accounts::ExpireAdhesion {
+            marjan::instruction::ExpireAdhesion {},
+            marjan::accounts::ExpireAdhesion {
                 item: *item,
                 usage: self.usage_pda(item, &agency),
                 request: *request,
@@ -568,13 +568,13 @@ impl Env {
         let debtor_agency = self.agency(&debtor.pubkey());
         let obligation = self.obligation_pda(&debtor_agency, &id);
         let ix = self.ix(
-            solutio::instruction::RegisterObligation {
+            marjan::instruction::RegisterObligation {
                 obligation_id: id,
                 creditor: *creditor,
                 verified_amount: amount,
                 evidence_hash: hash(&format!("{label}-liquidacao")),
             },
-            solutio::accounts::RegisterObligation {
+            marjan::accounts::RegisterObligation {
                 payer: self.sponsor.pubkey(),
                 debtor_authority: debtor.pubkey(),
                 debtor_agency,
@@ -589,11 +589,11 @@ impl Env {
     pub fn attach_doc(&mut self, debtor: &Keypair, obligation: &Pubkey, nfe_key: &str, amount: u64) -> Result<(), u32> {
         let h = hash(nfe_key);
         let ix = self.ix(
-            solutio::instruction::AttachFiscalDocument {
+            marjan::instruction::AttachFiscalDocument {
                 doc_key_hash: h,
                 amount,
             },
-            solutio::accounts::AttachFiscalDocument {
+            marjan::accounts::AttachFiscalDocument {
                 payer: self.sponsor.pubkey(),
                 debtor_authority: debtor.pubkey(),
                 debtor_agency: self.agency(&debtor.pubkey()),
@@ -607,11 +607,11 @@ impl Env {
 
     pub fn mark_eligible_as(&mut self, verifier: &Keypair, obligation: &Pubkey, amount: u64) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::MarkEligible {
+            marjan::instruction::MarkEligible {
                 eligible_amount: amount,
                 evidence_hash: hash("parecer-elegibilidade"),
             },
-            solutio::accounts::MarkEligible {
+            marjan::accounts::MarkEligible {
                 verifier: verifier.pubkey(),
                 registry: self.registry(),
                 obligation: *obligation,
@@ -637,12 +637,12 @@ impl Env {
         let n = o.financing_count;
         let financing = self.financing_pda(obligation, n);
         let ix = self.ix(
-            solutio::instruction::Finance {
+            marjan::instruction::Finance {
                 financing_no: n,
                 amount,
                 notice_evidence_hash: notice,
             },
-            solutio::accounts::Finance {
+            marjan::accounts::Finance {
                 payer: self.sponsor.pubkey(),
                 financier: financier.pubkey(),
                 creditor: creditor.pubkey(),
@@ -656,11 +656,11 @@ impl Env {
 
     pub fn reduce(&mut self, debtor: &Keypair, obligation: &Pubkey, amount: u64) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::RecordReduction {
+            marjan::instruction::RecordReduction {
                 amount,
                 evidence_hash: hash("glosa"),
             },
-            solutio::accounts::DebtorUpdate {
+            marjan::accounts::DebtorUpdate {
                 debtor_authority: debtor.pubkey(),
                 debtor_agency: self.agency(&debtor.pubkey()),
                 obligation: *obligation,
@@ -671,11 +671,11 @@ impl Env {
 
     pub fn pay(&mut self, debtor: &Keypair, obligation: &Pubkey, amount: u64) -> Result<(), u32> {
         let ix = self.ix(
-            solutio::instruction::RecordPayment {
+            marjan::instruction::RecordPayment {
                 amount,
                 evidence_hash: hash("ordem-bancaria"),
             },
-            solutio::accounts::DebtorUpdate {
+            marjan::accounts::DebtorUpdate {
                 debtor_authority: debtor.pubkey(),
                 debtor_agency: self.agency(&debtor.pubkey()),
                 obligation: *obligation,

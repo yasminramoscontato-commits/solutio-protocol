@@ -20,7 +20,7 @@
       ],
       "practice": "A state central purchasing body computes 50% of 21 units as 10, 'observada a impossibilidade de fracionamento' (founder field observation).",
       "enforcement": "program",
-      "code": "programs/solutio/src/rules.rs::individual_cap; framework engine PROC-01"
+      "code": "programs/marjan/src/rules.rs::individual_cap; framework engine PROC-01"
     },
     {
       "id": "PROC-02",
@@ -36,7 +36,7 @@
       ],
       "practice": "The federal Gestão de Atas formula: balance for adhesions = maximum - (awaiting authorization + authorized).",
       "enforcement": "program",
-      "code": "programs/solutio/src/rules.rs::adhesion_cap; framework engine PROC-02"
+      "code": "programs/marjan/src/rules.rs::adhesion_cap; framework engine PROC-02"
     },
     {
       "id": "PROC-03",
@@ -50,7 +50,7 @@
       ],
       "practice": "State central purchasing body practice: authorization reserves the balance; after use, 'baixa definitiva do saldo' or 'restituição do saldo correspondente' (founder field observation).",
       "enforcement": "program",
-      "code": "programs/solutio/src/instructions/carona.rs::handle_request_adhesion"
+      "code": "programs/marjan/src/instructions/carona.rs::handle_request_adhesion"
     },
     {
       "id": "PROC-04",
@@ -62,9 +62,9 @@
         "Lei 14.133/2021, art. 86, §2, III",
         "Decreto 11.462/2023, art. 31, §1; Decreto AL 95.019/2023, art. 31, §1"
       ],
-      "practice": "In the field, acceptance arrives by e-mail and is attached as a PDF to the process and to Compras.gov.br ('Anexo Aceitação'). Solutio records it as the supplier's signature.",
+      "practice": "In the field, acceptance arrives by e-mail and is attached as a PDF to the process and to Compras.gov.br ('Anexo Aceitação'). Marjan records it as the supplier's signature.",
       "enforcement": "program",
-      "code": "programs/solutio/src/instructions/carona.rs::handle_supplier_respond"
+      "code": "programs/marjan/src/instructions/carona.rs::handle_supplier_respond"
     },
     {
       "id": "PROC-05",
@@ -79,7 +79,7 @@
       ],
       "practice": "",
       "enforcement": "program",
-      "code": "programs/solutio/src/instructions/carona.rs::handle_authorize_adhesion"
+      "code": "programs/marjan/src/instructions/carona.rs::handle_authorize_adhesion"
     },
     {
       "id": "PROC-06",
@@ -93,7 +93,7 @@
       ],
       "practice": "Authorization despachos remind the adherent of the 90-day limit in free text.",
       "enforcement": "program",
-      "code": "programs/solutio/src/instructions/carona.rs::handle_expire_adhesion"
+      "code": "programs/marjan/src/instructions/carona.rs::handle_expire_adhesion"
     },
     {
       "id": "PROC-07",
@@ -107,7 +107,7 @@
       ],
       "practice": "",
       "enforcement": "program",
-      "code": "programs/solutio/src/rules.rs::check_reservation (manager); framework engine (participant)"
+      "code": "programs/marjan/src/rules.rs::check_reservation (manager); framework engine (participant)"
     },
     {
       "id": "PROC-08",
@@ -118,7 +118,7 @@
       "sources": ["Lei 14.133/2021, art. 86, §8", "Decreto 11.462/2023, art. 33"],
       "practice": "",
       "enforcement": "program",
-      "code": "programs/solutio/src/rules.rs::check_reservation"
+      "code": "programs/marjan/src/rules.rs::check_reservation"
     },
     {
       "id": "PROC-09",
@@ -129,7 +129,7 @@
       "sources": ["Decreto AL 95.019/2023, art. 33"],
       "practice": "",
       "enforcement": "program",
-      "code": "programs/solutio/src/rules.rs::profile_allows"
+      "code": "programs/marjan/src/rules.rs::profile_allows"
     },
     {
       "id": "PROC-10",
@@ -140,7 +140,7 @@
       "sources": ["Lei 14.133/2021, art. 86, §§6-7", "Decreto 11.462/2023, art. 32, §§1-2"],
       "practice": "",
       "enforcement": "program",
-      "code": "programs/solutio/src/rules.rs::exception_applies"
+      "code": "programs/marjan/src/rules.rs::exception_applies"
     },
     {
       "id": "PROC-11",
@@ -246,7 +246,7 @@
       "sources": ["Lei 4.320/1964, art. 63"],
       "practice": "",
       "enforcement": "program",
-      "code": "programs/solutio/src/instructions/obligation.rs::handle_register_obligation"
+      "code": "programs/marjan/src/instructions/obligation.rs::handle_register_obligation"
     },
     {
       "id": "PAY-02",
@@ -282,7 +282,7 @@
       ],
       "practice": "",
       "enforcement": "program",
-      "code": "programs/solutio/src/rules.rs::finance; FiscalDocument PDA"
+      "code": "programs/marjan/src/rules.rs::finance; FiscalDocument PDA"
     },
     {
       "id": "PAY-05",
@@ -293,7 +293,7 @@
       "sources": ["Código Civil, art. 290"],
       "practice": "",
       "enforcement": "program",
-      "code": "programs/solutio/src/instructions/obligation.rs::handle_finance"
+      "code": "programs/marjan/src/instructions/obligation.rs::handle_finance"
     },
     {
       "id": "PAY-06",

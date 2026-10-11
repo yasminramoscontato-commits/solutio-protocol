@@ -39,9 +39,9 @@ Observed duration in one case: about **five months** from step 1 to step 5.
 4. The analyst checks **control spreadsheets** for valid state records with the same object. A record-control system on the intranet is replacing them; it is fed by each dispatch issued in SEI.
 5. A verification dispatch is issued. The planning unit then checks whether an intention-to-register (IRP) procedure is open.
 
-## What each step becomes in Solutio
+## What each step becomes in Marjan
 
-| Today | In Solutio | Rule |
+| Today | In Marjan | Rule |
 | --- | --- | --- |
 | Supplier acceptance by e-mail, attached as PDF | The supplier signs the acceptance; no attachment to check | PROC-04 |
 | 50% computed by hand in a dispatch | Computed and enforced when quantity is reserved, rounded down | PROC-01 |
