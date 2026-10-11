@@ -1,14 +1,14 @@
 [package]
-name = "solutio"
+name = "marjan"
 version = "0.1.0"
-description = "Solutio: verifiable legal limits and single-financing control for public procurement obligations"
+description = "Marjan: verifiable legal limits and single-financing control for public procurement obligations"
 license = "Apache-2.0"
 edition.workspace = true
 rust-version.workspace = true
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "solutio"
+name = "marjan"
 
 [features]
 default = []

@@ -1,9 +1,9 @@
 # Devnet runs
 
-The Solutio program is deployed on **Solana devnet**. Every row below is a real devnet transaction you can open in the explorer.
+The Marjan program is deployed on **Solana devnet**. Every row below is a real devnet transaction you can open in the explorer.
 
 - Program: [`5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E`](https://explorer.solana.com/address/5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E?cluster=devnet)
-- Current binary: SHA-256 `99ce61559156d59b42b3fae711aaf589f5769766afab9857a12b6386e5837ebd` (the audited version, commit `38d8baa`; checked against `solana program dump`). Upgrade transaction: [`fyQ8KkWM1n9UcgWz…`](https://explorer.solana.com/tx/fyQ8KkWM1n9UcgWzCE4XSZkdienD4xNTyuz3L5hEXTSZ9c4BhMFU3uVLWCvzAAEee97njXE5wBn4Kv7BriywPcz?cluster=devnet).
+- Current binary: SHA-256 `99ce61559156d59b42b3fae711aaf589f5769766afab9857a12b6386e5837ebd` (the audited version, commit `38d8baa`; checked against `solana program dump`). It was built under the project's former name, Solutio; the rename changes no instruction, account or seed, so a binary rebuilt under the new name behaves the same but has a different hash. Upgrade transaction: [`fyQ8KkWM1n9UcgWz…`](https://explorer.solana.com/tx/fyQ8KkWM1n9UcgWzCE4XSZkdienD4xNTyuz3L5hEXTSZ9c4BhMFU3uVLWCvzAAEee97njXE5wBn4Kv7BriywPcz?cluster=devnet).
 - An earlier run of 32 transactions against the pre-audit binary is preserved in the git history (commit `722f683`, this file).
 
 **What is real:** the program, the transactions, the on-chain refusals, the balances and the rent refunds.
@@ -90,4 +90,4 @@ node measure-costs.mjs    # fees, rent and refunds -> devnet-costs.json
 python3 render_devnet.py  # this page
 ```
 
-Requires a funded devnet keypair at `~/.config/solana/devnet-deployer.json` (the program's upgrade authority, which is also the registry authority). Set `SOLUTIO_RPC=http://127.0.0.1:8899` to run against a local validator; local runs write `*.localnet.json` and never overwrite the devnet records.
+Requires a funded devnet keypair at `~/.config/solana/devnet-deployer.json` (the program's upgrade authority, which is also the registry authority). Set `MARJAN_RPC=http://127.0.0.1:8899` to run against a local validator; local runs write `*.localnet.json` and never overwrite the devnet records.

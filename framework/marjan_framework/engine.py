@@ -1,7 +1,7 @@
 """Reference engine for shared purchasing instruments.
 
 Pure Python, no dependencies. It mirrors the rules the Solana program enforces
-(see programs/solutio/src/rules.rs) and adds the rules that are not on-chain yet
+(see programs/marjan/src/rules.rs) and adds the rules that are not on-chain yet
 (participants, rectification, EU framework agreements, aggregation alerts).
 
 Every decision cites a rule id from rulebook.json, so a refusal can always be
@@ -61,7 +61,7 @@ class Decision:
 class ControlMode:
     """How strictly a control system applies the rules.
 
-    STRICT is Solutio. LEGACY is an illustrative control that reproduces the
+    STRICT is Marjan. LEGACY is an illustrative control that reproduces the
     three outcomes documented by TCU Acórdão 547/2026 (individual cap rounded
     up; global balance allowed to go negative; authorization after expiry).
     It does not claim to be the federal system's internal logic.
@@ -73,7 +73,7 @@ class ControlMode:
     check_expiry_on_authorize: bool
 
 
-STRICT = ControlMode("Solutio", "floor", True, True)
+STRICT = ControlMode("Marjan", "floor", True, True)
 LEGACY = ControlMode("Legacy control (outcomes documented by TCU 547/2026)", "ceil", False, False)
 
 

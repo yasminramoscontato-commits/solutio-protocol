@@ -89,7 +89,7 @@ class Art141Exception(Enum):
     EMERGENCY = "I: grave disturbance of order, emergency or public calamity"
     SMALL_BUSINESS_AT_RISK = "II: micro/small business, family farmer, MEI or cooperative at risk of discontinuity"
     STRUCTURAL_SYSTEMS = "III: services needed for structural systems, risk of discontinuity"
-    INSOLVENCY = "IV: bankruptcy, judicial recovery or dissolution of the contractor"
+    INSOLVENCY = "IV: bankruptcy, judicial recovery or dismarjann of the contractor"
     ESSENTIAL = "V: object essential to public assets or core activities, risk of discontinuity"
 
 

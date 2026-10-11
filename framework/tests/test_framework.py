@@ -1,4 +1,4 @@
-"""Tests for the Solutio framework. Run: python -m unittest discover -s framework/tests"""
+"""Tests for the Marjan framework. Run: python -m unittest discover -s framework/tests"""
 
 import json
 import random
@@ -7,11 +7,11 @@ import unittest
 from datetime import date
 from pathlib import Path
 
-from solutio_framework import economics, scenarios
-from solutio_framework.engine import (
+from marjan_framework import economics, scenarios
+from marjan_framework.engine import (
     DAY, LEGACY, STRICT, Body, Exception_, FrameworkAgreement, PriceRecordItem, Sphere,
 )
-from solutio_framework.payments import (
+from marjan_framework.payments import (
     AntecipaGovContract, Art141Exception, Category, Claim, PaymentQueue, Receivable, ReceivableRegistry, overdue_flags,
 )
 
@@ -47,7 +47,7 @@ class KnowledgeBaseIntegrity(unittest.TestCase):
             for ev in s.evidence:
                 self.assertIn(ev, self.evidence, s.id)
             for st in s.steps:
-                for d in (st.legacy, st.solutio):
+                for d in (st.legacy, st.marjan):
                     if d is not None and d.rule:
                         self.assertIn(d.rule, self.rules, f"{s.id}: {d.rule}")
 
@@ -109,18 +109,18 @@ class Procurement(unittest.TestCase):
         self.assertEqual(d.rule, "PROC-10")
 
     def test_alagoas_profile(self):
-        outcomes = [st.solutio.ok for st in scenarios.s07_alagoas_art33().steps]
+        outcomes = [st.marjan.ok for st in scenarios.s07_alagoas_art33().steps]
         self.assertEqual(outcomes, [False, True, True])
 
     def test_participants_and_roles(self):
         s = scenarios.s06_field_participant()
-        self.assertEqual([st.solutio.ok for st in s.steps], [True, False, False, True])
+        self.assertEqual([st.marjan.ok for st in s.steps], [True, False, False, True])
         it = item()
         self.assertEqual(it.request(Body("m", Sphere.STATE), 1, T0)[0].rule, "PROC-07")
 
     def test_split_items_respect_per_item_caps(self):
         s = scenarios.s05_field_split_items()
-        self.assertEqual([st.solutio.ok for st in s.steps], [False, True, True, True])
+        self.assertEqual([st.marjan.ok for st in s.steps], [False, True, True, True])
         self.assertEqual(s.metrics["taken"], 18)
         self.assertFalse(s.metrics["alert"])
 

@@ -1,4 +1,4 @@
-// Shared helpers for the Solutio devnet scripts.
+// Shared helpers for the Marjan devnet scripts.
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -11,8 +11,8 @@ export const { AnchorProvider, Program, Wallet, BN } = anchor;
 export { Keypair, PublicKey, SystemProgram, Transaction };
 
 export const here = path.dirname(fileURLToPath(import.meta.url));
-export const RPC = process.env.SOLUTIO_RPC ?? "https://api.devnet.solana.com";
-export const idl = JSON.parse(fs.readFileSync(path.join(here, "idl/solutio.json"), "utf8"));
+export const RPC = process.env.MARJAN_RPC ?? "https://api.devnet.solana.com";
+export const idl = JSON.parse(fs.readFileSync(path.join(here, "idl/marjan.json"), "utf8"));
 export const PROGRAM_ID = new PublicKey(idl.address);
 export const BPF_UPGRADEABLE = new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111");
 

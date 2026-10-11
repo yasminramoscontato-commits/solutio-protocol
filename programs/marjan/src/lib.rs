@@ -1,4 +1,4 @@
-//! Solutio — verifiable legal limits and single-financing control for public
+//! Marjan — verifiable legal limits and single-financing control for public
 //! procurement obligations, on Solana.
 //!
 //! Module 1 (Carona) enforces Law 14.133/2021 art. 86 adhesion caps, following
@@ -24,7 +24,7 @@ pub use state::*;
 declare_id!("5cmBDMRdqAfrhmkMmLVxTBCNBHxh5sneyvWXJViyjz9E");
 
 #[program]
-pub mod solutio {
+pub mod marjan {
     use super::*;
 
     // ---- registry ----

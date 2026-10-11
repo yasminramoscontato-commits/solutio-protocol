@@ -4,9 +4,9 @@
 mod common;
 
 use common::*;
+use marjan::{error::ErrorCode, state::*};
 use solana_keypair::Keypair;
 use solana_signer::Signer;
-use solutio::{error::ErrorCode, state::*};
 
 type Pk = anchor_lang::prelude::Pubkey;
 

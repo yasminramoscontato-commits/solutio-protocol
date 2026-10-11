@@ -2,7 +2,7 @@
 
 Each scenario is built from a public artifact (evidence id in evidence.json) or
 from the founder's anonymized field observation. Where a documented defect
-exists, the same sequence runs under LEGACY and under STRICT (Solutio), so the
+exists, the same sequence runs under LEGACY and under STRICT (Marjan), so the
 difference is measured, not asserted.
 
 Quantities are normalized (e.g. 100 units = the registered quantity) unless the
@@ -32,7 +32,7 @@ T0 = 1_000 * DAY
 class Step:
     action: str
     legacy: Optional[Decision]
-    solutio: Decision
+    marjan: Decision
 
 
 @dataclass
@@ -96,7 +96,7 @@ def s02_rounding() -> Scenario:
     s.steps.append(Step("Adherent requests 11 of 21 registered units",
                         Decision.allow(f"cap {legacy_cap}: 11 accepted (52.4% > 50%)"),
                         Decision.deny("PROC-01", f"cap {strict_cap}: 11 refused")))
-    s.finding = "Rounding up lets each adherent exceed the statutory 50%; TCU recommends rounding down (item 9.1.1.6), which Solutio does."
+    s.finding = "Rounding up lets each adherent exceed the statutory 50%; TCU recommends rounding down (item 9.1.1.6), which Marjan does."
     return s
 
 
@@ -139,7 +139,7 @@ def s04_authorize_after_expiry() -> Scenario:
     s.steps.append(Step("Request on day 0, authorization on day 20, record valid until day 10",
                         s.metrics[LEGACY.name], s.metrics[STRICT.name]))
     s.metrics = {k: v.ok for k, v in s.metrics.items()}
-    s.finding = "Solutio checks validity at authorization too (TCU item 9.1.1.7)."
+    s.finding = "Marjan checks validity at authorization too (TCU item 9.1.1.7)."
     return s
 
 
@@ -161,7 +161,7 @@ def s05_field_split_items() -> Scenario:
     s.metrics = agg
     s.finding = (f"Each item stays within 50% ({agg['per_item_share']}%). Across the object the body holds "
                  f"{agg['share_of_object']}% of {agg['registered_across_items']} units, so the split also respects a "
-                 "per-object reading. Solutio reports this aggregate (PROC-15) without judging it.")
+                 "per-object reading. Marjan reports this aggregate (PROC-15) without judging it.")
     return s
 
 

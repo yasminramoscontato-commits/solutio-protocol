@@ -1,5 +1,5 @@
 // Measures real fees, rent deposits and rent refunds of a recorded run
-// (client/devnet-run.json, or its .localnet.json twin when SOLUTIO_RPC is local).
+// (client/devnet-run.json, or its .localnet.json twin when MARJAN_RPC is local).
 import fs from "node:fs";
 import path from "node:path";
 import { IS_LOCAL, fetchTx, here, sleep } from "./lib.mjs";

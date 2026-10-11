@@ -1,5 +1,5 @@
 {
-  "_note": "Illustrative scenario inputs, not forecasts. Every number marked 'assumption' is a choice to be validated; every number marked with an evidence id comes from evidence.json. Edit and rerun `python -m solutio_framework economics`.",
+  "_note": "Illustrative scenario inputs, not forecasts. Every number marked 'assumption' is a choice to be validated; every number marked with an evidence id comes from evidence.json. Edit and rerun `python -m marjan_framework economics`.",
   "fx": {
     "brl_per_usd": {"value": 5.40, "kind": "assumption"},
     "usd_per_sol": {"value": 150, "kind": "assumption", "sensitivity": [50, 150, 300]}

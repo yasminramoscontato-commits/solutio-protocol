@@ -34,7 +34,7 @@ Every claim below carries an evidence id from [`framework/EVIDENCE.md`](framewor
 | United States | IDIQ / interagency contracts | Orders may not exceed the stated maximum. In one GAO audit, 10 of 11 orders on a shared contract were out of scope (`US-GAO-05-201`) |
 | Brazil | Ata de registro de preços (price record) | 50% per adherent and 2x in total (Law 14.133, art. 86) |
 
-Solutio's reference engine runs the Brazilian and EU rules on the same core (scenario S08 in [`framework/SCENARIOS.md`](framework/SCENARIOS.md)).
+Marjan's reference engine runs the Brazilian and EU rules on the same core (scenario S08 in [`framework/SCENARIOS.md`](framework/SCENARIOS.md)).
 
 ## 3. Brazil: the rules exist, the shared state does not
 
@@ -77,9 +77,9 @@ Solutio's reference engine runs the Brazilian and EU rules on the same core (sce
 
 ---
 
-## What Solutio changes at each level
+## What Marjan changes at each level
 
-| Level | Failure | Solutio |
+| Level | Failure | Marjan |
 | --- | --- | --- |
 | Global | The same receivable is financed twice | One eligible balance per obligation; one document per obligation (PAY-04) |
 | Global | Late payment is invisible until it becomes a crisis | The age of every verified obligation is public; legal thresholds are flagged (PAY-03, PAY-07) |

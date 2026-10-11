@@ -2,7 +2,7 @@
 
 | Date | Decision | Reason |
 | --- | --- | --- |
-| 2026-10-09 | Build Solutio, not a clinical chain-of-custody system | Multi-institution problem with a numeric legal rule no single party controls; data is public by law; founder works inside public procurement workflows |
+| 2026-10-09 | Build this protocol (first named Solutio), not a clinical chain-of-custody system | Multi-institution problem with a numeric legal rule no single party controls; data is public by law; founder works inside public procurement workflows |
 | 2026-10-09 | Two modules — Carona (art. 86 caps) and Obligations (single financing) — sharing the invariant pattern but not the same data model | Different legal rules and different signers; avoids an over-generic abstraction |
 | 2026-10-09 | All legal and accounting rules live in `rules.rs` as pure functions | Exhaustive and randomized testing without a VM; one-to-one traceability to legal sources |
 | 2026-10-09 | ~~Acceptance by the supplier is the authoritative cap check~~ (superseded below) | First version |
@@ -12,7 +12,7 @@
 | 2026-10-09 | Exceptions to §5 are claimed per adhesion, not set per item | Decree art. 32 §§1–2 ties them to the purpose of the purchase and to who manages the record |
 | 2026-10-09 | 90-day execution window, manager extension, permissionless lapse | Decree art. 31 §§2–3; lapsing needs no trusted party, so balances cannot be held hostage |
 | 2026-10-09 | Record status: Active, Suspended, Cancelled (final) | Decree arts. 28–29 |
-| 2026-10-09 | Product insight: in Compras.gov.br the supplier's acceptance is an uploaded document; in Solutio it is the supplier's signature | Removes a manual verification step and a forgery vector |
+| 2026-10-09 | Product insight: in Compras.gov.br the supplier's acceptance is an uploaded document; in Marjan it is the supplier's signature | Removes a manual verification step and a forgery vector |
 | 2026-10-09 | `verified` ≠ `eligible` ≠ `financed` | Liquidation recognizes a debt; it does not prove the claim is assignable, unencumbered or financeable |
 | 2026-10-09 | Reductions are always recorded and can mark an obligation Impaired | A disallowance is a government act; the protocol must reflect reality, not refuse it |
 | 2026-10-09 | Financing closes after the first payment (MVP) | Keeps the balance model simple and defensible until payment routing to financiers is modeled |
@@ -38,6 +38,7 @@
 | 2026-10-09 | Close instructions recover rent only for terminal records; fiscal-document markers and executed adhesions are never closed | Closing a marker would let the same invoice back a new obligation; executed adhesions are the provenance obligations cite |
 | 2026-10-09 | Build with `opt-level = "s"` | Keeps the program near its original size so devnet upgrades need less rent; all tests pass with the same results |
 | 2026-10-09 | Concurrency is tested with transactions submitted in parallel to a validator, not in LiteSVM | LiteSVM executes sequentially; only a validator shows several transactions contending for the same account in one slot |
+| 2026-10-11 | Renamed the project from Solutio to Marjan (code, docs, repository) | INPI: SOLUTIO is registered in class 42 (software and IT services, reg. 917072413) and a second application is pending in the same class (933452772). Program ID, instructions, accounts and seeds are unchanged; the devnet binary keeps working |
 
 ## Pending
 
